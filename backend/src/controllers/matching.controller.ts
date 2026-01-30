@@ -11,7 +11,7 @@ export const findPilots = async (
   next: NextFunction
 ) => {
   try {
-    const { bookingId } = req.params
+    const bookingId = req.params.bookingId as string
 
     const result = await matchingService.findAndAssignPilot(bookingId)
 
@@ -74,7 +74,7 @@ export const respondToOffer = async (
 ) => {
   try {
     const pilotId = req.user!.id
-    const { offerId } = req.params
+    const offerId = req.params.offerId as string
     const { accept } = req.body
 
     const result = await matchingService.respondToJobOffer(offerId, pilotId, accept)
@@ -94,7 +94,7 @@ export const autoAssign = async (
   next: NextFunction
 ) => {
   try {
-    const { bookingId } = req.params
+    const bookingId = req.params.bookingId as string
 
     const result = await matchingService.autoAssignBooking(bookingId)
 

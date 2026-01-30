@@ -51,7 +51,7 @@ export const getUserDetails = async (
   next: NextFunction
 ) => {
   try {
-    const { userId } = req.params
+    const userId = req.params.userId as string
     const result = await adminService.getUserDetails(userId)
     res.json(formatResponse(true, 'User details retrieved', result))
   } catch (error) {
@@ -65,7 +65,7 @@ export const updateUserStatus = async (
   next: NextFunction
 ) => {
   try {
-    const { userId } = req.params
+    const userId = req.params.userId as string
     const { isActive } = req.body
 
     const user = await adminService.updateUserStatus(userId, isActive)
@@ -108,7 +108,7 @@ export const getPilotDetails = async (
   next: NextFunction
 ) => {
   try {
-    const { pilotId } = req.params
+    const pilotId = req.params.pilotId as string
     const result = await adminService.getPilotDetails(pilotId)
     res.json(formatResponse(true, 'Pilot details retrieved', result))
   } catch (error) {
@@ -122,7 +122,7 @@ export const updatePilotStatus = async (
   next: NextFunction
 ) => {
   try {
-    const { pilotId } = req.params
+    const pilotId = req.params.pilotId as string
     const { status, reason } = req.body
 
     const pilot = await adminService.updatePilotStatus(pilotId, status, reason)
@@ -138,7 +138,7 @@ export const verifyDocument = async (
   next: NextFunction
 ) => {
   try {
-    const { documentId } = req.params
+    const documentId = req.params.documentId as string
     const { status, rejectedReason } = req.body
 
     const document = await adminService.verifyPilotDocument(documentId, status, rejectedReason)
@@ -181,7 +181,7 @@ export const getBookingDetails = async (
   next: NextFunction
 ) => {
   try {
-    const { bookingId } = req.params
+    const bookingId = req.params.bookingId as string
     const booking = await adminService.getBookingDetails(bookingId)
     res.json(formatResponse(true, 'Booking details retrieved', { booking }))
   } catch (error) {
@@ -195,7 +195,7 @@ export const assignPilot = async (
   next: NextFunction
 ) => {
   try {
-    const { bookingId } = req.params
+    const bookingId = req.params.bookingId as string
     const { pilotId } = req.body
 
     const booking = await adminService.assignPilotToBooking(bookingId, pilotId)
@@ -211,7 +211,7 @@ export const cancelBooking = async (
   next: NextFunction
 ) => {
   try {
-    const { bookingId } = req.params
+    const bookingId = req.params.bookingId as string
     const { reason } = req.body
 
     const booking = await adminService.cancelBookingByAdmin(bookingId, reason)

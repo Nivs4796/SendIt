@@ -27,7 +27,7 @@ export const getCoupon = async (
   next: NextFunction
 ) => {
   try {
-    const { id } = req.params
+    const id = req.params.id as string
     const coupon = await couponService.getCouponById(id)
     res.json(formatResponse(true, 'Coupon retrieved', { coupon }))
   } catch (error) {
@@ -44,7 +44,7 @@ export const updateCoupon = async (
   next: NextFunction
 ) => {
   try {
-    const { id } = req.params
+    const id = req.params.id as string
     const coupon = await couponService.updateCoupon(id, req.body)
     res.json(formatResponse(true, 'Coupon updated', { coupon }))
   } catch (error) {
@@ -61,7 +61,7 @@ export const deleteCoupon = async (
   next: NextFunction
 ) => {
   try {
-    const { id } = req.params
+    const id = req.params.id as string
     await couponService.deleteCoupon(id)
     res.json(formatResponse(true, 'Coupon deleted'))
   } catch (error) {

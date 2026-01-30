@@ -160,7 +160,7 @@ export const getUserWallet = async (
   next: NextFunction
 ) => {
   try {
-    const { userId } = req.params
+    const userId = req.params.userId as string
     const { page = '1', limit = '10' } = req.query
 
     const [balance, history] = await Promise.all([
