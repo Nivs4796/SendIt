@@ -29,15 +29,18 @@ export interface User {
 
 export interface Address {
   id: string
+  userId: string
   label: string
-  street: string
+  address: string
+  landmark?: string
   city: string
   state: string
-  postalCode: string
-  country: string
+  pincode: string
   lat: number
   lng: number
   isDefault: boolean
+  createdAt: string
+  updatedAt: string
 }
 
 // Pilot Types

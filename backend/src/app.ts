@@ -13,8 +13,27 @@ const app: Application = express()
 
 // Security middleware
 app.use(helmet())
+
+// CORS configuration - allow multiple origins for development
+const allowedOrigins = [
+  config.clientUrl,
+  'http://localhost:3000',
+  'http://localhost:3001',
+  'http://localhost:3002',
+  'http://localhost:3003',
+]
+
 app.use(cors({
-  origin: config.clientUrl,
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, Postman, etc.)
+    if (!origin) return callback(null, true)
+
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true)
+    } else {
+      callback(null, true) // Allow all origins in development
+    }
+  },
   credentials: true,
 }))
 

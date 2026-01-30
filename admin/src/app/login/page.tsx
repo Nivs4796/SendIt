@@ -38,7 +38,7 @@ export default function LoginPage() {
         throw new Error(data.message || 'Login failed')
       }
 
-      login(data.data.admin, data.data.token)
+      login(data.data.admin, data.data.accessToken)
       router.push('/dashboard')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed')
@@ -71,7 +71,7 @@ export default function LoginPage() {
               <Input
                 id="email"
                 type="email"
-                placeholder="admin@sendit.com"
+                placeholder="admin@sendit.co.in"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required

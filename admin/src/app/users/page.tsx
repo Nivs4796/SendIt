@@ -335,9 +335,9 @@ export default function UsersPage() {
                     <div className="space-y-2">
                       {selectedUser.addresses.map((addr) => (
                         <div key={addr.id} className="p-3 bg-muted rounded-lg">
-                          <p className="font-medium">{addr.label}</p>
+                          <p className="font-medium">{addr.label}{addr.isDefault && <Badge variant="outline" className="ml-2">Default</Badge>}</p>
                           <p className="text-sm text-muted-foreground">
-                            {addr.street}, {addr.city}, {addr.state} {addr.postalCode}
+                            {addr.address}{addr.landmark && `, ${addr.landmark}`}, {addr.city}, {addr.state} {addr.pincode}
                           </p>
                         </div>
                       ))}

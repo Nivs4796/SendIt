@@ -100,19 +100,25 @@ export default function DashboardPage() {
     refetchInterval: 30000, // Refresh every 30 seconds
   })
 
-  const stats = (data?.data as DashboardStats) || {}
+  // Handle nested API response structure
+  const apiData = data?.data as {
+    users?: { total: number }
+    pilots?: { total: number; active: number; online: number; pending: number }
+    bookings?: { total: number; today: number; completed: number; pending: number; cancelled: number }
+    revenue?: { total: number; today: number }
+  } | null
 
   // Merge real-time stats with API data
   const displayStats = {
-    totalUsers: stats.totalUsers || 0,
-    totalPilots: stats.totalPilots || 0,
-    totalBookings: stats.totalBookings || 0,
-    totalRevenue: stats.totalRevenue || 0,
-    pendingPilots: stats.pendingPilots || 0,
-    activeBookings: realtimeStats?.activeBookings ?? stats.activeBookings ?? 0,
-    onlinePilots: realtimeStats?.onlinePilots ?? stats.onlinePilots ?? 0,
-    todayDeliveries: realtimeStats?.todayDeliveries ?? stats.todayBookings ?? 0,
-    todayRevenue: realtimeStats?.todayRevenue ?? stats.todayRevenue ?? 0,
+    totalUsers: apiData?.users?.total || 0,
+    totalPilots: apiData?.pilots?.total || 0,
+    totalBookings: apiData?.bookings?.total || 0,
+    totalRevenue: apiData?.revenue?.total || 0,
+    pendingPilots: apiData?.pilots?.pending || 0,
+    activeBookings: realtimeStats?.activeBookings ?? (apiData?.bookings?.total || 0) - (apiData?.bookings?.completed || 0) - (apiData?.bookings?.cancelled || 0),
+    onlinePilots: realtimeStats?.onlinePilots ?? apiData?.pilots?.online ?? 0,
+    todayDeliveries: realtimeStats?.todayDeliveries ?? apiData?.bookings?.completed ?? 0,
+    todayRevenue: realtimeStats?.todayRevenue ?? apiData?.revenue?.today ?? 0,
   }
 
   if (isLoading) {
