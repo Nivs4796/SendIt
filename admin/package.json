@@ -6,7 +6,21 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "test:report": "playwright show-report",
+    "test:auth": "playwright test tests/auth.spec.ts",
+    "test:dashboard": "playwright test tests/dashboard.spec.ts",
+    "test:users": "playwright test tests/users.spec.ts",
+    "test:pilots": "playwright test tests/pilots.spec.ts",
+    "test:bookings": "playwright test tests/bookings.spec.ts",
+    "test:vehicles": "playwright test tests/vehicles.spec.ts",
+    "test:wallet": "playwright test tests/wallet.spec.ts",
+    "test:analytics": "playwright test tests/analytics.spec.ts",
+    "test:settings": "playwright test tests/settings.spec.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -39,6 +53,7 @@
     "zustand": "^5.0.10"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",

@@ -81,7 +81,9 @@ export default function PilotsPage() {
 
   const handleView = async (pilotId: string) => {
     const response = await adminApi.getPilotDetails(pilotId)
-    setSelectedPilot(response.data as Pilot)
+    // API returns { pilot: {...}, bookingStats: [...], totalEarnings: ... }
+    const pilotData = (response.data as { pilot: Pilot }).pilot
+    setSelectedPilot(pilotData)
     setIsViewOpen(true)
   }
 
@@ -181,7 +183,7 @@ export default function PilotsPage() {
                       </Badge>
                     </TableCell>
                     <TableCell>{pilot.rating.toFixed(1)} ⭐</TableCell>
-                    <TableCell>{pilot.totalRides}</TableCell>
+                    <TableCell>{pilot.totalDeliveries ?? pilot.totalRides ?? 0}</TableCell>
                     <TableCell>{format(new Date(pilot.createdAt), 'MMM d, yyyy')}</TableCell>
                     <TableCell>
                       <DropdownMenu>
@@ -303,24 +305,27 @@ export default function PilotsPage() {
 
         {/* View Dialog */}
         <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>
-          <DialogContent className="max-w-3xl">
+          <DialogContent className="max-w-3xl max-h-[85vh] flex flex-col">
             <DialogHeader>
               <DialogTitle>Pilot Details</DialogTitle>
+              <DialogDescription>View pilot information, documents, and vehicles</DialogDescription>
             </DialogHeader>
             {selectedPilot && (
-              <div className="space-y-6">
+              <div className="space-y-6 overflow-y-auto flex-1 pr-2">
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  <div>
+                  <div className="min-w-0">
                     <Label className="text-muted-foreground">Name</Label>
-                    <p className="font-medium">{selectedPilot.name}</p>
+                    <p className="font-medium truncate">{selectedPilot.name}</p>
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <Label className="text-muted-foreground">Email</Label>
-                    <p className="font-medium">{selectedPilot.email}</p>
+                    <p className="font-medium truncate" title={selectedPilot.email || ''}>
+                      {selectedPilot.email || 'N/A'}
+                    </p>
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <Label className="text-muted-foreground">Phone</Label>
-                    <p className="font-medium">{selectedPilot.phone}</p>
+                    <p className="font-medium truncate">{selectedPilot.phone}</p>
                   </div>
                   <div>
                     <Label className="text-muted-foreground">Status</Label>
@@ -333,14 +338,14 @@ export default function PilotsPage() {
                     <p className="font-medium">{selectedPilot.rating.toFixed(1)} ⭐</p>
                   </div>
                   <div>
-                    <Label className="text-muted-foreground">Total Rides</Label>
-                    <p className="font-medium">{selectedPilot.totalRides}</p>
+                    <Label className="text-muted-foreground">Total Deliveries</Label>
+                    <p className="font-medium">{selectedPilot.totalDeliveries ?? selectedPilot.totalRides ?? 0}</p>
                   </div>
                 </div>
 
                 {selectedPilot.documents && selectedPilot.documents.length > 0 && (
                   <div>
-                    <Label className="text-muted-foreground mb-2 block">Documents</Label>
+                    <Label className="text-muted-foreground mb-2 block">Documents ({selectedPilot.documents.length})</Label>
                     <div className="space-y-2">
                       {selectedPilot.documents.map((doc) => (
                         <div key={doc.id} className="flex items-center justify-between p-3 bg-muted rounded-lg">
@@ -374,7 +379,7 @@ export default function PilotsPage() {
 
                 {selectedPilot.vehicles && selectedPilot.vehicles.length > 0 && (
                   <div>
-                    <Label className="text-muted-foreground mb-2 block">Vehicles</Label>
+                    <Label className="text-muted-foreground mb-2 block">Vehicles ({selectedPilot.vehicles.length})</Label>
                     <div className="space-y-2">
                       {selectedPilot.vehicles.map((vehicle) => (
                         <div key={vehicle.id} className="flex items-center justify-between p-3 bg-muted rounded-lg">

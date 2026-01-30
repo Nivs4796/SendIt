@@ -61,7 +61,8 @@ export interface Pilot {
   currentLat?: number
   currentLng?: number
   rating: number
-  totalRides: number
+  totalRides?: number
+  totalDeliveries?: number
   createdAt: string
   updatedAt: string
   documents?: PilotDocument[]

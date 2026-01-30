@@ -442,7 +442,7 @@ export default function BookingsPage() {
                     >
                       <p className="font-medium">{pilot.name}</p>
                       <p className="text-sm text-muted-foreground">
-                        {pilot.rating.toFixed(1)} ⭐ • {pilot.totalRides} rides
+                        {pilot.rating.toFixed(1)} ⭐ • {pilot.totalDeliveries ?? pilot.totalRides ?? 0} deliveries
                       </p>
                     </div>
                   ))

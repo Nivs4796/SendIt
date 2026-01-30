@@ -84,13 +84,15 @@ export default function UsersPage() {
 
   const handleEdit = (user: User) => {
     setSelectedUser(user)
-    setEditForm({ name: user.name, email: user.email, phone: user.phone })
+    setEditForm({ name: user.name || '', email: user.email || '', phone: user.phone || '' })
     setIsEditOpen(true)
   }
 
   const handleView = async (userId: string) => {
     const response = await adminApi.getUserDetails(userId)
-    setSelectedUser(response.data as User)
+    // API returns { user: {...}, bookingStats: [...] }
+    const userData = (response.data as { user: User }).user
+    setSelectedUser(userData)
     setIsViewOpen(true)
   }
 
@@ -259,7 +261,7 @@ export default function UsersPage() {
                 <Label htmlFor="name">Name</Label>
                 <Input
                   id="name"
-                  value={editForm.name}
+                  value={editForm.name ?? ''}
                   onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
                 />
               </div>
@@ -268,7 +270,7 @@ export default function UsersPage() {
                 <Input
                   id="email"
                   type="email"
-                  value={editForm.email}
+                  value={editForm.email ?? ''}
                   onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
                 />
               </div>
@@ -276,7 +278,7 @@ export default function UsersPage() {
                 <Label htmlFor="phone">Phone</Label>
                 <Input
                   id="phone"
-                  value={editForm.phone}
+                  value={editForm.phone ?? ''}
                   onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
                 />
               </div>
@@ -294,24 +296,27 @@ export default function UsersPage() {
 
         {/* View Dialog */}
         <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col">
             <DialogHeader>
               <DialogTitle>User Details</DialogTitle>
+              <DialogDescription>View user account information and saved addresses</DialogDescription>
             </DialogHeader>
             {selectedUser && (
-              <div className="space-y-6">
+              <div className="space-y-6 overflow-y-auto flex-1 pr-2">
                 <div className="grid grid-cols-2 gap-4">
-                  <div>
+                  <div className="min-w-0">
                     <Label className="text-muted-foreground">Name</Label>
-                    <p className="font-medium">{selectedUser.name}</p>
+                    <p className="font-medium truncate">{selectedUser.name}</p>
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <Label className="text-muted-foreground">Email</Label>
-                    <p className="font-medium">{selectedUser.email}</p>
+                    <p className="font-medium truncate" title={selectedUser.email || ''}>
+                      {selectedUser.email || 'N/A'}
+                    </p>
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <Label className="text-muted-foreground">Phone</Label>
-                    <p className="font-medium">{selectedUser.phone}</p>
+                    <p className="font-medium truncate">{selectedUser.phone}</p>
                   </div>
                   <div>
                     <Label className="text-muted-foreground">Status</Label>
@@ -324,14 +329,14 @@ export default function UsersPage() {
                   <div>
                     <Label className="text-muted-foreground">Joined</Label>
                     <p className="font-medium">
-                      {format(new Date(selectedUser.createdAt), 'MMMM d, yyyy')}
+                      {selectedUser.createdAt ? format(new Date(selectedUser.createdAt), 'MMMM d, yyyy') : 'N/A'}
                     </p>
                   </div>
                 </div>
 
                 {selectedUser.addresses && selectedUser.addresses.length > 0 && (
                   <div>
-                    <Label className="text-muted-foreground mb-2 block">Saved Addresses</Label>
+                    <Label className="text-muted-foreground mb-2 block">Saved Addresses ({selectedUser.addresses.length})</Label>
                     <div className="space-y-2">
                       {selectedUser.addresses.map((addr) => (
                         <div key={addr.id} className="p-3 bg-muted rounded-lg">
