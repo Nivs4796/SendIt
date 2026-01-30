@@ -1,0 +1,10 @@
+<svg width="200" height="150" viewBox="0 0 200 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="200" height="150" fill="#F3E8FF" rx="8"/>
+  <rect x="20" y="40" width="55" height="55" rx="6" fill="#8B5CF6"/>
+  <rect x="28" y="50" width="35" height="25" rx="4" fill="white"/>
+  <rect x="75" y="25" width="105" height="70" rx="4" fill="#A78BFA"/>
+  <circle cx="45" cy="105" r="18" fill="#1F2937"/>
+  <circle cx="105" cy="105" r="18" fill="#1F2937"/>
+  <circle cx="155" cy="105" r="18" fill="#1F2937"/>
+  <text x="100" y="140" text-anchor="middle" font-family="system-ui" font-size="12" fill="#6B7280">Tempo</text>
+</svg>

@@ -1,0 +1,43 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="300" rx="16" fill="#D1FAE5"/>
+
+  <!-- Leaves/Nature elements -->
+  <path d="M50 100Q70 80 90 100Q70 120 50 100Z" fill="#10B981" opacity="0.5"/>
+  <path d="M330 80Q350 60 370 80Q350 100 330 80Z" fill="#10B981" opacity="0.5"/>
+  <path d="M60 200Q80 180 100 200Q80 220 60 200Z" fill="#10B981" opacity="0.3"/>
+
+  <!-- EV Bike -->
+  <g transform="translate(100, 100)">
+    <!-- Wheels -->
+    <circle cx="50" cy="100" r="30" stroke="#10B981" stroke-width="5" fill="none"/>
+    <circle cx="50" cy="100" r="12" fill="#10B981"/>
+    <circle cx="150" cy="100" r="30" stroke="#10B981" stroke-width="5" fill="none"/>
+    <circle cx="150" cy="100" r="12" fill="#10B981"/>
+
+    <!-- Frame -->
+    <path d="M50 100L80 50H130L150 100" stroke="#1F2937" stroke-width="5" stroke-linecap="round"/>
+    <line x1="80" y1="50" x2="100" y2="100" stroke="#1F2937" stroke-width="5"/>
+
+    <!-- Battery pack (green glow) -->
+    <rect x="85" y="55" width="40" height="25" rx="5" fill="#10B981"/>
+    <rect x="90" y="60" width="30" height="15" rx="3" fill="#6EE7B7"/>
+    <!-- Lightning bolt -->
+    <path d="M100 58L95 68H105L100 78" stroke="#1F2937" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- Rider -->
+    <circle cx="115" cy="25" r="15" fill="#FBBF24"/>
+    <rect x="105" y="40" width="20" height="30" rx="5" fill="#10B981"/>
+  </g>
+
+  <!-- Lightning bolts decoration -->
+  <path d="M320 140L310 160H325L315 180" stroke="#F59E0B" stroke-width="3" stroke-linecap="round"/>
+  <path d="M340 150L333 165H343L336 180" stroke="#F59E0B" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- CO2 crossed out -->
+  <g transform="translate(300, 90)">
+    <text x="0" y="15" font-family="system-ui" font-size="14" fill="#6B7280">CO₂</text>
+    <line x1="-5" y1="20" x2="35" y2="0" stroke="#EF4444" stroke-width="3"/>
+  </g>
+
+  <text x="200" y="260" text-anchor="middle" font-family="system-ui" font-size="18" fill="#374151" font-weight="600">EV Eco-Friendly</text>
+</svg>

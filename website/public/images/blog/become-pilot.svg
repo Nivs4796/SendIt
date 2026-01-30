@@ -1,0 +1,51 @@
+<svg width="800" height="400" viewBox="0 0 800 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="400" fill="#1F2937"/>
+
+  <!-- Road -->
+  <rect x="0" y="300" width="800" height="100" fill="#374151"/>
+  <rect x="50" y="345" width="60" height="8" fill="#FCD34D"/>
+  <rect x="170" y="345" width="60" height="8" fill="#FCD34D"/>
+  <rect x="290" y="345" width="60" height="8" fill="#FCD34D"/>
+  <rect x="410" y="345" width="60" height="8" fill="#FCD34D"/>
+  <rect x="530" y="345" width="60" height="8" fill="#FCD34D"/>
+  <rect x="650" y="345" width="60" height="8" fill="#FCD34D"/>
+
+  <!-- Pilot on bike -->
+  <g transform="translate(300, 150)">
+    <!-- Wheels -->
+    <circle cx="50" cy="130" r="35" stroke="#10B981" stroke-width="6" fill="none"/>
+    <circle cx="50" cy="130" r="15" fill="#10B981"/>
+    <circle cx="170" cy="130" r="35" stroke="#10B981" stroke-width="6" fill="none"/>
+    <circle cx="170" cy="130" r="15" fill="#10B981"/>
+
+    <!-- Frame -->
+    <path d="M50 130L90 70H145L170 130" stroke="#F9FAFB" stroke-width="6" stroke-linecap="round"/>
+    <line x1="90" y1="70" x2="110" y2="130" stroke="#F9FAFB" stroke-width="6"/>
+
+    <!-- Delivery box -->
+    <rect x="55" y="20" width="70" height="55" rx="8" fill="#10B981"/>
+    <rect x="65" y="30" width="50" height="35" rx="4" fill="white"/>
+    <path d="M75 48L85 58L105 38" stroke="#10B981" stroke-width="4" stroke-linecap="round"/>
+
+    <!-- Rider -->
+    <circle cx="130" cy="40" r="22" fill="#FBBF24"/>
+    <circle cx="123" cy="35" r="3" fill="#1F2937"/>
+    <circle cx="137" cy="35" r="3" fill="#1F2937"/>
+    <path d="M125 48Q130 54 135 48" stroke="#1F2937" stroke-width="2" stroke-linecap="round"/>
+    <rect x="115" y="62" width="30" height="45" rx="8" fill="#10B981"/>
+    <!-- Helmet -->
+    <path d="M108 35Q115 10 145 10Q152 35 152 35" fill="#1F2937"/>
+  </g>
+
+  <!-- Money floating -->
+  <text x="200" y="120" font-family="system-ui" font-size="32" fill="#10B981" font-weight="700">₹</text>
+  <text x="600" y="100" font-family="system-ui" font-size="40" fill="#10B981" font-weight="700">₹</text>
+  <text x="150" y="200" font-family="system-ui" font-size="28" fill="#F59E0B" font-weight="700">₹</text>
+  <text x="650" y="180" font-family="system-ui" font-size="36" fill="#F59E0B" font-weight="700">₹</text>
+
+  <!-- Stars -->
+  <text x="250" y="80" font-family="system-ui" font-size="24" fill="#FCD34D">★</text>
+  <text x="550" y="60" font-family="system-ui" font-size="20" fill="#FCD34D">★</text>
+
+  <text x="400" y="380" text-anchor="middle" font-family="system-ui" font-size="20" fill="white" font-weight="600">Start Earning Today</text>
+</svg>

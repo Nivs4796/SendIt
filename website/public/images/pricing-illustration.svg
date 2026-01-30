@@ -1,0 +1,45 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="300" fill="#F0FDF4" rx="16"/>
+
+  <!-- Calculator/pricing display -->
+  <rect x="120" y="40" width="160" height="180" rx="16" fill="#1F2937"/>
+  <rect x="135" y="55" width="130" height="50" rx="8" fill="#374151"/>
+  <text x="200" y="90" text-anchor="middle" font-family="system-ui" font-size="28" fill="#10B981" font-weight="700">₹49</text>
+
+  <!-- Buttons grid -->
+  <g transform="translate(140, 120)">
+    <rect width="35" height="25" rx="4" fill="#4B5563"/>
+    <rect x="42" width="35" height="25" rx="4" fill="#4B5563"/>
+    <rect x="84" width="35" height="25" rx="4" fill="#4B5563"/>
+
+    <rect y="32" width="35" height="25" rx="4" fill="#4B5563"/>
+    <rect x="42" y="32" width="35" height="25" rx="4" fill="#4B5563"/>
+    <rect x="84" y="32" width="35" height="25" rx="4" fill="#10B981"/>
+  </g>
+
+  <!-- Floating price tags -->
+  <g transform="translate(40, 80)">
+    <rect width="60" height="30" rx="6" fill="#F59E0B"/>
+    <text x="30" y="22" text-anchor="middle" font-family="system-ui" font-size="14" fill="white" font-weight="600">₹29</text>
+  </g>
+
+  <g transform="translate(300, 60)">
+    <rect width="60" height="30" rx="6" fill="#3B82F6"/>
+    <text x="30" y="22" text-anchor="middle" font-family="system-ui" font-size="14" fill="white" font-weight="600">₹99</text>
+  </g>
+
+  <g transform="translate(310, 150)">
+    <rect width="60" height="30" rx="6" fill="#10B981"/>
+    <text x="30" y="22" text-anchor="middle" font-family="system-ui" font-size="14" fill="white" font-weight="600">₹149</text>
+  </g>
+
+  <!-- Discount badge -->
+  <g transform="translate(50, 180)">
+    <circle cx="30" cy="30" r="30" fill="#EF4444"/>
+    <text x="30" y="25" text-anchor="middle" font-family="system-ui" font-size="10" fill="white">SAVE</text>
+    <text x="30" y="40" text-anchor="middle" font-family="system-ui" font-size="14" fill="white" font-weight="700">20%</text>
+  </g>
+
+  <text x="200" y="260" text-anchor="middle" font-family="system-ui" font-size="16" fill="#374151" font-weight="600">Transparent Pricing</text>
+  <text x="200" y="280" text-anchor="middle" font-family="system-ui" font-size="12" fill="#6B7280">No hidden charges</text>
+</svg>

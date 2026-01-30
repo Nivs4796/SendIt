@@ -1,0 +1,50 @@
+import rateLimit from 'express-rate-limit'
+import { config } from '../config'
+
+// General API rate limiter
+export const apiLimiter = rateLimit({
+  windowMs: config.rateLimitWindowMs, // 15 minutes
+  max: config.rateLimitMax, // 100 requests per window
+  message: {
+    success: false,
+    message: 'Too many requests, please try again later.',
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+})
+
+// Strict rate limiter for auth endpoints
+export const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10, // 10 requests per window
+  message: {
+    success: false,
+    message: 'Too many authentication attempts, please try again later.',
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+})
+
+// OTP rate limiter - stricter
+export const otpLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 3, // 3 OTP requests per minute
+  message: {
+    success: false,
+    message: 'Too many OTP requests, please wait before requesting again.',
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+})
+
+// Booking creation rate limiter
+export const bookingLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 5, // 5 bookings per minute
+  message: {
+    success: false,
+    message: 'Too many booking requests, please try again later.',
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+})

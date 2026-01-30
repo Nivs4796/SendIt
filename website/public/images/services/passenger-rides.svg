@@ -1,0 +1,31 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="300" rx="16" fill="#FEF3C7"/>
+
+  <!-- Auto rickshaw -->
+  <g transform="translate(100, 100)">
+    <!-- Body -->
+    <rect x="40" y="40" width="120" height="80" rx="10" fill="#F59E0B"/>
+    <rect x="50" y="50" width="50" height="40" rx="6" fill="white"/>
+
+    <!-- Roof -->
+    <path d="M50 40Q100 10 150 40" stroke="#1F2937" stroke-width="4" fill="none"/>
+    <rect x="60" y="20" width="80" height="20" rx="6" fill="#1F2937"/>
+
+    <!-- Wheels -->
+    <circle cx="70" cy="130" r="20" fill="#1F2937"/>
+    <circle cx="70" cy="130" r="10" fill="#6B7280"/>
+    <circle cx="130" cy="130" r="20" fill="#1F2937"/>
+    <circle cx="130" cy="130" r="10" fill="#6B7280"/>
+
+    <!-- Passenger silhouette -->
+    <circle cx="120" cy="70" r="15" fill="#374151"/>
+    <rect x="110" y="85" width="20" height="25" rx="4" fill="#374151"/>
+  </g>
+
+  <!-- Motion lines -->
+  <line x1="80" y1="180" x2="50" y2="180" stroke="#F59E0B" stroke-width="3" stroke-linecap="round"/>
+  <line x1="90" y1="195" x2="60" y2="195" stroke="#F59E0B" stroke-width="2" stroke-linecap="round"/>
+  <line x1="85" y1="210" x2="55" y2="210" stroke="#F59E0B" stroke-width="2" stroke-linecap="round"/>
+
+  <text x="200" y="260" text-anchor="middle" font-family="system-ui" font-size="18" fill="#374151" font-weight="600">Passenger Rides</text>
+</svg>

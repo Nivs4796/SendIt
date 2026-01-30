@@ -1,0 +1,46 @@
+<svg width="280" height="560" viewBox="0 0 280 560" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Phone frame background -->
+  <rect width="280" height="560" rx="32" fill="white"/>
+
+  <!-- Status bar -->
+  <rect x="0" y="0" width="280" height="44" fill="#10B981"/>
+  <text x="24" y="28" font-family="system-ui" font-size="12" fill="white">9:41</text>
+  <circle cx="230" cy="22" r="4" fill="white"/>
+  <rect x="245" y="18" width="20" height="8" rx="2" fill="white"/>
+
+  <!-- Header -->
+  <rect x="0" y="44" width="280" height="60" fill="#10B981"/>
+  <text x="24" y="82" font-family="system-ui" font-size="20" fill="white" font-weight="600">SendIt</text>
+  <circle cx="244" cy="74" r="16" fill="white" opacity="0.2"/>
+  <text x="244" y="78" text-anchor="middle" font-family="system-ui" font-size="12" fill="white">👤</text>
+
+  <!-- Map area -->
+  <rect x="16" y="120" width="248" height="180" rx="16" fill="#E5E7EB"/>
+  <circle cx="140" cy="210" r="40" fill="#D1FAE5"/>
+  <circle cx="140" cy="210" r="20" fill="#10B981"/>
+  <circle cx="140" cy="210" r="8" fill="white"/>
+  <!-- Route line -->
+  <path d="M80 180Q100 220 140 210Q180 200 200 240" stroke="#10B981" stroke-width="3" stroke-dasharray="8 4"/>
+  <circle cx="80" cy="180" r="8" fill="#F59E0B"/>
+  <circle cx="200" cy="240" r="8" fill="#10B981"/>
+
+  <!-- Pickup card -->
+  <rect x="16" y="316" width="248" height="70" rx="12" fill="#F9FAFB"/>
+  <circle cx="40" cy="351" r="12" fill="#10B981" opacity="0.1"/>
+  <circle cx="40" cy="351" r="6" fill="#10B981"/>
+  <text x="60" y="340" font-family="system-ui" font-size="10" fill="#6B7280">PICKUP</text>
+  <text x="60" y="358" font-family="system-ui" font-size="13" fill="#1F2937" font-weight="500">123 Satellite Road</text>
+  <text x="60" y="373" font-family="system-ui" font-size="11" fill="#9CA3AF">Ahmedabad, Gujarat</text>
+
+  <!-- Drop card -->
+  <rect x="16" y="394" width="248" height="70" rx="12" fill="#F9FAFB"/>
+  <circle cx="40" cy="429" r="12" fill="#EF4444" opacity="0.1"/>
+  <circle cx="40" cy="429" r="6" fill="#EF4444"/>
+  <text x="60" y="418" font-family="system-ui" font-size="10" fill="#6B7280">DROP</text>
+  <text x="60" y="436" font-family="system-ui" font-size="13" fill="#1F2937" font-weight="500">456 SG Highway</text>
+  <text x="60" y="451" font-family="system-ui" font-size="11" fill="#9CA3AF">Ahmedabad, Gujarat</text>
+
+  <!-- Book button -->
+  <rect x="16" y="488" width="248" height="52" rx="26" fill="#10B981"/>
+  <text x="140" y="520" text-anchor="middle" font-family="system-ui" font-size="16" fill="white" font-weight="600">Book Delivery - ₹49</text>
+</svg>

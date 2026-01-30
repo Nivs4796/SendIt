@@ -1,0 +1,6 @@
+<svg width="135" height="40" viewBox="0 0 135 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="135" height="40" rx="5" fill="#1F2937"/>
+  <text x="75" y="13" text-anchor="middle" font-family="system-ui" font-size="8" fill="white">GET IT ON</text>
+  <text x="75" y="28" text-anchor="middle" font-family="system-ui" font-size="14" fill="white" font-weight="600">Google Play</text>
+  <polygon points="15,12 15,28 27,20" fill="#10B981"/>
+</svg>

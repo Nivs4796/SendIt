@@ -1,0 +1,515 @@
+// SendIt Delivery Platform - Database Schema
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================
+// USER MODELS
+// ============================================
+
+model User {
+  id            String    @id @default(cuid())
+  phone         String    @unique
+  email         String?   @unique
+  name          String?
+  avatar        String?
+  isVerified    Boolean   @default(false)
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  addresses     Address[]
+  bookings      Booking[]
+  reviews       Review[]
+  notifications Notification[]
+  otps          OTP[]
+
+  @@map("users")
+}
+
+model Pilot {
+  id              String      @id @default(cuid())
+  phone           String      @unique
+  email           String?     @unique
+  name            String
+  avatar          String?
+  dateOfBirth     DateTime?
+  gender          Gender?
+
+  // Documents
+  aadhaarNumber   String?     @unique
+  licenseNumber   String?     @unique
+  panNumber       String?     @unique
+
+  // Status
+  isVerified      Boolean     @default(false)
+  isActive        Boolean     @default(true)
+  isOnline        Boolean     @default(false)
+  status          PilotStatus @default(PENDING)
+
+  // Location
+  currentLat      Float?
+  currentLng      Float?
+  lastLocationAt  DateTime?
+
+  // Stats
+  totalDeliveries Int         @default(0)
+  rating          Float       @default(0)
+  totalEarnings   Float       @default(0)
+
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  // Relations
+  vehicles        Vehicle[]
+  bookings        Booking[]
+  earnings        Earning[]
+  reviews         Review[]
+  documents       Document[]
+  notifications   Notification[]
+  otps            OTP[]
+  bankAccount     BankAccount?
+
+  @@map("pilots")
+}
+
+model Admin {
+  id        String    @id @default(cuid())
+  email     String    @unique
+  password  String
+  name      String
+  role      AdminRole @default(ADMIN)
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@map("admins")
+}
+
+// ============================================
+// ADDRESS & LOCATION
+// ============================================
+
+model Address {
+  id          String      @id @default(cuid())
+  userId      String
+  label       String      // Home, Office, etc.
+  address     String
+  landmark    String?
+  city        String
+  state       String
+  pincode     String
+  lat         Float
+  lng         Float
+  isDefault   Boolean     @default(false)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // Relations
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pickups     Booking[]   @relation("PickupAddress")
+  drops       Booking[]   @relation("DropAddress")
+
+  @@map("addresses")
+}
+
+// ============================================
+// VEHICLE MODELS
+// ============================================
+
+model VehicleType {
+  id              String    @id @default(cuid())
+  name            String    @unique // Cycle, EV Cycle, 2 Wheeler, 3 Wheeler, Truck
+  description     String?
+  icon            String?
+  maxWeight       Float     // in KG
+  basePrice       Float     // Base fare
+  pricePerKm      Float     // Per km charge
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  vehicles        Vehicle[]
+  bookings        Booking[]
+
+  @@map("vehicle_types")
+}
+
+model Vehicle {
+  id              String      @id @default(cuid())
+  pilotId         String
+  vehicleTypeId   String
+  registrationNo  String?     @unique
+  model           String?
+  color           String?
+  isActive        Boolean     @default(true)
+  isVerified      Boolean     @default(false)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  // Relations
+  pilot           Pilot       @relation(fields: [pilotId], references: [id], onDelete: Cascade)
+  vehicleType     VehicleType @relation(fields: [vehicleTypeId], references: [id])
+  bookings        Booking[]
+
+  @@map("vehicles")
+}
+
+// ============================================
+// BOOKING & DELIVERY
+// ============================================
+
+model Booking {
+  id                String        @id @default(cuid())
+  bookingNumber     String        @unique @default(cuid())
+  userId            String
+  pilotId           String?
+  vehicleId         String?
+  vehicleTypeId     String
+
+  // Addresses
+  pickupAddressId   String
+  dropAddressId     String
+
+  // Package Details
+  packageType       PackageType   @default(PARCEL)
+  packageWeight     Float?        // in KG
+  packageDescription String?
+
+  // Pricing
+  distance          Float         // in KM
+  baseFare          Float
+  distanceFare      Float
+  taxes             Float         @default(0)
+  discount          Float         @default(0)
+  totalAmount       Float
+  paymentMethod     PaymentMethod @default(CASH)
+  paymentStatus     PaymentStatus @default(PENDING)
+
+  // Status & Timing
+  status            BookingStatus @default(PENDING)
+  scheduledAt       DateTime?     // For scheduled deliveries
+  acceptedAt        DateTime?
+  pickedUpAt        DateTime?
+  deliveredAt       DateTime?
+  cancelledAt       DateTime?
+  cancelReason      String?
+
+  // OTP for delivery
+  pickupOtp         String?
+  deliveryOtp       String?
+
+  // Tracking
+  currentLat        Float?
+  currentLng        Float?
+
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  // Relations
+  user              User          @relation(fields: [userId], references: [id])
+  pilot             Pilot?        @relation(fields: [pilotId], references: [id])
+  vehicle           Vehicle?      @relation(fields: [vehicleId], references: [id])
+  vehicleType       VehicleType   @relation(fields: [vehicleTypeId], references: [id])
+  pickupAddress     Address       @relation("PickupAddress", fields: [pickupAddressId], references: [id])
+  dropAddress       Address       @relation("DropAddress", fields: [dropAddressId], references: [id])
+  review            Review?
+  payment           Payment?
+  trackingHistory   TrackingHistory[]
+
+  @@map("bookings")
+}
+
+model TrackingHistory {
+  id          String        @id @default(cuid())
+  bookingId   String
+  status      BookingStatus
+  lat         Float?
+  lng         Float?
+  note        String?
+  createdAt   DateTime      @default(now())
+
+  // Relations
+  booking     Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@map("tracking_history")
+}
+
+// ============================================
+// PAYMENT & EARNINGS
+// ============================================
+
+model Payment {
+  id              String        @id @default(cuid())
+  bookingId       String        @unique
+  amount          Float
+  method          PaymentMethod
+  status          PaymentStatus @default(PENDING)
+  transactionId   String?
+  gatewayResponse Json?
+  paidAt          DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  // Relations
+  booking         Booking       @relation(fields: [bookingId], references: [id])
+
+  @@map("payments")
+}
+
+model Earning {
+  id          String      @id @default(cuid())
+  pilotId     String
+  bookingId   String?
+  amount      Float
+  type        EarningType @default(DELIVERY)
+  description String?
+  status      EarningStatus @default(PENDING)
+  createdAt   DateTime    @default(now())
+
+  // Relations
+  pilot       Pilot       @relation(fields: [pilotId], references: [id])
+
+  @@map("earnings")
+}
+
+model BankAccount {
+  id            String    @id @default(cuid())
+  pilotId       String    @unique
+  accountName   String
+  accountNumber String
+  ifscCode      String
+  bankName      String
+  isVerified    Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  pilot         Pilot     @relation(fields: [pilotId], references: [id], onDelete: Cascade)
+
+  @@map("bank_accounts")
+}
+
+// ============================================
+// REVIEWS & RATINGS
+// ============================================
+
+model Review {
+  id          String    @id @default(cuid())
+  bookingId   String    @unique
+  userId      String
+  pilotId     String
+  rating      Int       // 1-5
+  comment     String?
+  createdAt   DateTime  @default(now())
+
+  // Relations
+  booking     Booking   @relation(fields: [bookingId], references: [id])
+  user        User      @relation(fields: [userId], references: [id])
+  pilot       Pilot     @relation(fields: [pilotId], references: [id])
+
+  @@map("reviews")
+}
+
+// ============================================
+// DOCUMENTS & VERIFICATION
+// ============================================
+
+model Document {
+  id          String        @id @default(cuid())
+  pilotId     String
+  type        DocumentType
+  url         String
+  status      DocumentStatus @default(PENDING)
+  rejectedReason String?
+  verifiedAt  DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  // Relations
+  pilot       Pilot         @relation(fields: [pilotId], references: [id], onDelete: Cascade)
+
+  @@map("documents")
+}
+
+model OTP {
+  id          String    @id @default(cuid())
+  phone       String
+  otp         String
+  purpose     OTPPurpose
+  userId      String?
+  pilotId     String?
+  expiresAt   DateTime
+  isUsed      Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+
+  // Relations
+  user        User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pilot       Pilot?    @relation(fields: [pilotId], references: [id], onDelete: Cascade)
+
+  @@map("otps")
+}
+
+// ============================================
+// NOTIFICATIONS
+// ============================================
+
+model Notification {
+  id          String    @id @default(cuid())
+  userId      String?
+  pilotId     String?
+  title       String
+  body        String
+  type        NotificationType
+  data        Json?
+  isRead      Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+
+  // Relations
+  user        User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pilot       Pilot?    @relation(fields: [pilotId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+// ============================================
+// SETTINGS & CONFIG
+// ============================================
+
+model Setting {
+  id          String    @id @default(cuid())
+  key         String    @unique
+  value       String
+  description String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("settings")
+}
+
+model ServiceArea {
+  id          String    @id @default(cuid())
+  name        String
+  city        String
+  state       String
+  polygon     Json      // GeoJSON polygon
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("service_areas")
+}
+
+// ============================================
+// ENUMS
+// ============================================
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum PilotStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  SUSPENDED
+}
+
+enum AdminRole {
+  SUPER_ADMIN
+  ADMIN
+  SUPPORT
+}
+
+enum PackageType {
+  DOCUMENT
+  PARCEL
+  FOOD
+  GROCERY
+  MEDICINE
+  FRAGILE
+  OTHER
+}
+
+enum BookingStatus {
+  PENDING
+  ACCEPTED
+  ARRIVED_PICKUP
+  PICKED_UP
+  IN_TRANSIT
+  ARRIVED_DROP
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  CASH
+  UPI
+  CARD
+  WALLET
+  NETBANKING
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum EarningType {
+  DELIVERY
+  BONUS
+  INCENTIVE
+  REFERRAL
+  PENALTY
+}
+
+enum EarningStatus {
+  PENDING
+  PAID
+  CANCELLED
+}
+
+enum DocumentType {
+  AADHAAR_FRONT
+  AADHAAR_BACK
+  LICENSE_FRONT
+  LICENSE_BACK
+  PAN_CARD
+  VEHICLE_RC
+  VEHICLE_INSURANCE
+  PROFILE_PHOTO
+  VEHICLE_PHOTO
+}
+
+enum DocumentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum OTPPurpose {
+  LOGIN
+  SIGNUP
+  RESET_PASSWORD
+  VERIFY_PHONE
+  PICKUP
+  DELIVERY
+}
+
+enum NotificationType {
+  BOOKING
+  PAYMENT
+  PROMOTION
+  SYSTEM
+  CHAT
+}
