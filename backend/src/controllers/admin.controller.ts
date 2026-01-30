@@ -75,6 +75,22 @@ export const updateUserStatus = async (
   }
 }
 
+export const updateUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userId = req.params.userId as string
+    const { name, email, phone } = req.body
+
+    const user = await adminService.updateUser(userId, { name, email, phone })
+    res.json(formatResponse(true, 'User updated successfully', { user }))
+  } catch (error) {
+    next(error)
+  }
+}
+
 // ============================================
 // PILOT MANAGEMENT
 // ============================================
@@ -143,6 +159,22 @@ export const verifyDocument = async (
 
     const document = await adminService.verifyPilotDocument(documentId, status, rejectedReason)
     res.json(formatResponse(true, `Document ${status}`, { document }))
+  } catch (error) {
+    next(error)
+  }
+}
+
+export const updatePilot = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const pilotId = req.params.pilotId as string
+    const { name, email, phone, dateOfBirth, gender } = req.body
+
+    const pilot = await adminService.updatePilot(pilotId, { name, email, phone, dateOfBirth, gender })
+    res.json(formatResponse(true, 'Pilot updated successfully', { pilot }))
   } catch (error) {
     next(error)
   }
@@ -293,6 +325,90 @@ export const getRevenueAnalytics = async (
     const { days = '30' } = req.query
     const analytics = await adminService.getRevenueAnalytics(parseInt(days as string))
     res.json(formatResponse(true, 'Revenue analytics retrieved', analytics))
+  } catch (error) {
+    next(error)
+  }
+}
+
+// ============================================
+// VEHICLE MANAGEMENT
+// ============================================
+
+export const listVehicles = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { page = '1', limit = '10', search, verified, vehicleTypeId } = req.query
+    const isVerified = verified === 'true' ? true : verified === 'false' ? false : undefined
+
+    const result = await adminService.listAllVehicles(
+      parseInt(page as string),
+      parseInt(limit as string),
+      search as string | undefined,
+      isVerified,
+      vehicleTypeId as string | undefined
+    )
+
+    res.json(formatResponse(true, 'Vehicles retrieved', { vehicles: result.vehicles }, result.meta))
+  } catch (error) {
+    next(error)
+  }
+}
+
+export const getVehicleDetails = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const vehicleId = req.params.vehicleId as string
+    const vehicle = await adminService.getVehicleDetails(vehicleId)
+    res.json(formatResponse(true, 'Vehicle details retrieved', { vehicle }))
+  } catch (error) {
+    next(error)
+  }
+}
+
+export const verifyVehicle = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const vehicleId = req.params.vehicleId as string
+    const { isVerified, reason } = req.body
+
+    const vehicle = await adminService.verifyVehicle(vehicleId, isVerified, reason)
+    res.json(formatResponse(true, `Vehicle ${isVerified ? 'verified' : 'rejected'}`, { vehicle }))
+  } catch (error) {
+    next(error)
+  }
+}
+
+// ============================================
+// WALLET TRANSACTIONS
+// ============================================
+
+export const listWalletTransactions = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { page = '1', limit = '10', userId, type, dateFrom, dateTo } = req.query
+
+    const result = await adminService.listWalletTransactions(
+      parseInt(page as string),
+      parseInt(limit as string),
+      userId as string | undefined,
+      type as 'CREDIT' | 'DEBIT' | undefined,
+      dateFrom ? new Date(dateFrom as string) : undefined,
+      dateTo ? new Date(dateTo as string) : undefined
+    )
+
+    res.json(formatResponse(true, 'Wallet transactions retrieved', { transactions: result.transactions }, result.meta))
   } catch (error) {
     next(error)
   }

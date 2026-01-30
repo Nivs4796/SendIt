@@ -44,6 +44,21 @@ export const updateUserStatusSchema = z.object({
   }),
 })
 
+export const adminUpdateUserSchema = z.object({
+  params: z.object({
+    userId: uuidSchema,
+  }),
+  body: z.object({
+    name: z.string().min(2).max(100).optional(),
+    email: z.string().email('Invalid email format').optional(),
+    phone: z.string().min(10).max(15).optional(),
+  }).refine((data) => {
+    return data.name || data.email || data.phone
+  }, {
+    message: 'At least one field (name, email, or phone) must be provided',
+  }),
+})
+
 // ============================================
 // PILOT MANAGEMENT
 // ============================================
@@ -186,5 +201,76 @@ export const analyticsQuerySchema = z.object({
       .default('30')
       .transform((val) => parseInt(val))
       .pipe(z.number().int().positive().max(365, 'Maximum 365 days')),
+  }),
+})
+
+// ============================================
+// PILOT EDIT
+// ============================================
+
+export const adminUpdatePilotSchema_Edit = z.object({
+  params: z.object({
+    pilotId: uuidSchema,
+  }),
+  body: z.object({
+    name: z.string().min(2).max(100).optional(),
+    email: z.string().email('Invalid email format').optional(),
+    phone: z.string().min(10).max(15).optional(),
+    dateOfBirth: z.string().datetime().optional(),
+    gender: z.enum(['MALE', 'FEMALE', 'OTHER']).optional(),
+  }).refine((data) => {
+    return data.name || data.email || data.phone || data.dateOfBirth || data.gender
+  }, {
+    message: 'At least one field must be provided',
+  }),
+})
+
+// ============================================
+// VEHICLE MANAGEMENT
+// ============================================
+
+export const listVehiclesSchema = z.object({
+  query: paginationSchema.extend({
+    search: z.string().max(100).optional(),
+    verified: z.enum(['true', 'false']).optional(),
+    vehicleTypeId: z.string().optional(),
+  }),
+})
+
+export const getVehicleDetailsSchema = z.object({
+  params: z.object({
+    vehicleId: uuidSchema,
+  }),
+})
+
+export const verifyVehicleSchema = z.object({
+  params: z.object({
+    vehicleId: uuidSchema,
+  }),
+  body: z.object({
+    isVerified: z.boolean({ message: 'isVerified must be a boolean' }),
+    reason: z.string().max(500).optional(),
+  }).refine((data) => {
+    // If rejecting, reason should be provided
+    if (!data.isVerified && !data.reason) {
+      return false
+    }
+    return true
+  }, {
+    message: 'Reason is required when rejecting a vehicle',
+    path: ['reason'],
+  }),
+})
+
+// ============================================
+// WALLET TRANSACTIONS
+// ============================================
+
+export const listWalletTransactionsSchema = z.object({
+  query: paginationSchema.extend({
+    userId: z.string().optional(),
+    type: z.enum(['CREDIT', 'DEBIT']).optional(),
+    dateFrom: z.string().datetime().optional(),
+    dateTo: z.string().datetime().optional(),
   }),
 })

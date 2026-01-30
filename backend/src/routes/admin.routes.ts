@@ -6,9 +6,11 @@ import {
   listUsersSchema,
   getUserDetailsSchema,
   updateUserStatusSchema,
+  adminUpdateUserSchema,
   listPilotsSchema,
   getPilotDetailsSchema,
   adminUpdatePilotStatusSchema,
+  adminUpdatePilotSchema_Edit,
   verifyDocumentSchema,
   adminListBookingsSchema,
   getBookingDetailsSchema,
@@ -17,6 +19,10 @@ import {
   updateSettingSchema,
   updateSettingsBulkSchema,
   analyticsQuerySchema,
+  listVehiclesSchema,
+  getVehicleDetailsSchema,
+  verifyVehicleSchema,
+  listWalletTransactionsSchema,
 } from '../validators/admin.validator'
 
 const router = Router()
@@ -170,6 +176,52 @@ router.get('/users/:userId', validate(getUserDetailsSchema), adminController.get
  */
 router.put('/users/:userId/status', validate(updateUserStatusSchema), adminController.updateUserStatus)
 
+/**
+ * @swagger
+ * /admin/users/{userId}:
+ *   put:
+ *     summary: Update user profile
+ *     description: Edit user profile information (name, email, phone).
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 minLength: 2
+ *                 maxLength: 100
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               phone:
+ *                 type: string
+ *                 minLength: 10
+ *                 maxLength: 15
+ *           example:
+ *             name: "John Doe"
+ *             email: "john@example.com"
+ *     responses:
+ *       200:
+ *         description: User updated successfully
+ *       400:
+ *         description: Email or phone already in use
+ *       404:
+ *         description: User not found
+ */
+router.put('/users/:userId', validate(adminUpdateUserSchema), adminController.updateUser)
+
 // ============================================
 // PILOT MANAGEMENT
 // ============================================
@@ -276,6 +328,58 @@ router.get('/pilots/:pilotId', validate(getPilotDetailsSchema), adminController.
  *         description: Pilot not found
  */
 router.put('/pilots/:pilotId/status', validate(adminUpdatePilotStatusSchema), adminController.updatePilotStatus)
+
+/**
+ * @swagger
+ * /admin/pilots/{pilotId}:
+ *   put:
+ *     summary: Update pilot profile
+ *     description: Edit pilot profile information (name, email, phone, dateOfBirth, gender).
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: pilotId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 minLength: 2
+ *                 maxLength: 100
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               phone:
+ *                 type: string
+ *                 minLength: 10
+ *                 maxLength: 15
+ *               dateOfBirth:
+ *                 type: string
+ *                 format: date-time
+ *               gender:
+ *                 type: string
+ *                 enum: [MALE, FEMALE, OTHER]
+ *           example:
+ *             name: "John Pilot"
+ *             phone: "9876543210"
+ *     responses:
+ *       200:
+ *         description: Pilot updated successfully
+ *       400:
+ *         description: Email or phone already in use
+ *       404:
+ *         description: Pilot not found
+ */
+router.put('/pilots/:pilotId', validate(adminUpdatePilotSchema_Edit), adminController.updatePilot)
 
 /**
  * @swagger
@@ -647,5 +751,167 @@ router.get('/analytics/bookings', validate(analyticsQuerySchema), adminControlle
  *                       type: array
  */
 router.get('/analytics/revenue', validate(analyticsQuerySchema), adminController.getRevenueAnalytics)
+
+// ============================================
+// VEHICLE MANAGEMENT
+// ============================================
+
+/**
+ * @swagger
+ * /admin/vehicles:
+ *   get:
+ *     summary: List all vehicles
+ *     description: Get paginated list of all vehicles with optional filtering.
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Search by plate number or model
+ *       - in: query
+ *         name: verified
+ *         schema:
+ *           type: boolean
+ *         description: Filter by verification status
+ *       - in: query
+ *         name: vehicleTypeId
+ *         schema:
+ *           type: string
+ *         description: Filter by vehicle type
+ *     responses:
+ *       200:
+ *         description: List of vehicles with pagination
+ */
+router.get('/vehicles', validate(listVehiclesSchema), adminController.listVehicles)
+
+/**
+ * @swagger
+ * /admin/vehicles/{vehicleId}:
+ *   get:
+ *     summary: Get vehicle details
+ *     description: Get detailed information about a specific vehicle including pilot and bookings.
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: vehicleId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Vehicle details
+ *       404:
+ *         description: Vehicle not found
+ */
+router.get('/vehicles/:vehicleId', validate(getVehicleDetailsSchema), adminController.getVehicleDetails)
+
+/**
+ * @swagger
+ * /admin/vehicles/{vehicleId}/verify:
+ *   put:
+ *     summary: Verify or reject vehicle
+ *     description: Verify or reject a pilot's vehicle.
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: vehicleId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - isVerified
+ *             properties:
+ *               isVerified:
+ *                 type: boolean
+ *                 description: true to verify, false to reject
+ *               reason:
+ *                 type: string
+ *                 maxLength: 500
+ *                 description: Required when rejecting
+ *           example:
+ *             isVerified: true
+ *     responses:
+ *       200:
+ *         description: Vehicle verification status updated
+ *       400:
+ *         description: Reason required when rejecting
+ *       404:
+ *         description: Vehicle not found
+ */
+router.put('/vehicles/:vehicleId/verify', validate(verifyVehicleSchema), adminController.verifyVehicle)
+
+// ============================================
+// WALLET TRANSACTIONS
+// ============================================
+
+/**
+ * @swagger
+ * /admin/wallet/transactions:
+ *   get:
+ *     summary: List wallet transactions
+ *     description: Get paginated list of all wallet transactions with optional filtering.
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *       - in: query
+ *         name: userId
+ *         schema:
+ *           type: string
+ *         description: Filter by user ID
+ *       - in: query
+ *         name: type
+ *         schema:
+ *           type: string
+ *           enum: [CREDIT, DEBIT]
+ *         description: Filter by transaction type
+ *       - in: query
+ *         name: dateFrom
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *       - in: query
+ *         name: dateTo
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *     responses:
+ *       200:
+ *         description: List of wallet transactions with pagination
+ */
+router.get('/wallet/transactions', validate(listWalletTransactionsSchema), adminController.listWalletTransactions)
 
 export default router

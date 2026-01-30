@@ -167,6 +167,52 @@ export const updateUserStatus = async (userId: string, isActive: boolean) => {
   return user
 }
 
+export const updateUser = async (
+  userId: string,
+  data: { name?: string; email?: string; phone?: string }
+) => {
+  // Check if user exists
+  const existingUser = await prisma.user.findUnique({ where: { id: userId } })
+  if (!existingUser) {
+    throw new AppError('User not found', 404)
+  }
+
+  // Check for unique constraints if updating email or phone
+  if (data.email && data.email !== existingUser.email) {
+    const emailExists = await prisma.user.findUnique({ where: { email: data.email } })
+    if (emailExists) {
+      throw new AppError('Email already in use', 400)
+    }
+  }
+
+  if (data.phone && data.phone !== existingUser.phone) {
+    const phoneExists = await prisma.user.findUnique({ where: { phone: data.phone } })
+    if (phoneExists) {
+      throw new AppError('Phone already in use', 400)
+    }
+  }
+
+  const user = await prisma.user.update({
+    where: { id: userId },
+    data,
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      phone: true,
+      avatar: true,
+      walletBalance: true,
+      isVerified: true,
+      isActive: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  })
+
+  logger.info(`User ${userId} profile updated by admin`)
+  return user
+}
+
 // ============================================
 // PILOT MANAGEMENT
 // ============================================
@@ -312,6 +358,57 @@ export const verifyPilotDocument = async (
 
   logger.info(`Document ${documentId} ${status}`)
   return document
+}
+
+export const updatePilot = async (
+  pilotId: string,
+  data: { name?: string; email?: string; phone?: string; dateOfBirth?: Date; gender?: 'MALE' | 'FEMALE' | 'OTHER' }
+) => {
+  const existingPilot = await prisma.pilot.findUnique({ where: { id: pilotId } })
+  if (!existingPilot) {
+    throw new AppError('Pilot not found', 404)
+  }
+
+  // Check for unique constraints
+  if (data.email && data.email !== existingPilot.email) {
+    const emailExists = await prisma.pilot.findUnique({ where: { email: data.email } })
+    if (emailExists) {
+      throw new AppError('Email already in use', 400)
+    }
+  }
+
+  if (data.phone && data.phone !== existingPilot.phone) {
+    const phoneExists = await prisma.pilot.findUnique({ where: { phone: data.phone } })
+    if (phoneExists) {
+      throw new AppError('Phone already in use', 400)
+    }
+  }
+
+  const pilot = await prisma.pilot.update({
+    where: { id: pilotId },
+    data,
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      phone: true,
+      avatar: true,
+      dateOfBirth: true,
+      gender: true,
+      status: true,
+      isOnline: true,
+      isVerified: true,
+      isActive: true,
+      rating: true,
+      totalDeliveries: true,
+      totalEarnings: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  })
+
+  logger.info(`Pilot ${pilotId} profile updated by admin`)
+  return pilot
 }
 
 // ============================================
@@ -587,5 +684,164 @@ export const getRevenueAnalytics = async (days: number = 30) => {
     })),
     total: totalRevenue._sum.totalAmount || 0,
     totalOrders: totalRevenue._count,
+  }
+}
+
+// ============================================
+// VEHICLE MANAGEMENT
+// ============================================
+
+export const listAllVehicles = async (
+  page: number = 1,
+  limit: number = 10,
+  search?: string,
+  isVerified?: boolean,
+  vehicleTypeId?: string
+) => {
+  const { skip, take } = getPaginationParams(page, limit)
+
+  const where = {
+    ...(isVerified !== undefined && { isVerified }),
+    ...(vehicleTypeId && { vehicleTypeId }),
+    ...(search && {
+      OR: [
+        { registrationNo: { contains: search, mode: 'insensitive' as const } },
+        { model: { contains: search, mode: 'insensitive' as const } },
+        { pilot: { name: { contains: search, mode: 'insensitive' as const } } },
+        { pilot: { phone: { contains: search } } },
+      ],
+    }),
+  }
+
+  const [vehicles, total] = await Promise.all([
+    prisma.vehicle.findMany({
+      where,
+      skip,
+      take,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        pilot: { select: { id: true, name: true, phone: true, status: true } },
+        vehicleType: true,
+      },
+    }),
+    prisma.vehicle.count({ where }),
+  ])
+
+  return {
+    vehicles,
+    meta: { page, limit: take, total, totalPages: Math.ceil(total / take) },
+  }
+}
+
+export const getVehicleDetails = async (vehicleId: string) => {
+  const vehicle = await prisma.vehicle.findUnique({
+    where: { id: vehicleId },
+    include: {
+      pilot: {
+        select: {
+          id: true,
+          name: true,
+          phone: true,
+          email: true,
+          status: true,
+          rating: true,
+        },
+      },
+      vehicleType: true,
+      bookings: {
+        take: 5,
+        orderBy: { createdAt: 'desc' },
+        select: {
+          id: true,
+          bookingNumber: true,
+          status: true,
+          createdAt: true,
+        },
+      },
+    },
+  })
+
+  if (!vehicle) {
+    throw new AppError('Vehicle not found', 404)
+  }
+
+  return vehicle
+}
+
+export const verifyVehicle = async (
+  vehicleId: string,
+  isVerified: boolean,
+  reason?: string
+) => {
+  const vehicle = await prisma.vehicle.update({
+    where: { id: vehicleId },
+    data: { isVerified },
+    include: {
+      pilot: { select: { id: true, name: true } },
+      vehicleType: true,
+    },
+  })
+
+  // Notify pilot
+  await prisma.notification.create({
+    data: {
+      pilotId: vehicle.pilotId,
+      title: `Vehicle ${isVerified ? 'Verified' : 'Rejected'}`,
+      body: reason || `Your vehicle ${vehicle.registrationNo || ''} has been ${isVerified ? 'verified' : 'rejected'}`,
+      type: 'SYSTEM',
+    },
+  })
+
+  logger.info(`Vehicle ${vehicleId} ${isVerified ? 'verified' : 'rejected'} by admin`)
+  return vehicle
+}
+
+// ============================================
+// WALLET TRANSACTIONS
+// ============================================
+
+export const listWalletTransactions = async (
+  page: number = 1,
+  limit: number = 10,
+  userId?: string,
+  type?: 'CREDIT' | 'DEBIT',
+  dateFrom?: Date,
+  dateTo?: Date
+) => {
+  const { skip, take } = getPaginationParams(page, limit)
+
+  const where = {
+    ...(userId && { userId }),
+    ...(type && { type }),
+    ...(dateFrom && { createdAt: { gte: dateFrom } }),
+    ...(dateTo && { createdAt: { lte: dateTo } }),
+  }
+
+  const [transactions, total] = await Promise.all([
+    prisma.walletTransaction.findMany({
+      where,
+      skip,
+      take,
+      orderBy: { createdAt: 'desc' },
+    }),
+    prisma.walletTransaction.count({ where }),
+  ])
+
+  // Get user details for transactions
+  const userIds = [...new Set(transactions.map((t) => t.userId))]
+  const users = await prisma.user.findMany({
+    where: { id: { in: userIds } },
+    select: { id: true, name: true, phone: true },
+  })
+  const userMap = new Map(users.map((u) => [u.id, u]))
+
+  const transactionsWithUsers = transactions.map((t) => ({
+    ...t,
+    user: userMap.get(t.userId),
+  }))
+
+  return {
+    transactions: transactionsWithUsers,
+    meta: { page, limit: take, total, totalPages: Math.ceil(total / take) },
   }
 }
