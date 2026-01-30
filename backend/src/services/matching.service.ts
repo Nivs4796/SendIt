@@ -3,6 +3,8 @@ import { AppError } from '../middleware/errorHandler'
 import { calculateDistance } from '../utils/helpers'
 import { BookingStatus } from '@prisma/client'
 import logger from '../config/logger'
+import { emitToPilot } from '../socket'
+import { BookingOfferPayload } from '../socket/types'
 
 // Configuration for matching algorithm
 const MATCHING_CONFIG = {
@@ -303,6 +305,38 @@ export const createJobOffer = async (
 
   logger.info(`Job offer created: ${offer.id} for pilot ${pilotId}`)
 
+  // Emit real-time offer to pilot via socket
+  const bookingDetails = await prisma.booking.findUnique({
+    where: { id: bookingId },
+    include: {
+      pickupAddress: true,
+      dropAddress: true,
+    },
+  })
+
+  if (bookingDetails) {
+    const offerPayload: BookingOfferPayload = {
+      bookingId,
+      bookingNumber: bookingDetails.bookingNumber,
+      pickupAddress: {
+        address: bookingDetails.pickupAddress.address,
+        lat: bookingDetails.pickupAddress.lat,
+        lng: bookingDetails.pickupAddress.lng,
+      },
+      dropAddress: {
+        address: bookingDetails.dropAddress.address,
+        lat: bookingDetails.dropAddress.lat,
+        lng: bookingDetails.dropAddress.lng,
+      },
+      distance: bookingDetails.distance,
+      totalAmount: bookingDetails.totalAmount,
+      packageType: bookingDetails.packageType,
+      expiresAt: expiresAt.toISOString(),
+    }
+
+    emitToPilot(pilotId, 'booking:offer', offerPayload)
+  }
+
   return offer
 }
 
@@ -602,6 +636,9 @@ export const cleanupExpiredOffers = (): void => {
       offer.status = 'EXPIRED'
       activeJobOffers.set(id, offer)
       logger.info(`Job offer ${id} expired`)
+
+      // Notify pilot that offer expired
+      emitToPilot(offer.pilotId, 'offer:expired', { bookingId: offer.bookingId })
     }
 
     // Remove old offers (older than 1 hour)

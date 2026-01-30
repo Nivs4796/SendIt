@@ -7,6 +7,8 @@ import {
   getPaginationParams,
 } from '../utils/helpers'
 import { BookingStatus, PaymentMethod, PackageType } from '@prisma/client'
+import { emitToBooking, emitToUser, emitToAdmin } from '../socket'
+import { BookingStatusPayload, DashboardStatsPayload } from '../socket/types'
 
 interface CreateBookingInput {
   userId: string
@@ -295,7 +297,20 @@ export const acceptBooking = async (bookingId: string, pilotId: string) => {
     },
   })
 
-  // TODO: Send notification to user
+  // Emit real-time status update
+  const statusPayload: BookingStatusPayload = {
+    bookingId,
+    status: 'ACCEPTED',
+    timestamp: new Date().toISOString(),
+    pilotId: pilot.id,
+    pilotName: pilot.name,
+    pilotPhone: pilot.phone,
+  }
+  emitToBooking(bookingId, 'booking:status', statusPayload)
+  emitToUser(updatedBooking.user.id, 'booking:status', statusPayload)
+
+  // Update admin dashboard
+  broadcastDashboardStats()
 
   return updatedBooking
 }
@@ -377,6 +392,16 @@ export const updateBookingStatus = async (
     },
   })
 
+  // Emit real-time status update
+  const statusPayload: BookingStatusPayload = {
+    bookingId,
+    status,
+    timestamp: new Date().toISOString(),
+    pilotId,
+  }
+  emitToBooking(bookingId, 'booking:status', statusPayload)
+  emitToUser(updatedBooking.user.id, 'booking:status', statusPayload)
+
   // If delivered, update pilot stats
   if (status === 'DELIVERED') {
     await prisma.pilot.update({
@@ -397,6 +422,9 @@ export const updateBookingStatus = async (
         status: 'PENDING',
       },
     })
+
+    // Update admin dashboard on delivery
+    broadcastDashboardStats()
   }
 
   return updatedBooking
@@ -443,5 +471,62 @@ export const cancelBooking = async (
     },
   })
 
+  // Emit real-time status update
+  const statusPayload: BookingStatusPayload = {
+    bookingId,
+    status: 'CANCELLED',
+    timestamp: new Date().toISOString(),
+  }
+  emitToBooking(bookingId, 'booking:status', statusPayload)
+
+  // Notify pilot if assigned
+  if (booking.pilotId) {
+    const { emitToPilot } = await import('../socket')
+    emitToPilot(booking.pilotId, 'booking:status', statusPayload)
+  }
+
+  // Update admin dashboard
+  broadcastDashboardStats()
+
   return updatedBooking
+}
+
+// Helper to broadcast dashboard stats
+async function broadcastDashboardStats(): Promise<void> {
+  try {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+
+    const [activeBookings, onlinePilots, pendingBookings, todayStats] = await Promise.all([
+      prisma.booking.count({
+        where: {
+          status: { in: ['ACCEPTED', 'ARRIVED_PICKUP', 'PICKED_UP', 'IN_TRANSIT', 'ARRIVED_DROP'] },
+        },
+      }),
+      prisma.pilot.count({ where: { isOnline: true } }),
+      prisma.booking.count({ where: { status: 'PENDING' } }),
+      prisma.booking.aggregate({
+        where: {
+          createdAt: { gte: today },
+          status: 'DELIVERED',
+        },
+        _count: true,
+        _sum: { totalAmount: true },
+      }),
+    ])
+
+    const stats: DashboardStatsPayload = {
+      activeBookings,
+      onlinePilots,
+      pendingBookings,
+      todayDeliveries: todayStats._count,
+      todayRevenue: todayStats._sum.totalAmount || 0,
+      timestamp: new Date().toISOString(),
+    }
+
+    emitToAdmin('dashboard:stats', stats)
+  } catch (error) {
+    // Don't throw - this is a background operation
+    console.error('Failed to broadcast dashboard stats:', error)
+  }
 }
