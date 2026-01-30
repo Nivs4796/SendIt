@@ -17,6 +17,7 @@ model User {
   email         String?   @unique
   name          String?
   avatar        String?
+  walletBalance Float     @default(0)
   isVerified    Boolean   @default(false)
   isActive      Boolean   @default(true)
   createdAt     DateTime  @default(now())
@@ -407,6 +408,69 @@ model ServiceArea {
 }
 
 // ============================================
+// COUPON & DISCOUNT SYSTEM
+// ============================================
+
+model Coupon {
+  id              String        @id @default(cuid())
+  code            String        @unique
+  description     String?
+  discountType    DiscountType  @default(PERCENTAGE)
+  discountValue   Float         // Percentage or fixed amount
+  minOrderAmount  Float?        // Minimum order to apply
+  maxDiscount     Float?        // Cap for percentage discounts
+  usageLimit      Int?          // Total uses allowed
+  usageCount      Int           @default(0)
+  perUserLimit    Int           @default(1) // Uses per user
+  vehicleTypeIds  String[]      // Empty means all vehicle types
+  isActive        Boolean       @default(true)
+  startsAt        DateTime      @default(now())
+  expiresAt       DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  // Relations
+  usages          CouponUsage[]
+
+  @@map("coupons")
+}
+
+model CouponUsage {
+  id        String    @id @default(cuid())
+  couponId  String
+  userId    String
+  bookingId String?
+  discount  Float     // Actual discount applied
+  usedAt    DateTime  @default(now())
+
+  // Relations
+  coupon    Coupon    @relation(fields: [couponId], references: [id])
+
+  @@unique([couponId, bookingId])
+  @@map("coupon_usages")
+}
+
+// ============================================
+// WALLET & TRANSACTIONS
+// ============================================
+
+model WalletTransaction {
+  id            String            @id @default(cuid())
+  userId        String
+  type          WalletTxnType
+  amount        Float
+  balanceBefore Float
+  balanceAfter  Float
+  description   String?
+  referenceId   String?           // Booking ID, refund ID, etc.
+  referenceType String?           // BOOKING, REFUND, TOPUP, etc.
+  status        WalletTxnStatus   @default(COMPLETED)
+  createdAt     DateTime          @default(now())
+
+  @@map("wallet_transactions")
+}
+
+// ============================================
 // ENUMS
 // ============================================
 
@@ -512,4 +576,21 @@ enum NotificationType {
   PROMOTION
   SYSTEM
   CHAT
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED
+}
+
+enum WalletTxnType {
+  CREDIT
+  DEBIT
+}
+
+enum WalletTxnStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REVERSED
 }

@@ -6,6 +6,10 @@ import addressRoutes from './address.routes'
 import pilotRoutes from './pilot.routes'
 import vehicleRoutes from './vehicle.routes'
 import reviewRoutes from './review.routes'
+import matchingRoutes from './matching.routes'
+import couponRoutes from './coupon.routes'
+import walletRoutes from './wallet.routes'
+import adminRoutes from './admin.routes'
 
 const router = Router()
 
@@ -36,5 +40,9 @@ router.use('/pilots', pilotRoutes)
 router.use('/vehicles', vehicleRoutes)
 router.use('/bookings', bookingRoutes)
 router.use('/reviews', reviewRoutes)
+router.use('/matching', matchingRoutes)
+router.use('/coupons', couponRoutes)
+router.use('/wallet', walletRoutes)
+router.use('/admin', adminRoutes)
 
 export default router
