@@ -32,16 +32,26 @@ test.describe('Bookings Management', () => {
 
   test.describe('Booking Listing', () => {
     test('should display list of bookings', async ({ page }) => {
-      await expect(page.locator('tbody tr').first()).toBeVisible({ timeout: 15000 });
+      // Wait for a row with an action button (actual booking row, not "No bookings found")
+      const bookingRow = page.locator('tbody tr').filter({ has: page.locator('button') }).first();
+      await expect(bookingRow).toBeVisible({ timeout: 15000 });
     });
 
     test('should display booking status badges', async ({ page }) => {
-      const hasBadge = await page.locator('tbody').getByText(/pending|searching|confirmed|in.transit|delivered|cancelled/i).first().isVisible({ timeout: 15000 }).catch(() => false);
+      // Wait for actual booking data to load first
+      const bookingRow = page.locator('tbody tr').filter({ has: page.locator('button') }).first();
+      await expect(bookingRow).toBeVisible({ timeout: 15000 });
+
+      const hasBadge = await page.locator('tbody').getByText(/pending|searching|confirmed|in.transit|delivered|cancelled/i).first().isVisible().catch(() => false);
       expect(hasBadge).toBeTruthy();
     });
 
     test('should display prices in rupee format', async ({ page }) => {
-      await expect(page.locator('tbody').getByText(/₹/).first()).toBeVisible({ timeout: 15000 });
+      // Wait for actual booking data to load first
+      const bookingRow = page.locator('tbody tr').filter({ has: page.locator('button') }).first();
+      await expect(bookingRow).toBeVisible({ timeout: 15000 });
+
+      await expect(page.locator('tbody').getByText(/₹/).first()).toBeVisible();
     });
   });
 
@@ -76,16 +86,26 @@ test.describe('Bookings Management', () => {
 
   test.describe('View Booking Details', () => {
     test('should open view details dialog', async ({ page }) => {
-      await expect(page.locator('tbody tr').first()).toBeVisible({ timeout: 15000 });
-      await page.locator('tbody tr').first().locator('button').click();
+      // Wait for a row with an action button (actual booking row, not "No bookings found")
+      const bookingRow = page.locator('tbody tr').filter({ has: page.locator('button') }).first();
+      await expect(bookingRow).toBeVisible({ timeout: 15000 });
+
+      const actionButton = bookingRow.locator('button');
+      await actionButton.waitFor({ state: 'visible' });
+      await actionButton.click();
       await page.locator('[role="menuitem"]').filter({ hasText: /view/i }).click();
 
       await expect(page.locator('[role="dialog"]')).toBeVisible();
     });
 
     test('should display booking information in dialog', async ({ page }) => {
-      await expect(page.locator('tbody tr').first()).toBeVisible({ timeout: 15000 });
-      await page.locator('tbody tr').first().locator('button').click();
+      // Wait for a row with an action button (actual booking row, not "No bookings found")
+      const bookingRow = page.locator('tbody tr').filter({ has: page.locator('button') }).first();
+      await expect(bookingRow).toBeVisible({ timeout: 15000 });
+
+      const actionButton = bookingRow.locator('button');
+      await actionButton.waitFor({ state: 'visible' });
+      await actionButton.click();
       await page.locator('[role="menuitem"]').filter({ hasText: /view/i }).click();
 
       await expect(page.locator('[role="dialog"]').getByText(/booking id/i)).toBeVisible();
@@ -94,8 +114,13 @@ test.describe('Bookings Management', () => {
 
   test.describe('Booking Actions', () => {
     test('should show action menu options', async ({ page }) => {
-      await expect(page.locator('tbody tr').first()).toBeVisible({ timeout: 15000 });
-      await page.locator('tbody tr').first().locator('button').click();
+      // Wait for a row with an action button (actual booking row, not "No bookings found")
+      const bookingRow = page.locator('tbody tr').filter({ has: page.locator('button') }).first();
+      await expect(bookingRow).toBeVisible({ timeout: 15000 });
+
+      const actionButton = bookingRow.locator('button');
+      await actionButton.waitFor({ state: 'visible' });
+      await actionButton.click();
 
       await expect(page.locator('[role="menuitem"]').filter({ hasText: /view/i })).toBeVisible();
     });
@@ -107,8 +132,8 @@ test.describe('Bookings Management', () => {
     });
 
     test('should have Previous and Next buttons', async ({ page }) => {
-      await expect(page.getByRole('button', { name: /previous/i })).toBeVisible();
-      await expect(page.getByRole('button', { name: /next/i })).toBeVisible();
+      await expect(page.getByRole('button', { name: 'Previous' })).toBeVisible();
+      await expect(page.getByRole('button', { name: 'Next', exact: true })).toBeVisible();
     });
   });
 });

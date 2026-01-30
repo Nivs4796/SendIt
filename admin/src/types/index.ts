@@ -113,16 +113,27 @@ export type BookingStatus =
   | 'DELIVERED'
   | 'CANCELLED'
 
+export interface BookingAddress {
+  id: string
+  address: string
+  city: string
+  state: string
+  pincode: string
+  landmark?: string
+  lat?: number
+  lng?: number
+}
+
 export interface Booking {
   id: string
   userId: string
   pilotId?: string
   vehicleTypeId: string
   status: BookingStatus
-  pickupAddress: string
+  pickupAddress: string | BookingAddress | null
   pickupLat: number
   pickupLng: number
-  dropoffAddress: string
+  dropoffAddress: string | BookingAddress | null
   dropoffLat: number
   dropoffLng: number
   distance: number

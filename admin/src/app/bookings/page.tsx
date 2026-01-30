@@ -47,6 +47,14 @@ const statusColors: Record<BookingStatus, 'default' | 'secondary' | 'destructive
   CANCELLED: 'destructive',
 }
 
+// Helper to format address object to string
+const formatAddress = (addr: { address?: string; city?: string; state?: string; pincode?: string } | string | null | undefined): string => {
+  if (!addr) return 'N/A'
+  if (typeof addr === 'string') return addr
+  const parts = [addr.address, addr.city, addr.state, addr.pincode].filter(Boolean)
+  return parts.join(', ') || 'N/A'
+}
+
 export default function BookingsPage() {
   const queryClient = useQueryClient()
   const [page, setPage] = useState(1)
@@ -191,13 +199,13 @@ export default function BookingsPage() {
                       #{booking.id.slice(0, 8)}
                     </TableCell>
                     <TableCell>
-                      <div className="max-w-[200px] truncate" title={booking.pickupAddress}>
-                        {booking.pickupAddress}
+                      <div className="max-w-[200px] truncate" title={formatAddress(booking.pickupAddress)}>
+                        {formatAddress(booking.pickupAddress)}
                       </div>
                     </TableCell>
                     <TableCell>
-                      <div className="max-w-[200px] truncate" title={booking.dropoffAddress}>
-                        {booking.dropoffAddress}
+                      <div className="max-w-[200px] truncate" title={formatAddress(booking.dropoffAddress)}>
+                        {formatAddress(booking.dropoffAddress)}
                       </div>
                     </TableCell>
                     <TableCell>
@@ -300,14 +308,14 @@ export default function BookingsPage() {
                     <MapPin className="h-5 w-5 text-green-600 mt-0.5" />
                     <div>
                       <Label className="text-muted-foreground text-xs">Pickup</Label>
-                      <p className="font-medium">{selectedBooking.pickupAddress}</p>
+                      <p className="font-medium">{formatAddress(selectedBooking.pickupAddress)}</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3 p-3 bg-red-50 dark:bg-red-950/30 rounded-lg">
                     <MapPin className="h-5 w-5 text-red-600 mt-0.5" />
                     <div>
                       <Label className="text-muted-foreground text-xs">Dropoff</Label>
-                      <p className="font-medium">{selectedBooking.dropoffAddress}</p>
+                      <p className="font-medium">{formatAddress(selectedBooking.dropoffAddress)}</p>
                     </div>
                   </div>
                 </div>
