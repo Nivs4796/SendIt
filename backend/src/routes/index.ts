@@ -10,6 +10,7 @@ import matchingRoutes from './matching.routes'
 import couponRoutes from './coupon.routes'
 import walletRoutes from './wallet.routes'
 import adminRoutes from './admin.routes'
+import uploadRoutes from './upload.routes'
 
 const router = Router()
 
@@ -44,5 +45,6 @@ router.use('/matching', matchingRoutes)
 router.use('/coupons', couponRoutes)
 router.use('/wallet', walletRoutes)
 router.use('/admin', adminRoutes)
+router.use('/upload', uploadRoutes)
 
 export default router

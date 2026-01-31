@@ -209,6 +209,7 @@ model Booking {
   // Tracking
   currentLat        Float?
   currentLng        Float?
+  deliveryPhoto     String?       // Photo proof of delivery
 
   createdAt         DateTime      @default(now())
   updatedAt         DateTime      @updatedAt
@@ -323,19 +324,22 @@ model Review {
 // ============================================
 
 model Document {
-  id          String        @id @default(cuid())
-  pilotId     String
-  type        DocumentType
-  url         String
-  status      DocumentStatus @default(PENDING)
+  id             String        @id @default(cuid())
+  pilotId        String
+  type           DocumentType
+  url            String
+  filename       String?
+  status         DocumentStatus @default(PENDING)
+  isVerified     Boolean       @default(false)
   rejectedReason String?
-  verifiedAt  DateTime?
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  verifiedAt     DateTime?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
 
   // Relations
-  pilot       Pilot         @relation(fields: [pilotId], references: [id], onDelete: Cascade)
+  pilot          Pilot         @relation(fields: [pilotId], references: [id], onDelete: Cascade)
 
+  @@unique([pilotId, type])
   @@map("documents")
 }
 
@@ -553,6 +557,12 @@ enum DocumentType {
   VEHICLE_INSURANCE
   PROFILE_PHOTO
   VEHICLE_PHOTO
+  ID_PROOF
+  DRIVING_LICENSE
+  INSURANCE
+  POLLUTION_CERTIFICATE
+  PARENTAL_CONSENT
+  BANK_PROOF
 }
 
 enum DocumentStatus {

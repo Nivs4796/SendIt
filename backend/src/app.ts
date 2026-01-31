@@ -1,6 +1,7 @@
 import express, { Application } from 'express'
 import cors from 'cors'
 import helmet from 'helmet'
+import path from 'path'
 import swaggerUi from 'swagger-ui-express'
 import { config } from './config'
 import { swaggerSpec } from './config/swagger'
@@ -45,6 +46,12 @@ if (process.env.NODE_ENV !== 'test') {
 // Body parsing
 app.use(express.json({ limit: '10mb' }))
 app.use(express.urlencoded({ extended: true }))
+
+// Static file serving for uploads
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads'), {
+  maxAge: '1d', // Cache for 1 day
+  etag: true,
+}))
 
 // Rate limiting (skip in test environment for faster tests)
 if (process.env.NODE_ENV !== 'test') {
