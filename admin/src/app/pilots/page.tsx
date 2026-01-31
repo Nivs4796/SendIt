@@ -56,6 +56,8 @@ export default function PilotsPage() {
     status: 'APPROVED',
     reason: '',
   })
+  const [isEditOpen, setIsEditOpen] = useState(false)
+  const [editForm, setEditForm] = useState({ name: '', email: '', phone: '' })
 
   const { data, isLoading } = useQuery({
     queryKey: ['pilots', page, search, statusFilter],
@@ -84,6 +86,19 @@ export default function PilotsPage() {
     },
   })
 
+  const updatePilotMutation = useMutation({
+    mutationFn: ({ pilotId, data }: { pilotId: string; data: { name?: string; email?: string; phone?: string } }) =>
+      adminApi.updatePilot(pilotId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['pilots'] })
+      setIsEditOpen(false)
+      toast.success('Pilot updated successfully')
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Failed to update pilot')
+    },
+  })
+
   const handleView = async (pilotId: string) => {
     const response = await adminApi.getPilotDetails(pilotId)
     // API returns { pilot: {...}, bookingStats: [...], totalEarnings: ... }
@@ -105,6 +120,27 @@ export default function PilotsPage() {
         status: statusAction.status,
         reason: statusAction.reason || undefined,
       })
+    }
+  }
+
+  const handleEdit = (pilot: Pilot) => {
+    setSelectedPilot(pilot)
+    setEditForm({ name: pilot.name || '', email: pilot.email || '', phone: pilot.phone || '' })
+    setIsEditOpen(true)
+  }
+
+  const handleSaveEdit = () => {
+    if (selectedPilot) {
+      const changes: { name?: string; email?: string; phone?: string } = {}
+      if (editForm.name !== selectedPilot.name) changes.name = editForm.name
+      if (editForm.email !== selectedPilot.email) changes.email = editForm.email
+      if (editForm.phone !== selectedPilot.phone) changes.phone = editForm.phone
+
+      if (Object.keys(changes).length > 0) {
+        updatePilotMutation.mutate({ pilotId: selectedPilot.id, data: changes })
+      } else {
+        setIsEditOpen(false)
+      }
     }
   }
 
@@ -201,6 +237,10 @@ export default function PilotsPage() {
                           <DropdownMenuItem onClick={() => handleView(pilot.id)}>
                             <Eye className="mr-2 h-4 w-4" />
                             View Details
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleEdit(pilot)}>
+                            <Edit className="mr-2 h-4 w-4" />
+                            Edit
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           {pilot.status === 'PENDING' && (
@@ -404,6 +444,51 @@ export default function PilotsPage() {
                 )}
               </div>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Dialog */}
+        <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit Pilot</DialogTitle>
+              <DialogDescription>Update pilot information</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-name">Name</Label>
+                <Input
+                  id="edit-name"
+                  value={editForm.name}
+                  onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-email">Email</Label>
+                <Input
+                  id="edit-email"
+                  type="email"
+                  value={editForm.email}
+                  onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-phone">Phone</Label>
+                <Input
+                  id="edit-phone"
+                  value={editForm.phone}
+                  onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsEditOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSaveEdit} disabled={updatePilotMutation.isPending}>
+                {updatePilotMutation.isPending ? 'Saving...' : 'Save Changes'}
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>
