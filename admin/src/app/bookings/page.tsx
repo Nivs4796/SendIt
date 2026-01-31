@@ -1,8 +1,9 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Search, MoreHorizontal, Eye, UserPlus, XCircle, MapPin } from 'lucide-react'
+import { Search, MoreHorizontal, Eye, UserPlus, XCircle } from 'lucide-react'
 import { AdminLayout } from '@/components/layout/admin-layout'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -58,12 +59,12 @@ const formatAddress = (addr: { address?: string; city?: string; state?: string; 
 }
 
 export default function BookingsPage() {
+  const router = useRouter()
   const queryClient = useQueryClient()
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null)
-  const [isViewOpen, setIsViewOpen] = useState(false)
   const [isCancelOpen, setIsCancelOpen] = useState(false)
   const [isAssignOpen, setIsAssignOpen] = useState(false)
   const [cancelReason, setCancelReason] = useState('')
@@ -118,14 +119,8 @@ export default function BookingsPage() {
     },
   })
 
-  const handleView = async (bookingId: string) => {
-    try {
-      const response = await adminApi.getBookingDetails(bookingId)
-      setSelectedBooking((response.data as { booking: Booking }).booking)
-      setIsViewOpen(true)
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Failed to load booking details')
-    }
+  const handleView = (bookingId: string) => {
+    router.push(`/bookings/${bookingId}`)
   }
 
   const openCancelDialog = (booking: Booking) => {
@@ -293,113 +288,6 @@ export default function BookingsPage() {
             </div>
           </div>
         )}
-
-        {/* View Dialog */}
-        <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Booking Details</DialogTitle>
-            </DialogHeader>
-            {selectedBooking && (
-              <div className="space-y-6">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label className="text-muted-foreground">Booking ID</Label>
-                    <p className="font-mono">{selectedBooking.id}</p>
-                  </div>
-                  <div>
-                    <Label className="text-muted-foreground">Status</Label>
-                    <p>
-                      <Badge variant={statusColors[selectedBooking.status]}>
-                        {selectedBooking.status}
-                      </Badge>
-                    </p>
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  <div className="flex items-start gap-3 p-3 bg-green-50 dark:bg-green-950/30 rounded-lg">
-                    <MapPin className="h-5 w-5 text-green-600 mt-0.5" />
-                    <div>
-                      <Label className="text-muted-foreground text-xs">Pickup</Label>
-                      <p className="font-medium">{formatAddress(selectedBooking.pickupAddress)}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3 p-3 bg-red-50 dark:bg-red-950/30 rounded-lg">
-                    <MapPin className="h-5 w-5 text-red-600 mt-0.5" />
-                    <div>
-                      <Label className="text-muted-foreground text-xs">Dropoff</Label>
-                      <p className="font-medium">{formatAddress(selectedBooking.dropoffAddress)}</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div>
-                    <Label className="text-muted-foreground">Distance</Label>
-                    <p className="font-medium">{selectedBooking.distance} km</p>
-                  </div>
-                  <div>
-                    <Label className="text-muted-foreground">Duration</Label>
-                    <p className="font-medium">{selectedBooking.duration} min</p>
-                  </div>
-                  <div>
-                    <Label className="text-muted-foreground">Estimated Price</Label>
-                    <p className="font-medium">₹{selectedBooking.estimatedPrice}</p>
-                  </div>
-                  <div>
-                    <Label className="text-muted-foreground">Final Price</Label>
-                    <p className="font-medium">
-                      {selectedBooking.finalPrice ? `₹${selectedBooking.finalPrice}` : '-'}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label className="text-muted-foreground">Payment Method</Label>
-                    <p className="font-medium">{selectedBooking.paymentMethod}</p>
-                  </div>
-                  <div>
-                    <Label className="text-muted-foreground">Payment Status</Label>
-                    <p>
-                      <Badge
-                        variant={
-                          selectedBooking.paymentStatus === 'COMPLETED' ? 'default' : 'secondary'
-                        }
-                      >
-                        {selectedBooking.paymentStatus}
-                      </Badge>
-                    </p>
-                  </div>
-                </div>
-
-                {selectedBooking.user && (
-                  <div>
-                    <Label className="text-muted-foreground">Customer</Label>
-                    <p className="font-medium">{selectedBooking.user.name}</p>
-                    <p className="text-sm text-muted-foreground">{selectedBooking.user.phone}</p>
-                  </div>
-                )}
-
-                {selectedBooking.pilot && (
-                  <div>
-                    <Label className="text-muted-foreground">Pilot</Label>
-                    <p className="font-medium">{selectedBooking.pilot.name}</p>
-                    <p className="text-sm text-muted-foreground">{selectedBooking.pilot.phone}</p>
-                  </div>
-                )}
-
-                {selectedBooking.cancelReason && (
-                  <div>
-                    <Label className="text-muted-foreground">Cancellation Reason</Label>
-                    <p className="text-destructive">{selectedBooking.cancelReason}</p>
-                  </div>
-                )}
-              </div>
-            )}
-          </DialogContent>
-        </Dialog>
 
         {/* Cancel Dialog */}
         <Dialog open={isCancelOpen} onOpenChange={setIsCancelOpen}>

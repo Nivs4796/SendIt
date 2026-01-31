@@ -34,6 +34,8 @@ export interface ClientToServerEvents {
   // Admin events
   'admin:subscribe': () => void
   'admin:unsubscribe': () => void
+  'admin:booking:subscribe': (data: { bookingId: string }) => void
+  'admin:booking:unsubscribe': (data: { bookingId: string }) => void
 }
 
 // ============================================
@@ -82,6 +84,13 @@ export interface DashboardStatsPayload {
   timestamp: string
 }
 
+export interface BookingLocationPayload {
+  bookingId: string
+  lat: number
+  lng: number
+  timestamp: string
+}
+
 export interface NotificationPayload {
   id: string
   title: string
@@ -104,6 +113,9 @@ export interface ServerToClientEvents {
 
   // Admin dashboard stats
   'dashboard:stats': (data: DashboardStatsPayload) => void
+
+  // Booking location update (live tracking)
+  'booking:location': (data: BookingLocationPayload) => void
 
   // Notifications (to user/pilot)
   'notification': (data: NotificationPayload) => void

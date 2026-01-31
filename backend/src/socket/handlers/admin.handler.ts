@@ -1,7 +1,7 @@
 import prisma from '../../config/database'
 import logger from '../../config/logger'
 import type { AppServer, AppSocket } from '../index'
-import { joinAdminRoom, leaveAdminRoom } from '../rooms'
+import { joinAdminRoom, leaveAdminRoom, joinBookingRoom, leaveBookingRoom } from '../rooms'
 import { DashboardStatsPayload } from '../types'
 
 /**
@@ -42,6 +42,66 @@ export function registerAdminHandlers(io: AppServer, socket: AppSocket): void {
   socket.on('admin:unsubscribe', () => {
     leaveAdminRoom(socket)
     logger.info(`Admin ${user.id} unsubscribed from dashboard`)
+  })
+
+  /**
+   * Subscribe to a specific booking for live tracking
+   */
+  socket.on('admin:booking:subscribe', async ({ bookingId }) => {
+    try {
+      // Verify booking exists
+      const booking = await prisma.booking.findUnique({
+        where: { id: bookingId },
+        select: {
+          id: true,
+          status: true,
+          pilotId: true,
+          pilot: {
+            select: {
+              currentLat: true,
+              currentLng: true,
+            },
+          },
+        },
+      })
+
+      if (!booking) {
+        socket.emit('error', {
+          code: 'ERR_1302',
+          message: 'Booking not found',
+        })
+        return
+      }
+
+      // Join the booking room
+      joinBookingRoom(socket, bookingId)
+
+      // If pilot has location, send it immediately
+      if (booking.pilot?.currentLat && booking.pilot?.currentLng) {
+        socket.emit('booking:location', {
+          bookingId,
+          lat: booking.pilot.currentLat,
+          lng: booking.pilot.currentLng,
+          timestamp: new Date().toISOString(),
+        })
+      }
+
+      logger.info(`Admin ${user.id} subscribed to booking ${bookingId}`)
+    } catch (error) {
+      logger.error('Error in admin:booking:subscribe handler:', error)
+      socket.emit('error', {
+        code: 'ERR_1000',
+        message: 'Failed to subscribe to booking',
+      })
+    }
+  })
+
+  /**
+   * Unsubscribe from a specific booking
+   */
+  socket.on('admin:booking:unsubscribe', ({ bookingId }) => {
+    leaveBookingRoom(socket, bookingId)
+    logger.info(`Admin ${user.id} unsubscribed from booking ${bookingId}`)
   })
 
   /**

@@ -1,17 +1,27 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import { io, Socket } from 'socket.io-client'
 import Cookies from 'js-cookie'
 import type { RealtimeStats, Booking } from '@/types'
 
 const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3000'
 
+interface PilotLocation {
+  bookingId: string
+  lat: number
+  lng: number
+  timestamp: string
+}
+
 interface SocketContextType {
   socket: Socket | null
   isConnected: boolean
   realtimeStats: RealtimeStats | null
   bookingUpdates: Booking[]
+  pilotLocations: Map<string, PilotLocation>
+  subscribeToBooking: (bookingId: string) => void
+  unsubscribeFromBooking: (bookingId: string) => void
 }
 
 const SocketContext = createContext<SocketContextType>({
@@ -19,6 +29,9 @@ const SocketContext = createContext<SocketContextType>({
   isConnected: false,
   realtimeStats: null,
   bookingUpdates: [],
+  pilotLocations: new Map(),
+  subscribeToBooking: () => {},
+  unsubscribeFromBooking: () => {},
 })
 
 export function SocketProvider({ children }: { children: React.ReactNode }) {
@@ -26,6 +39,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
   const [isConnected, setIsConnected] = useState(false)
   const [realtimeStats, setRealtimeStats] = useState<RealtimeStats | null>(null)
   const [bookingUpdates, setBookingUpdates] = useState<Booking[]>([])
+  const [pilotLocations, setPilotLocations] = useState<Map<string, PilotLocation>>(new Map())
 
   useEffect(() => {
     const token = Cookies.get('admin_token')
@@ -66,6 +80,15 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
       })
     })
 
+    // Listen for pilot location updates
+    socketInstance.on('booking:location', (location: PilotLocation) => {
+      setPilotLocations((prev) => {
+        const updated = new Map(prev)
+        updated.set(location.bookingId, location)
+        return updated
+      })
+    })
+
     socketInstance.on('error', (error) => {
       console.error('Socket error:', error)
     })
@@ -77,8 +100,35 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
+  // Subscribe to a specific booking for tracking
+  const subscribeToBooking = useCallback((bookingId: string) => {
+    if (socket && isConnected) {
+      socket.emit('admin:booking:subscribe', { bookingId })
+    }
+  }, [socket, isConnected])
+
+  // Unsubscribe from a specific booking
+  const unsubscribeFromBooking = useCallback((bookingId: string) => {
+    if (socket && isConnected) {
+      socket.emit('admin:booking:unsubscribe', { bookingId })
+      setPilotLocations((prev) => {
+        const updated = new Map(prev)
+        updated.delete(bookingId)
+        return updated
+      })
+    }
+  }, [socket, isConnected])
+
   return (
-    <SocketContext.Provider value={{ socket, isConnected, realtimeStats, bookingUpdates }}>
+    <SocketContext.Provider value={{
+      socket,
+      isConnected,
+      realtimeStats,
+      bookingUpdates,
+      pilotLocations,
+      subscribeToBooking,
+      unsubscribeFromBooking,
+    }}>
       {children}
     </SocketContext.Provider>
   )
