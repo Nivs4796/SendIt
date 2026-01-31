@@ -9,6 +9,14 @@ import { adminApi } from '@/lib/api'
 import { useSocket } from '@/lib/socket'
 import type { DashboardStats, Booking } from '@/types'
 
+// Helper to safely format address preview
+const formatAddressPreview = (addr: string | { address?: string } | null | undefined): string => {
+  if (!addr) return 'Unknown location'
+  if (typeof addr === 'string') return addr.slice(0, 30)
+  if (typeof addr === 'object' && addr.address) return addr.address.slice(0, 30)
+  return 'Unknown location'
+}
+
 function StatCard({
   title,
   value,
@@ -77,7 +85,7 @@ function RecentBookings({ bookings }: { bookings: Booking[] }) {
                   <div>
                     <p className="text-sm font-medium">#{booking.id.slice(0, 8)}</p>
                     <p className="text-xs text-muted-foreground">
-                      {booking.pickupAddress?.slice(0, 30)}...
+                      {formatAddressPreview(booking.pickupAddress)}...
                     </p>
                   </div>
                 </div>
