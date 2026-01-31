@@ -761,45 +761,109 @@ async function main() {
   console.log(`✅ Created ${walletTxns.length} wallet transactions`)
 
   // ============================================
-  // SETTINGS
+  // SETTINGS (Comprehensive Platform Configuration)
   // ============================================
-  const settings = await Promise.all([
-    prisma.setting.upsert({
-      where: { key: 'platform_fee_percent' },
-      update: {},
-      create: { key: 'platform_fee_percent', value: '20', description: 'Platform fee percentage' },
-    }),
-    prisma.setting.upsert({
-      where: { key: 'gst_percent' },
-      update: {},
-      create: { key: 'gst_percent', value: '5', description: 'GST percentage' },
-    }),
-    prisma.setting.upsert({
-      where: { key: 'pilot_search_radius_km' },
-      update: {},
-      create: { key: 'pilot_search_radius_km', value: '5', description: 'Search radius in km' },
-    }),
-    prisma.setting.upsert({
-      where: { key: 'min_wallet_balance' },
-      update: {},
-      create: { key: 'min_wallet_balance', value: '0', description: 'Min wallet balance for pilots' },
-    }),
-    prisma.setting.upsert({
-      where: { key: 'cancellation_fee_percent' },
-      update: {},
-      create: { key: 'cancellation_fee_percent', value: '10', description: 'Cancellation fee %' },
-    }),
-    prisma.setting.upsert({
-      where: { key: 'job_offer_timeout_seconds' },
-      update: {},
-      create: { key: 'job_offer_timeout_seconds', value: '30', description: 'Job offer timeout' },
-    }),
-    prisma.setting.upsert({
-      where: { key: 'max_active_bookings_per_pilot' },
-      update: {},
-      create: { key: 'max_active_bookings_per_pilot', value: '1', description: 'Max active jobs' },
-    }),
-  ])
+  const settingsData = [
+    // ========== PRICING & FEES ==========
+    { key: 'platform_fee_percent', value: '20', description: 'Platform commission percentage taken from each delivery' },
+    { key: 'gst_percent', value: '5', description: 'Goods and Services Tax percentage' },
+    { key: 'cancellation_fee_percent', value: '10', description: 'Cancellation fee percentage charged to users' },
+    { key: 'min_order_amount', value: '50', description: 'Minimum order amount to process a booking (₹)' },
+    { key: 'surge_pricing_multiplier', value: '1.0', description: 'Multiplier for surge pricing during peak hours (1.0 = no surge)' },
+    { key: 'surge_pricing_active_hours', value: '{"start": 18, "end": 21}', description: 'Peak hours for surge pricing (JSON format)' },
+    { key: 'max_discount_percentage', value: '50', description: 'Maximum discount percentage allowed on any booking' },
+    { key: 'refund_processing_days', value: '3', description: 'Days to process refunds for cancelled orders' },
+    { key: 'extra_weight_charge_per_kg', value: '10', description: 'Additional charge per kg beyond vehicle type max weight (₹)' },
+    { key: 'tds_deduction_percent', value: '1', description: 'Tax Deducted at Source percentage for pilot earnings' },
+
+    // ========== BOOKING & DELIVERY ==========
+    { key: 'pilot_search_radius_km', value: '5', description: 'Search radius (km) for finding nearby pilots' },
+    { key: 'max_delivery_distance_km', value: '50', description: 'Maximum distance a delivery can travel (km)' },
+    { key: 'min_delivery_distance_km', value: '0.5', description: 'Minimum distance to qualify for a booking (km)' },
+    { key: 'job_offer_timeout_seconds', value: '30', description: 'Time pilots have to accept delivery jobs (seconds)' },
+    { key: 'delivery_base_wait_time_minutes', value: '5', description: 'Base wait time before automatic cancellation of unaccepted bookings' },
+    { key: 'max_delivery_age_minutes', value: '1440', description: 'Maximum age of a booking before it expires (1440 = 24 hours)' },
+    { key: 'max_bookings_per_user_daily', value: '100', description: 'Maximum bookings a user can create per day' },
+    { key: 'require_phone_verification_for_booking', value: 'true', description: 'Whether users must verify phone before booking' },
+
+    // ========== PILOT MANAGEMENT ==========
+    { key: 'max_active_bookings_per_pilot', value: '1', description: 'Maximum concurrent deliveries per pilot' },
+    { key: 'min_wallet_balance', value: '0', description: 'Minimum wallet balance required for pilots (₹)' },
+    { key: 'minimum_pilot_age_years', value: '21', description: 'Minimum age requirement for pilot registration' },
+    { key: 'minimum_pilot_rating', value: '3.5', description: 'Minimum rating required to accept bookings' },
+    { key: 'pilot_suspension_threshold_low_rating', value: '2.0', description: 'Auto-suspend if rating drops below this' },
+    { key: 'pilot_offline_threshold_minutes', value: '10', description: 'Minutes of inactivity before marking pilot as offline' },
+    { key: 'pilot_auto_logout_inactive_hours', value: '24', description: 'Auto-logout pilot after X hours of inactivity' },
+    { key: 'pilot_commission_percent', value: '80', description: 'Commission percentage for pilots (complement to platform fee)' },
+    { key: 'pilot_minimum_earnings_withdrawal', value: '500', description: 'Minimum amount pilot must earn before withdrawal (₹)' },
+    { key: 'pilot_registration_approval_required', value: 'true', description: 'Whether manual admin approval is required for pilot signup' },
+    { key: 'require_pilot_documents_verification', value: 'true', description: 'Whether pilots must upload and verify documents before going online' },
+
+    // ========== USER MANAGEMENT ==========
+    { key: 'new_user_welcome_bonus', value: '50', description: 'Bonus amount credited to new users on first booking (₹)' },
+    { key: 'referral_bonus_amount', value: '100', description: 'Bonus for successful referral (₹)' },
+    { key: 'referral_bonus_referee_amount', value: '100', description: 'Bonus given to referred user (₹)' },
+    { key: 'user_account_suspension_threshold_complaints', value: '5', description: 'Number of complaints before auto-suspension' },
+
+    // ========== PAYMENT & WALLET ==========
+    { key: 'enabled_payment_methods', value: 'CASH,UPI,CARD,WALLET', description: 'Comma-separated list of enabled payment methods' },
+    { key: 'cash_payment_enabled', value: 'true', description: 'Allow cash payment for deliveries' },
+    { key: 'wallet_minimum_topup_amount', value: '100', description: 'Minimum amount for wallet top-up (₹)' },
+    { key: 'wallet_maximum_balance', value: '100000', description: 'Maximum balance allowed in wallet (₹)' },
+    { key: 'wallet_transaction_expiry_days', value: '365', description: 'Days before unclaimed wallet credit expires' },
+    { key: 'payment_gateway_provider', value: 'RAZORPAY', description: 'Payment gateway provider (RAZORPAY, STRIPE, etc)' },
+    { key: 'max_failed_payment_attempts', value: '3', description: 'Failed payment attempts before account freeze' },
+
+    // ========== NOTIFICATIONS ==========
+    { key: 'sms_notifications_enabled', value: 'true', description: 'Enable SMS notifications to users and pilots' },
+    { key: 'email_notifications_enabled', value: 'true', description: 'Enable email notifications' },
+    { key: 'push_notifications_enabled', value: 'true', description: 'Enable push notifications to mobile apps' },
+    { key: 'max_notifications_per_day', value: '50', description: 'Maximum notifications sent to single user per day' },
+    { key: 'notification_quiet_hours', value: '{"start": 22, "end": 7}', description: 'Quiet hours for notifications (JSON format)' },
+    { key: 'sms_provider', value: 'MSG91', description: 'SMS provider service (TWILIO, MSG91, etc)' },
+
+    // ========== VEHICLE CONFIGURATION ==========
+    { key: 'active_vehicle_types', value: 'Cycle,EV Cycle,2 Wheeler,3 Wheeler,Truck', description: 'Comma-separated list of active vehicle types' },
+    { key: 'vehicle_registration_verification_required', value: 'true', description: 'Require RC verification for vehicles' },
+    { key: 'vehicle_insurance_verification_required', value: 'true', description: 'Require insurance verification' },
+    { key: 'vehicle_age_max_years', value: '15', description: 'Maximum age of vehicle to register' },
+
+    // ========== COUPON & PROMOTIONS ==========
+    { key: 'max_active_coupons', value: '20', description: 'Maximum number of concurrent active coupons' },
+    { key: 'max_discount_per_user_monthly', value: '5000', description: 'Maximum total discount per user per month (₹)' },
+    { key: 'monthly_promotion_budget', value: '100000', description: 'Monthly budget allocated for promotions/discounts (₹)' },
+
+    // ========== SERVICE AREA ==========
+    { key: 'enable_geofencing', value: 'true', description: 'Enforce service area restrictions via geofencing' },
+    { key: 'geofence_buffer_km', value: '2', description: 'Buffer distance (km) outside service area for grace period' },
+    { key: 'require_pickup_within_service_area', value: 'true', description: 'Require pickup location to be within service area' },
+    { key: 'allow_delivery_outside_service_area', value: 'false', description: 'Allow deliveries to locations outside service area' },
+    { key: 'inter_city_delivery_surcharge_percent', value: '15', description: 'Extra charge for deliveries outside main service area (%)' },
+
+    // ========== SECURITY & OTP ==========
+    { key: 'otp_validity_minutes', value: '5', description: 'OTP validity period in minutes' },
+    { key: 'max_otp_resend_attempts', value: '3', description: 'Maximum OTP resend attempts before cooldown' },
+    { key: 'otp_resend_cooldown_minutes', value: '1', description: 'Cooldown period between OTP requests (minutes)' },
+
+    // ========== PLATFORM OPERATIONS ==========
+    { key: 'maintenance_mode_enabled', value: 'false', description: 'Enable maintenance mode (disables bookings)' },
+    { key: 'maintenance_mode_message', value: 'Platform is under maintenance. Please try again later.', description: 'Message to display during maintenance' },
+    { key: 'google_maps_api_enabled', value: 'true', description: 'Enable Google Maps integration for distance/routing' },
+    { key: 'support_email', value: 'support@sendit.co.in', description: 'Customer support email address' },
+    { key: 'support_phone', value: '+919876543210', description: 'Customer support phone number' },
+    { key: 'app_store_url', value: '', description: 'iOS App Store URL' },
+    { key: 'play_store_url', value: '', description: 'Android Play Store URL' },
+  ]
+
+  const settings = await Promise.all(
+    settingsData.map((setting) =>
+      prisma.setting.upsert({
+        where: { key: setting.key },
+        update: {},
+        create: setting,
+      })
+    )
+  )
   console.log(`✅ Created ${settings.length} settings`)
 
   // ============================================
