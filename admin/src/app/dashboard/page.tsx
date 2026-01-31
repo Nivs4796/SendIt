@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
 import { Users, Bike, Package, DollarSign, Clock, CheckCircle, TrendingUp, Activity } from 'lucide-react'
@@ -8,7 +9,59 @@ import { Badge } from '@/components/ui/badge'
 import { AdminLayout } from '@/components/layout/admin-layout'
 import { adminApi } from '@/lib/api'
 import { useSocket } from '@/lib/socket'
-import type { DashboardStats, Booking } from '@/types'
+import type { DashboardStats, Booking, BookingStatus } from '@/types'
+
+// Demo booking data for live updates simulation
+interface DemoBooking {
+  id: string
+  status: BookingStatus
+  pickupAddress: string
+  dropoffAddress: string
+}
+
+const DEMO_BOOKINGS: DemoBooking[] = [
+  {
+    id: 'demo-bk-001-abcd1234',
+    status: 'IN_TRANSIT',
+    pickupAddress: 'Vastrapur Lake Garden, Ahmedabad',
+    dropoffAddress: 'Sindhu Bhavan Road, Bodakdev',
+  },
+  {
+    id: 'demo-bk-002-efgh5678',
+    status: 'PICKED_UP',
+    pickupAddress: 'SG Highway, Thaltej',
+    dropoffAddress: 'Prahlad Nagar, Satellite',
+  },
+  {
+    id: 'demo-bk-003-ijkl9012',
+    status: 'CONFIRMED',
+    pickupAddress: 'CG Road, Navrangpura',
+    dropoffAddress: 'Law Garden, Ellis Bridge',
+  },
+  {
+    id: 'demo-bk-004-mnop3456',
+    status: 'SEARCHING',
+    pickupAddress: 'Ashram Road, Usmanpura',
+    dropoffAddress: 'Maninagar, East Ahmedabad',
+  },
+  {
+    id: 'demo-bk-005-qrst7890',
+    status: 'PENDING',
+    pickupAddress: 'Drive-In Road, Memnagar',
+    dropoffAddress: 'Gulbai Tekra, Ambawadi',
+  },
+]
+
+// Status progression for demo animation
+const STATUS_PROGRESSION: BookingStatus[] = [
+  'PENDING',
+  'SEARCHING',
+  'CONFIRMED',
+  'PILOT_ARRIVED',
+  'PICKED_UP',
+  'IN_TRANSIT',
+  'DELIVERED',
+]
 
 // Helper to safely format address preview
 const formatAddressPreview = (addr: string | { address?: string } | null | undefined): string => {
@@ -50,10 +103,43 @@ function StatCard({
   )
 }
 
-function RecentBookings({ bookings }: { bookings: Booking[] }) {
+function RecentBookings({ bookings, demoMode = false }: { bookings: Booking[]; demoMode?: boolean }) {
+  const [demoBookings, setDemoBookings] = useState<DemoBooking[]>(DEMO_BOOKINGS)
+
+  // Animate demo bookings - update statuses periodically
+  useEffect(() => {
+    if (!demoMode) return
+
+    const interval = setInterval(() => {
+      setDemoBookings((prev) => {
+        return prev.map((booking, index) => {
+          const currentStatusIndex = STATUS_PROGRESSION.indexOf(booking.status as BookingStatus)
+
+          // Only progress some bookings randomly, and cycle back if delivered
+          if (Math.random() > 0.6) {
+            const nextIndex = currentStatusIndex >= STATUS_PROGRESSION.length - 1
+              ? 0  // Reset to PENDING when DELIVERED
+              : currentStatusIndex + 1
+
+            return {
+              ...booking,
+              status: STATUS_PROGRESSION[nextIndex],
+              // Generate new ID when cycling back to simulate new booking
+              id: nextIndex === 0 ? `demo-bk-${Date.now()}-${index}` : booking.id,
+            }
+          }
+          return booking
+        })
+      })
+    }, 3000) // Update every 3 seconds
+
+    return () => clearInterval(interval)
+  }, [demoMode])
+
   const statusColors: Record<string, string> = {
     PENDING: 'bg-yellow-500',
     SEARCHING: 'bg-blue-500',
+    ACCEPTED: 'bg-purple-500',
     CONFIRMED: 'bg-purple-500',
     PILOT_ARRIVED: 'bg-indigo-500',
     PICKED_UP: 'bg-cyan-500',
@@ -62,27 +148,70 @@ function RecentBookings({ bookings }: { bookings: Booking[] }) {
     CANCELLED: 'bg-red-500',
   }
 
+  const statusLabels: Record<string, string> = {
+    PENDING: 'Pending',
+    SEARCHING: 'Finding Pilot',
+    ACCEPTED: 'Accepted',
+    CONFIRMED: 'Confirmed',
+    PILOT_ARRIVED: 'Pilot Arrived',
+    PICKED_UP: 'Picked Up',
+    IN_TRANSIT: 'In Transit',
+    DELIVERED: 'Delivered',
+    CANCELLED: 'Cancelled',
+  }
+
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Activity className="h-5 w-5" />
           Live Booking Updates
+          {demoMode && (
+            <span className="flex items-center gap-1 text-xs text-amber-500 font-normal ml-2">
+              <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+              Demo
+            </span>
+          )}
         </CardTitle>
         <CardDescription>Real-time booking activity</CardDescription>
       </CardHeader>
       <CardContent>
-        {bookings.length === 0 ? (
+        {demoMode ? (
+          <div className="space-y-3">
+            {demoBookings.map((booking) => (
+              <div
+                key={booking.id}
+                className="flex items-center justify-between p-3 bg-muted/50 rounded-lg transition-all duration-300"
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`w-2 h-2 rounded-full ${statusColors[booking.status]} ${booking.status === 'IN_TRANSIT' ? 'animate-pulse' : ''}`} />
+                  <div>
+                    <p className="text-sm font-medium">#{booking.id.slice(0, 8)}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {booking.pickupAddress.slice(0, 25)}...
+                    </p>
+                  </div>
+                </div>
+                <Badge
+                  variant="outline"
+                  className={`transition-all duration-300 ${booking.status === 'DELIVERED' ? 'bg-green-500/10 text-green-500 border-green-500/30' : ''}`}
+                >
+                  {statusLabels[booking.status]}
+                </Badge>
+              </div>
+            ))}
+          </div>
+        ) : bookings.length === 0 ? (
           <p className="text-muted-foreground text-sm text-center py-4">No recent updates</p>
         ) : (
           <div className="space-y-3">
             {bookings.map((booking) => (
               <div
                 key={booking.id}
-                className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
+                className="flex items-center justify-between p-3 bg-muted/50 rounded-lg transition-all duration-300"
               >
                 <div className="flex items-center gap-3">
-                  <div className={`w-2 h-2 rounded-full ${statusColors[booking.status]}`} />
+                  <div className={`w-2 h-2 rounded-full ${statusColors[booking.status]} ${booking.status === 'IN_TRANSIT' ? 'animate-pulse' : ''}`} />
                   <div>
                     <p className="text-sm font-medium">#{booking.id.slice(0, 8)}</p>
                     <p className="text-xs text-muted-foreground">
@@ -90,7 +219,12 @@ function RecentBookings({ bookings }: { bookings: Booking[] }) {
                     </p>
                   </div>
                 </div>
-                <Badge variant="outline">{booking.status}</Badge>
+                <Badge
+                  variant="outline"
+                  className={`transition-all duration-300 ${booking.status === 'DELIVERED' ? 'bg-green-500/10 text-green-500 border-green-500/30' : ''}`}
+                >
+                  {statusLabels[booking.status] || booking.status}
+                </Badge>
               </div>
             ))}
           </div>
@@ -205,7 +339,7 @@ export default function DashboardPage() {
 
         {/* Live Updates */}
         <div className="grid gap-4 lg:grid-cols-2">
-          <RecentBookings bookings={bookingUpdates} />
+          <RecentBookings bookings={bookingUpdates} demoMode={bookingUpdates.length === 0} />
           <Card>
             <CardHeader>
               <CardTitle>Quick Actions</CardTitle>
