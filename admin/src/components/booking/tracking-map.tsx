@@ -276,11 +276,11 @@ export function TrackingMap({
   }, [demoMode, getDemoPilotPosition])
 
   return (
-    <div className={`relative w-full h-full min-h-[400px] ${className}`} style={{ height: '100%' }}>
+    <div className={`relative w-full h-full min-h-[400px] ${className}`} style={{ height: '100%', isolation: 'isolate' }}>
       <div
         ref={mapContainerRef}
         className="w-full h-full"
-        style={{ background: '#1a1a2e', position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+        style={{ background: '#1a1a2e', position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 0 }}
       />
       {demoMode && (
         <div className="absolute bottom-4 left-4 right-4 glass-card rounded-lg p-3 z-[1000]">

@@ -350,6 +350,30 @@
     box-shadow: var(--glow-emerald);
   }
 
+  /* Leaflet Map Container - Contain z-index */
+  .leaflet-container {
+    z-index: 0 !important;
+  }
+
+  .leaflet-pane,
+  .leaflet-tile,
+  .leaflet-marker-icon,
+  .leaflet-marker-shadow,
+  .leaflet-tile-container,
+  .leaflet-overlay-pane,
+  .leaflet-shadow-pane,
+  .leaflet-marker-pane,
+  .leaflet-tooltip-pane,
+  .leaflet-popup-pane,
+  .leaflet-control {
+    z-index: auto !important;
+  }
+
+  .leaflet-top,
+  .leaflet-bottom {
+    z-index: 10 !important;
+  }
+
   /* Emerald Glow Shadow */
   .glow-emerald {
     box-shadow: var(--glow-emerald);

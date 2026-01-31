@@ -244,7 +244,7 @@ export default function BookingDetailsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Map Section */}
           <div className="lg:col-span-2 space-y-6">
-            <div className="glass-card rounded-xl overflow-hidden">
+            <div className="glass-card rounded-xl overflow-hidden" style={{ isolation: 'isolate' }}>
               <div className="p-4 border-b border-border/50">
                 <h2 className="font-semibold flex items-center gap-2">
                   Live Tracking
@@ -261,7 +261,7 @@ export default function BookingDetailsPage() {
                   ) : null}
                 </h2>
               </div>
-              <div style={{ height: '500px' }} className="relative">
+              <div style={{ height: '500px', position: 'relative', zIndex: 0 }} className="overflow-hidden">
                 <TrackingMap
                   pickupLat={coords.pickupLat}
                   pickupLng={coords.pickupLng}
