@@ -7,8 +7,6 @@ import {
   Plus,
   Loader2,
   Search,
-  ChevronDown,
-  ChevronRight,
   DollarSign,
   Truck,
   Users,
@@ -21,6 +19,7 @@ import {
   Shield,
   Settings2,
   RotateCcw,
+  ChevronRight,
 } from 'lucide-react'
 import { AdminLayout } from '@/components/layout/admin-layout'
 import { Button } from '@/components/ui/button'
@@ -28,11 +27,6 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible'
 import {
   Dialog,
   DialogContent,
@@ -45,12 +39,13 @@ import {
 import { adminApi } from '@/lib/api'
 import type { Setting } from '@/types'
 import { toast } from 'sonner'
+import { cn } from '@/lib/utils'
 
 // Category definitions with icons, descriptions, and setting keys
 const SETTING_CATEGORIES = {
   pricing: {
     title: 'Pricing & Fees',
-    description: 'Configure platform fees, taxes, and pricing structure',
+    description: 'Platform fees, taxes, and pricing structure',
     icon: DollarSign,
     keys: [
       'platform_fee_percent',
@@ -69,7 +64,7 @@ const SETTING_CATEGORIES = {
   },
   booking: {
     title: 'Booking & Delivery',
-    description: 'Configure booking rules and delivery settings',
+    description: 'Booking rules and delivery settings',
     icon: Truck,
     keys: [
       'max_booking_distance_km',
@@ -86,7 +81,7 @@ const SETTING_CATEGORIES = {
   },
   pilot: {
     title: 'Pilot Management',
-    description: 'Configure pilot-related settings and requirements',
+    description: 'Pilot settings and requirements',
     icon: UserCheck,
     keys: [
       'pilot_min_age',
@@ -105,7 +100,7 @@ const SETTING_CATEGORIES = {
   },
   user: {
     title: 'User Management',
-    description: 'Configure user account settings and limits',
+    description: 'User account settings and limits',
     icon: Users,
     keys: [
       'user_referral_bonus',
@@ -120,7 +115,7 @@ const SETTING_CATEGORIES = {
   },
   payment: {
     title: 'Payment & Wallet',
-    description: 'Configure payment processing and wallet settings',
+    description: 'Payment processing and wallet settings',
     icon: Wallet,
     keys: [
       'min_wallet_topup',
@@ -137,7 +132,7 @@ const SETTING_CATEGORIES = {
   },
   notifications: {
     title: 'Notifications',
-    description: 'Configure notification preferences and settings',
+    description: 'Notification preferences',
     icon: Bell,
     keys: [
       'enable_push_notifications',
@@ -149,8 +144,8 @@ const SETTING_CATEGORIES = {
     ],
   },
   vehicle: {
-    title: 'Vehicle Configuration',
-    description: 'Configure vehicle types and requirements',
+    title: 'Vehicle Config',
+    description: 'Vehicle types and requirements',
     icon: Car,
     keys: [
       'vehicle_inspection_interval_days',
@@ -162,8 +157,8 @@ const SETTING_CATEGORIES = {
     ],
   },
   coupon: {
-    title: 'Coupon & Promotions',
-    description: 'Configure discount and promotional settings',
+    title: 'Coupons & Promos',
+    description: 'Discounts and promotional settings',
     icon: Tag,
     keys: [
       'max_coupon_discount_percent',
@@ -176,7 +171,7 @@ const SETTING_CATEGORIES = {
   },
   serviceArea: {
     title: 'Service Area',
-    description: 'Configure geographical service boundaries',
+    description: 'Geographical service boundaries',
     icon: MapPin,
     keys: [
       'default_service_radius_km',
@@ -187,7 +182,7 @@ const SETTING_CATEGORIES = {
   },
   security: {
     title: 'Security & OTP',
-    description: 'Configure security and verification settings',
+    description: 'Security and verification settings',
     icon: Shield,
     keys: [
       'otp_validity_minutes',
@@ -199,8 +194,8 @@ const SETTING_CATEGORIES = {
     ],
   },
   platform: {
-    title: 'Platform Operations',
-    description: 'Configure general platform settings',
+    title: 'Platform',
+    description: 'General platform settings',
     icon: Settings2,
     keys: [
       'maintenance_mode',
@@ -330,14 +325,7 @@ export default function SettingsPage() {
   const [newSetting, setNewSetting] = useState({ key: '', value: '', description: '' })
   const [isAddOpen, setIsAddOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
-  const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>(() => {
-    // Default: expand first 3 categories
-    const initial: Record<string, boolean> = {}
-    Object.keys(SETTING_CATEGORIES).forEach((key, index) => {
-      initial[key] = index < 3
-    })
-    return initial
-  })
+  const [activeCategory, setActiveCategory] = useState('pricing')
 
   const { data, isLoading } = useQuery({
     queryKey: ['settings'],
@@ -396,13 +384,6 @@ export default function SettingsPage() {
     })
   }
 
-  const toggleCategory = (categoryKey: string) => {
-    setExpandedCategories((prev) => ({
-      ...prev,
-      [categoryKey]: !prev[categoryKey],
-    }))
-  }
-
   // Filter settings based on search query
   const filteredSettings = useMemo(() => {
     if (!searchQuery.trim()) return settings
@@ -449,7 +430,7 @@ export default function SettingsPage() {
     if (metadata?.type === 'boolean') {
       const isChecked = currentValue === 'true' || currentValue === '1'
       return (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <Switch
             checked={isChecked}
             onCheckedChange={(checked) => {
@@ -459,7 +440,7 @@ export default function SettingsPage() {
               updateMutation.mutate({ key: setting.key, value: newValue, description: setting.description })
             }}
           />
-          <span className="text-sm text-muted-foreground">
+          <span className={cn("text-sm font-medium", isChecked ? "text-primary" : "text-muted-foreground")}>
             {isChecked ? 'Enabled' : 'Disabled'}
           </span>
         </div>
@@ -468,28 +449,32 @@ export default function SettingsPage() {
 
     return (
       <div className="flex items-center gap-2">
-        {metadata?.unit && metadata.unit !== 'x' && (
-          <span className="text-sm text-muted-foreground min-w-[24px]">{metadata.unit}</span>
-        )}
-        <Input
-          type={metadata?.type === 'number' || metadata?.type === 'percent' || metadata?.type === 'time' ? 'number' : 'text'}
-          value={currentValue}
-          onChange={(e) => handleChange(setting.key, e.target.value)}
-          className="w-[180px]"
-          min={metadata?.min}
-          max={metadata?.max}
-          step={metadata?.step || 1}
-        />
-        {metadata?.unit === 'x' && (
-          <span className="text-sm text-muted-foreground">x</span>
-        )}
-        {metadata?.type === 'percent' && (
-          <span className="text-sm text-muted-foreground">%</span>
-        )}
+        <div className="relative flex items-center">
+          {metadata?.unit && metadata.unit !== 'x' && metadata.unit !== '%' && (
+            <span className="absolute left-3 text-sm text-muted-foreground">{metadata.unit}</span>
+          )}
+          <Input
+            type={metadata?.type === 'number' || metadata?.type === 'percent' || metadata?.type === 'time' ? 'number' : 'text'}
+            value={currentValue}
+            onChange={(e) => handleChange(setting.key, e.target.value)}
+            className={cn(
+              "w-[160px]",
+              metadata?.unit && metadata.unit !== 'x' && metadata.unit !== '%' && "pl-8"
+            )}
+            min={metadata?.min}
+            max={metadata?.max}
+            step={metadata?.step || 1}
+          />
+          {(metadata?.unit === 'x' || metadata?.type === 'percent') && (
+            <span className="absolute right-3 text-sm text-muted-foreground">
+              {metadata?.type === 'percent' ? '%' : 'x'}
+            </span>
+          )}
+        </div>
         {isModified && (
-          <>
+          <div className="flex items-center gap-1">
             <Button
-              size="sm"
+              size="icon-sm"
               variant="ghost"
               onClick={() => handleReset(setting)}
               title="Reset to saved value"
@@ -497,7 +482,7 @@ export default function SettingsPage() {
               <RotateCcw className="h-4 w-4" />
             </Button>
             <Button
-              size="sm"
+              size="icon-sm"
               onClick={() => handleSave(setting)}
               disabled={updateMutation.isPending}
             >
@@ -507,22 +492,27 @@ export default function SettingsPage() {
                 <Save className="h-4 w-4" />
               )}
             </Button>
-          </>
+          </div>
         )}
       </div>
     )
   }
 
-  const renderSettingCard = (setting: Setting) => {
+  const renderSettingRow = (setting: Setting) => {
     const metadata = SETTING_METADATA[setting.key]
     const description = metadata?.description || setting.description
 
     return (
-      <div key={setting.key} className="flex items-center justify-between gap-4 p-4 border rounded-lg hover:bg-muted/50 transition-colors">
+      <div
+        key={setting.key}
+        className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-4 border-b border-border/50 last:border-0"
+      >
         <div className="flex-1 min-w-0">
-          <Label className="font-mono text-sm block">{setting.key}</Label>
+          <Label className="text-sm font-medium block">
+            {setting.key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+          </Label>
           {description && (
-            <p className="text-xs text-muted-foreground mt-1 truncate" title={description}>
+            <p className="text-xs text-muted-foreground mt-0.5">
               {description}
             </p>
           )}
@@ -531,48 +521,6 @@ export default function SettingsPage() {
           {renderSettingInput(setting)}
         </div>
       </div>
-    )
-  }
-
-  const renderCategory = (categoryKey: string, categorySettings: Setting[]) => {
-    const category = SETTING_CATEGORIES[categoryKey as keyof typeof SETTING_CATEGORIES]
-    const isExpanded = expandedCategories[categoryKey] ?? false
-    const Icon = category?.icon || Settings2
-
-    return (
-      <Card key={categoryKey}>
-        <Collapsible open={isExpanded} onOpenChange={() => toggleCategory(categoryKey)}>
-          <CollapsibleTrigger asChild>
-            <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-primary/10">
-                    <Icon className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-lg">
-                      {category?.title || 'Other Settings'}
-                    </CardTitle>
-                    <CardDescription>
-                      {category?.description || 'Additional configuration options'} ({categorySettings.length})
-                    </CardDescription>
-                  </div>
-                </div>
-                {isExpanded ? (
-                  <ChevronDown className="h-5 w-5 text-muted-foreground" />
-                ) : (
-                  <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                )}
-              </div>
-            </CardHeader>
-          </CollapsibleTrigger>
-          <CollapsibleContent>
-            <CardContent className="space-y-3 pt-0">
-              {categorySettings.map(renderSettingCard)}
-            </CardContent>
-          </CollapsibleContent>
-        </Collapsible>
-      </Card>
     )
   }
 
@@ -586,9 +534,20 @@ export default function SettingsPage() {
     )
   }
 
+  // Get all category keys including uncategorized
+  const categoryKeys = Object.keys(SETTING_CATEGORIES)
+  if (categorizedSettings['uncategorized']) {
+    categoryKeys.push('uncategorized')
+  }
+
+  const currentCategory = SETTING_CATEGORIES[activeCategory as keyof typeof SETTING_CATEGORIES]
+  const currentSettings = categorizedSettings[activeCategory] || []
+  const CurrentIcon = currentCategory?.icon || Settings2
+
   return (
     <AdminLayout>
       <div className="space-y-6">
+        {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold">Settings</h1>
@@ -603,14 +562,14 @@ export default function SettingsPage() {
                 placeholder="Search settings..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 w-[250px]"
+                className="pl-9 w-[220px]"
               />
             </div>
             <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
               <DialogTrigger asChild>
                 <Button>
                   <Plus className="mr-2 h-4 w-4" />
-                  Add Setting
+                  Add
                 </Button>
               </DialogTrigger>
               <DialogContent>
@@ -670,45 +629,93 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* Quick Actions */}
-        <div className="flex flex-wrap gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              const allExpanded: Record<string, boolean> = {}
-              Object.keys(SETTING_CATEGORIES).forEach((key) => {
-                allExpanded[key] = true
-              })
-              allExpanded['uncategorized'] = true
-              setExpandedCategories(allExpanded)
-            }}
-          >
-            Expand All
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              const allCollapsed: Record<string, boolean> = {}
-              Object.keys(SETTING_CATEGORIES).forEach((key) => {
-                allCollapsed[key] = false
-              })
-              allCollapsed['uncategorized'] = false
-              setExpandedCategories(allCollapsed)
-            }}
-          >
-            Collapse All
-          </Button>
+        {/* Main Content - Sidebar Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Sidebar Navigation */}
+          <Card className="lg:col-span-1 h-fit">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Categories</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="h-[calc(100vh-320px)] overflow-y-auto">
+                <div className="space-y-1 p-3 pt-0">
+                  {categoryKeys.map((categoryKey) => {
+                    const category = SETTING_CATEGORIES[categoryKey as keyof typeof SETTING_CATEGORIES]
+                    const Icon = category?.icon || Settings2
+                    const count = categorizedSettings[categoryKey]?.length || 0
+                    const isActive = activeCategory === categoryKey
+
+                    if (count === 0) return null
+
+                    return (
+                      <button
+                        key={categoryKey}
+                        onClick={() => setActiveCategory(categoryKey)}
+                        className={cn(
+                          "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-all",
+                          isActive
+                            ? "bg-primary text-primary-foreground shadow-sm"
+                            : "hover:bg-muted/80 text-foreground"
+                        )}
+                      >
+                        <Icon className={cn("h-4 w-4 flex-shrink-0", isActive ? "text-primary-foreground" : "text-muted-foreground")} />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">
+                            {category?.title || 'Other'}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span className={cn(
+                            "text-xs px-1.5 py-0.5 rounded-full",
+                            isActive ? "bg-primary-foreground/20 text-primary-foreground" : "bg-muted text-muted-foreground"
+                          )}>
+                            {count}
+                          </span>
+                          <ChevronRight className={cn(
+                            "h-4 w-4 transition-transform",
+                            isActive ? "text-primary-foreground rotate-90" : "text-muted-foreground"
+                          )} />
+                        </div>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Settings Content */}
+          <Card className="lg:col-span-3">
+            <CardHeader className="border-b">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-primary/10">
+                  <CurrentIcon className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <CardTitle>{currentCategory?.title || 'Other Settings'}</CardTitle>
+                  <CardDescription>
+                    {currentCategory?.description || 'Additional configuration options'}
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="h-[calc(100vh-380px)] overflow-y-auto">
+                <div className="px-6 py-2">
+                  {currentSettings.length > 0 ? (
+                    currentSettings.map(renderSettingRow)
+                  ) : (
+                    <div className="py-12 text-center text-muted-foreground">
+                      No settings in this category
+                    </div>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Settings Categories */}
-        <div className="space-y-4">
-          {Object.entries(categorizedSettings).map(([categoryKey, categorySettings]) =>
-            renderCategory(categoryKey, categorySettings)
-          )}
-        </div>
-
+        {/* Empty States */}
         {filteredSettings.length === 0 && searchQuery && (
           <Card>
             <CardContent className="py-8 text-center text-muted-foreground">
@@ -720,7 +727,7 @@ export default function SettingsPage() {
         {settings.length === 0 && !searchQuery && (
           <Card>
             <CardContent className="py-8 text-center text-muted-foreground">
-              No settings configured yet. Click &quot;Add Setting&quot; to create one.
+              No settings configured yet. Click &quot;Add&quot; to create one.
             </CardContent>
           </Card>
         )}
