@@ -147,7 +147,7 @@ export default function WalletPage() {
         </div>
 
         {/* Pagination */}
-        {meta && (
+        {meta && meta.total > 0 && (
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">
               Showing {(page - 1) * 10 + 1} to {Math.min(page * 10, meta.total)} of {meta.total}{' '}
