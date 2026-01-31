@@ -185,20 +185,23 @@ export interface RealtimeStats {
   timestamp: string
 }
 
-// Analytics Types
+// Analytics Types - Updated to match backend response
 export interface BookingAnalytics {
-  totalBookings: number
-  bookingsByStatus: Record<BookingStatus, number>
-  dailyBookings: { date: string; count: number }[]
-  completionRate: number
-  cancellationRate: number
+  dailyBookings: {
+    date: string
+    total: number
+    completed: number
+    cancelled: number
+    revenue: number
+  }[]
+  statusDistribution: { status: string; _count: number }[]
+  vehicleDistribution: { vehicleTypeId: string; _count: number }[]
 }
 
 export interface RevenueAnalytics {
-  totalRevenue: number
-  dailyRevenue: { date: string; amount: number }[]
-  averageBookingValue: number
-  revenueByPaymentMethod: Record<string, number>
+  daily: { date: string; revenue: number; orders: number }[]
+  total: number
+  totalOrders: number
 }
 
 // Settings Types
