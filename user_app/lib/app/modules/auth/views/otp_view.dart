@@ -33,6 +33,7 @@ class OtpView extends GetView<AuthController> {
 
     return Scaffold(
       backgroundColor: AppColors.white,
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         backgroundColor: AppColors.white,
         elevation: 0,
@@ -42,90 +43,102 @@ class OtpView extends GetView<AuthController> {
         ),
       ),
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Verification Code',
-                style: AppTextStyles.h2,
-              ),
-              const SizedBox(height: 8),
-              Obx(() => Text(
-                'We have sent the code to +91 ${controller.phone.value}',
-                style: AppTextStyles.bodyLarge.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-              )),
-              const SizedBox(height: 40),
-              // OTP Input
-              Center(
-                child: Pinput(
-                  controller: pinController,
-                  length: AppConstants.otpLength,
-                  defaultPinTheme: defaultPinTheme,
-                  focusedPinTheme: focusedPinTheme,
-                  onCompleted: (pin) {
-                    controller.otp.value = pin;
-                    controller.verifyOtp();
-                  },
-                  onChanged: (value) => controller.otp.value = value,
-                ),
-              ),
-              const SizedBox(height: 24),
-              // Error Message
-              Obx(() => controller.errorMessage.isNotEmpty
-                  ? Center(
-                      child: Text(
-                        controller.errorMessage.value,
-                        style: AppTextStyles.bodySmall.copyWith(
-                          color: AppColors.error,
-                        ),
-                      ),
-                    )
-                  : const SizedBox.shrink()),
-              const SizedBox(height: 24),
-              // Resend OTP
-              Center(
-                child: Obx(() => controller.canResendOtp.value
-                    ? TextButton(
-                        onPressed: controller.resendOtp,
-                        child: Text(
-                          'Resend OTP',
-                          style: AppTextStyles.labelLarge.copyWith(
-                            color: AppColors.primary,
-                          ),
-                        ),
-                      )
-                    : Text(
-                        'Resend OTP in ${controller.resendSeconds.value}s',
-                        style: AppTextStyles.bodyMedium.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                      )),
-              ),
-              const Spacer(),
-              // Verify Button
-              Obx(() => SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: controller.isLoading.value
-                      ? null
-                      : controller.verifyOtp,
-                  child: controller.isLoading.value
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: AppColors.white,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: MediaQuery.of(context).size.height -
+                  MediaQuery.of(context).padding.top -
+                  MediaQuery.of(context).padding.bottom -
+                  kToolbarHeight -
+                  48,
+            ),
+            child: IntrinsicHeight(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Verification Code',
+                    style: AppTextStyles.h2,
+                  ),
+                  const SizedBox(height: 8),
+                  Obx(() => Text(
+                    'We have sent the code to +91 ${controller.phone.value}',
+                    style: AppTextStyles.bodyLarge.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  )),
+                  const SizedBox(height: 40),
+                  // OTP Input
+                  Center(
+                    child: Pinput(
+                      controller: pinController,
+                      length: AppConstants.otpLength,
+                      defaultPinTheme: defaultPinTheme,
+                      focusedPinTheme: focusedPinTheme,
+                      onCompleted: (pin) {
+                        controller.otp.value = pin;
+                        controller.verifyOtp();
+                      },
+                      onChanged: (value) => controller.otp.value = value,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  // Error Message
+                  Obx(() => controller.errorMessage.isNotEmpty
+                      ? Center(
+                          child: Text(
+                            controller.errorMessage.value,
+                            style: AppTextStyles.bodySmall.copyWith(
+                              color: AppColors.error,
+                            ),
                           ),
                         )
-                      : const Text('Verify'),
-                ),
-              )),
-            ],
+                      : const SizedBox.shrink()),
+                  const SizedBox(height: 24),
+                  // Resend OTP
+                  Center(
+                    child: Obx(() => controller.canResendOtp.value
+                        ? TextButton(
+                            onPressed: controller.resendOtp,
+                            child: Text(
+                              'Resend OTP',
+                              style: AppTextStyles.labelLarge.copyWith(
+                                color: AppColors.primary,
+                              ),
+                            ),
+                          )
+                        : Text(
+                            'Resend OTP in ${controller.resendSeconds.value}s',
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                          )),
+                  ),
+                  const Spacer(),
+                  // Verify Button
+                  Obx(() => SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: controller.isLoading.value
+                          ? null
+                          : controller.verifyOtp,
+                      child: controller.isLoading.value
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: AppColors.white,
+                              ),
+                            )
+                          : const Text('Verify'),
+                    ),
+                  )),
+                  const SizedBox(height: 16),
+                ],
+              ),
+            ),
           ),
         ),
       ),

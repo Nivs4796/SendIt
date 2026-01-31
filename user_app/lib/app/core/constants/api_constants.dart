@@ -2,8 +2,10 @@ class ApiConstants {
   ApiConstants._();
 
   // Base URLs
-  static const String baseUrl = 'http://localhost:5000/api/v1';
-  static const String socketUrl = 'http://localhost:5000';
+  // Use your computer's IP for physical device testing
+  // For emulator use: 10.0.2.2 (Android) or localhost (iOS Simulator)
+  static const String baseUrl = 'http://172.16.17.55:5000/api/v1';
+  static const String socketUrl = 'http://172.16.17.55:5000';
 
   // Auth Endpoints
   static const String sendOtp = '/auth/user/send-otp';

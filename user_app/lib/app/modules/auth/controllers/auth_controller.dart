@@ -14,6 +14,7 @@ class AuthController extends GetxController {
 
   // Observable state
   final isLoading = false.obs;
+  final countryCode = '+91'.obs;
   final phone = ''.obs;
   final otp = ''.obs;
   final name = ''.obs;
@@ -75,7 +76,10 @@ class AuthController extends GetxController {
       isLoading.value = true;
       errorMessage.value = '';
 
-      final response = await _authRepository.sendOtp(phone.value);
+      final response = await _authRepository.sendOtp(
+        phone.value,
+        countryCode: countryCode.value,
+      );
 
       if (response.success) {
         Get.toNamed(Routes.otp);
@@ -105,7 +109,11 @@ class AuthController extends GetxController {
       isLoading.value = true;
       errorMessage.value = '';
 
-      final response = await _authRepository.verifyOtp(phone.value, otp.value);
+      final response = await _authRepository.verifyOtp(
+        phone.value,
+        otp.value,
+        countryCode: countryCode.value,
+      );
 
       if (response.success && response.data != null) {
         currentUser.value = response.data;
@@ -138,7 +146,10 @@ class AuthController extends GetxController {
       isLoading.value = true;
       errorMessage.value = '';
 
-      final response = await _authRepository.sendOtp(phone.value);
+      final response = await _authRepository.sendOtp(
+        phone.value,
+        countryCode: countryCode.value,
+      );
 
       if (response.success) {
         _startResendTimer();

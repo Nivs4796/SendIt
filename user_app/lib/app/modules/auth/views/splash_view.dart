@@ -30,7 +30,7 @@ class SplashView extends GetView<AuthController> {
                 borderRadius: BorderRadius.circular(30),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Colors.black.withValues(alpha: 0.1),
                     blurRadius: 20,
                     offset: const Offset(0, 10),
                   ),
@@ -55,7 +55,7 @@ class SplashView extends GetView<AuthController> {
             Text(
               'Deliver with Ease',
               style: AppTextStyles.bodyLarge.copyWith(
-                color: AppColors.white.withOpacity(0.8),
+                color: AppColors.white.withValues(alpha: 0.8),
               ),
             ),
             const SizedBox(height: 48),

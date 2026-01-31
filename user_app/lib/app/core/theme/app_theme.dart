@@ -28,17 +28,17 @@ class AppTheme {
       ),
 
       // AppBar Theme
-      appBarTheme: const AppBarTheme(
+      appBarTheme: AppBarTheme(
         elevation: 0,
         centerTitle: true,
         backgroundColor: AppColors.white,
         foregroundColor: AppColors.textPrimary,
-        iconTheme: IconThemeData(color: AppColors.textPrimary),
+        iconTheme: const IconThemeData(color: AppColors.textPrimary),
         titleTextStyle: AppTextStyles.h4,
       ),
 
       // Card Theme
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         elevation: 2,
         color: AppColors.surface,
         shape: RoundedRectangleBorder(

@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:get/get.dart' hide Response;
+import 'package:get/get.dart' hide Response, FormData;
 import '../../core/constants/api_constants.dart';
 import '../../services/storage_service.dart';
 import 'api_exceptions.dart';

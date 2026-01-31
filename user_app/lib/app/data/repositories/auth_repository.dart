@@ -9,18 +9,22 @@ class AuthRepository {
   final ApiClient _apiClient = ApiClient();
   final StorageService _storage = Get.find<StorageService>();
 
-  Future<ApiResponse> sendOtp(String phone) async {
+  Future<ApiResponse> sendOtp(String phone, {String countryCode = '+91'}) async {
+    // Send phone with country code
+    final fullPhone = '$countryCode$phone';
     final response = await _apiClient.post(
       ApiConstants.sendOtp,
-      data: {'phone': phone},
+      data: {'phone': fullPhone},
     );
     return ApiResponse.fromJson(response.data, null);
   }
 
-  Future<ApiResponse<UserModel>> verifyOtp(String phone, String otp) async {
+  Future<ApiResponse<UserModel>> verifyOtp(String phone, String otp, {String countryCode = '+91'}) async {
+    // Send phone with country code
+    final fullPhone = '$countryCode$phone';
     final response = await _apiClient.post(
       ApiConstants.verifyOtp,
-      data: {'phone': phone, 'otp': otp},
+      data: {'phone': fullPhone, 'otp': otp},
     );
 
     final apiResponse = ApiResponse<Map<String, dynamic>>.fromJson(
@@ -30,7 +34,7 @@ class AuthRepository {
 
     if (apiResponse.success && apiResponse.data != null) {
       // Store tokens
-      _storage.token = apiResponse.data!['token'];
+      _storage.token = apiResponse.data!['accessToken'];
       _storage.refreshToken = apiResponse.data!['refreshToken'];
 
       // Parse and store user
@@ -53,9 +57,25 @@ class AuthRepository {
 
   Future<ApiResponse<UserModel>> getProfile() async {
     final response = await _apiClient.get(ApiConstants.userProfile);
-    return ApiResponse<UserModel>.fromJson(
+    final apiResponse = ApiResponse<Map<String, dynamic>>.fromJson(
       response.data,
-      (data) => UserModel.fromJson(data),
+      (data) => data as Map<String, dynamic>,
+    );
+
+    if (apiResponse.success && apiResponse.data != null) {
+      // API returns user nested inside data.user
+      final userData = apiResponse.data!['user'] ?? apiResponse.data;
+      final user = UserModel.fromJson(userData);
+      return ApiResponse(
+        success: true,
+        message: apiResponse.message,
+        data: user,
+      );
+    }
+
+    return ApiResponse(
+      success: false,
+      message: apiResponse.message ?? 'Failed to get profile',
     );
   }
 
@@ -72,16 +92,28 @@ class AuthRepository {
       data: data,
     );
 
-    final apiResponse = ApiResponse<UserModel>.fromJson(
+    final apiResponse = ApiResponse<Map<String, dynamic>>.fromJson(
       response.data,
-      (data) => UserModel.fromJson(data),
+      (data) => data as Map<String, dynamic>,
     );
 
     if (apiResponse.success && apiResponse.data != null) {
-      _storage.user = apiResponse.data!.toJson();
+      // API returns user nested inside data.user
+      final userData = apiResponse.data!['user'] ?? apiResponse.data;
+      final user = UserModel.fromJson(userData);
+      _storage.user = user.toJson();
+
+      return ApiResponse(
+        success: true,
+        message: apiResponse.message,
+        data: user,
+      );
     }
 
-    return apiResponse;
+    return ApiResponse(
+      success: false,
+      message: apiResponse.message ?? 'Failed to update profile',
+    );
   }
 
   void logout() {

@@ -1,38 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'app_colors.dart';
 
 class AppTextStyles {
   AppTextStyles._();
 
-  static const String fontFamily = 'Poppins';
+  static String? get fontFamily => GoogleFonts.poppins().fontFamily;
 
   // Headings
-  static const TextStyle h1 = TextStyle(
-    fontFamily: fontFamily,
+  static TextStyle get h1 => GoogleFonts.poppins(
     fontSize: 32,
     fontWeight: FontWeight.bold,
     color: AppColors.textPrimary,
     height: 1.2,
   );
 
-  static const TextStyle h2 = TextStyle(
-    fontFamily: fontFamily,
+  static TextStyle get h2 => GoogleFonts.poppins(
     fontSize: 24,
     fontWeight: FontWeight.bold,
     color: AppColors.textPrimary,
     height: 1.3,
   );
 
-  static const TextStyle h3 = TextStyle(
-    fontFamily: fontFamily,
+  static TextStyle get h3 => GoogleFonts.poppins(
     fontSize: 20,
     fontWeight: FontWeight.w600,
     color: AppColors.textPrimary,
     height: 1.3,
   );
 
-  static const TextStyle h4 = TextStyle(
-    fontFamily: fontFamily,
+  static TextStyle get h4 => GoogleFonts.poppins(
     fontSize: 18,
     fontWeight: FontWeight.w600,
     color: AppColors.textPrimary,
@@ -40,24 +37,21 @@ class AppTextStyles {
   );
 
   // Body Text
-  static const TextStyle bodyLarge = TextStyle(
-    fontFamily: fontFamily,
+  static TextStyle get bodyLarge => GoogleFonts.poppins(
     fontSize: 16,
     fontWeight: FontWeight.normal,
     color: AppColors.textPrimary,
     height: 1.5,
   );
 
-  static const TextStyle bodyMedium = TextStyle(
-    fontFamily: fontFamily,
+  static TextStyle get bodyMedium => GoogleFonts.poppins(
     fontSize: 14,
     fontWeight: FontWeight.normal,
     color: AppColors.textPrimary,
     height: 1.5,
   );
 
-  static const TextStyle bodySmall = TextStyle(
-    fontFamily: fontFamily,
+  static TextStyle get bodySmall => GoogleFonts.poppins(
     fontSize: 12,
     fontWeight: FontWeight.normal,
     color: AppColors.textSecondary,
@@ -65,24 +59,21 @@ class AppTextStyles {
   );
 
   // Labels
-  static const TextStyle labelLarge = TextStyle(
-    fontFamily: fontFamily,
+  static TextStyle get labelLarge => GoogleFonts.poppins(
     fontSize: 14,
     fontWeight: FontWeight.w500,
     color: AppColors.textPrimary,
     height: 1.4,
   );
 
-  static const TextStyle labelMedium = TextStyle(
-    fontFamily: fontFamily,
+  static TextStyle get labelMedium => GoogleFonts.poppins(
     fontSize: 12,
     fontWeight: FontWeight.w500,
     color: AppColors.textPrimary,
     height: 1.4,
   );
 
-  static const TextStyle labelSmall = TextStyle(
-    fontFamily: fontFamily,
+  static TextStyle get labelSmall => GoogleFonts.poppins(
     fontSize: 10,
     fontWeight: FontWeight.w500,
     color: AppColors.textSecondary,
@@ -90,16 +81,14 @@ class AppTextStyles {
   );
 
   // Button Text
-  static const TextStyle button = TextStyle(
-    fontFamily: fontFamily,
+  static TextStyle get button => GoogleFonts.poppins(
     fontSize: 16,
     fontWeight: FontWeight.w600,
     color: AppColors.white,
     height: 1.2,
   );
 
-  static const TextStyle buttonSmall = TextStyle(
-    fontFamily: fontFamily,
+  static TextStyle get buttonSmall => GoogleFonts.poppins(
     fontSize: 14,
     fontWeight: FontWeight.w600,
     color: AppColors.white,
@@ -107,8 +96,7 @@ class AppTextStyles {
   );
 
   // Caption
-  static const TextStyle caption = TextStyle(
-    fontFamily: fontFamily,
+  static TextStyle get caption => GoogleFonts.poppins(
     fontSize: 12,
     fontWeight: FontWeight.normal,
     color: AppColors.textSecondary,
@@ -116,16 +104,14 @@ class AppTextStyles {
   );
 
   // Price
-  static const TextStyle price = TextStyle(
-    fontFamily: fontFamily,
+  static TextStyle get price => GoogleFonts.poppins(
     fontSize: 20,
     fontWeight: FontWeight.bold,
     color: AppColors.textPrimary,
     height: 1.2,
   );
 
-  static const TextStyle priceSmall = TextStyle(
-    fontFamily: fontFamily,
+  static TextStyle get priceSmall => GoogleFonts.poppins(
     fontSize: 16,
     fontWeight: FontWeight.w600,
     color: AppColors.textPrimary,
