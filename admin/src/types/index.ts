@@ -107,6 +107,7 @@ export interface Vehicle {
 export type BookingStatus =
   | 'PENDING'
   | 'SEARCHING'
+  | 'ACCEPTED'
   | 'CONFIRMED'
   | 'PILOT_ARRIVED'
   | 'PICKED_UP'

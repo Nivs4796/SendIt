@@ -39,6 +39,7 @@ import { format } from 'date-fns'
 const statusColors: Record<BookingStatus, 'default' | 'secondary' | 'destructive' | 'outline'> = {
   PENDING: 'secondary',
   SEARCHING: 'outline',
+  ACCEPTED: 'default',
   CONFIRMED: 'default',
   PILOT_ARRIVED: 'default',
   PICKED_UP: 'default',
@@ -125,7 +126,7 @@ export default function BookingsPage() {
   }
 
   const canCancel = (status: BookingStatus) =>
-    ['PENDING', 'SEARCHING', 'CONFIRMED'].includes(status)
+    ['PENDING', 'SEARCHING', 'ACCEPTED', 'CONFIRMED'].includes(status)
 
   const canAssign = (status: BookingStatus) =>
     ['PENDING', 'SEARCHING'].includes(status)
