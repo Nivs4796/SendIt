@@ -204,6 +204,7 @@ export default function BookingDetailsPage() {
 
   const coords = getCoordinates(booking)
   const hasValidCoords = coords.pickupLat && coords.pickupLng && coords.dropoffLat && coords.dropoffLng
+  const useDemoMode = !hasValidCoords
 
   return (
     <AdminLayout>
@@ -247,30 +248,30 @@ export default function BookingDetailsPage() {
               <div className="p-4 border-b border-border/50">
                 <h2 className="font-semibold flex items-center gap-2">
                   Live Tracking
-                  {isConnected && pilotLocation && (
+                  {useDemoMode ? (
+                    <span className="flex items-center gap-1 text-xs text-amber-500 font-normal">
+                      <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                      Demo
+                    </span>
+                  ) : isConnected && pilotLocation ? (
                     <span className="flex items-center gap-1 text-xs text-primary font-normal">
                       <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
                       Live
                     </span>
-                  )}
+                  ) : null}
                 </h2>
               </div>
-              {hasValidCoords ? (
-                <div className="h-[400px] md:h-[500px]">
-                  <TrackingMap
-                    pickupLat={coords.pickupLat}
-                    pickupLng={coords.pickupLng}
-                    dropoffLat={coords.dropoffLat}
-                    dropoffLng={coords.dropoffLng}
-                    pilotLat={pilotLocation?.lat}
-                    pilotLng={pilotLocation?.lng}
-                  />
-                </div>
-              ) : (
-                <div className="h-[400px] flex items-center justify-center text-muted-foreground">
-                  <p>Map coordinates not available</p>
-                </div>
-              )}
+              <div className="h-[400px] md:h-[500px]">
+                <TrackingMap
+                  pickupLat={coords.pickupLat}
+                  pickupLng={coords.pickupLng}
+                  dropoffLat={coords.dropoffLat}
+                  dropoffLng={coords.dropoffLng}
+                  pilotLat={pilotLocation?.lat}
+                  pilotLng={pilotLocation?.lng}
+                  demoMode={useDemoMode}
+                />
+              </div>
             </div>
 
             {/* Pilot Card on larger screens */}

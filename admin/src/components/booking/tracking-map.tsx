@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 
@@ -12,6 +12,7 @@ interface TrackingMapProps {
   pilotLat?: number
   pilotLng?: number
   className?: string
+  demoMode?: boolean
 }
 
 // Custom marker icons
@@ -67,6 +68,10 @@ const createPilotIcon = () => {
   })
 }
 
+// Demo coordinates for Ahmedabad, India
+const DEMO_PICKUP = { lat: 23.0225, lng: 72.5714 } // Ahmedabad center
+const DEMO_DROPOFF = { lat: 23.0396, lng: 72.5660 } // ~2km north
+
 export function TrackingMap({
   pickupLat,
   pickupLng,
@@ -75,6 +80,7 @@ export function TrackingMap({
   pilotLat,
   pilotLng,
   className = '',
+  demoMode = false,
 }: TrackingMapProps) {
   const mapRef = useRef<L.Map | null>(null)
   const mapContainerRef = useRef<HTMLDivElement>(null)
@@ -82,6 +88,22 @@ export function TrackingMap({
   const dropoffMarkerRef = useRef<L.Marker | null>(null)
   const pilotMarkerRef = useRef<L.Marker | null>(null)
   const routeLineRef = useRef<L.Polyline | null>(null)
+  const pilotPathRef = useRef<L.Polyline | null>(null)
+  const animationRef = useRef<number | null>(null)
+  const [demoProgress, setDemoProgress] = useState(0)
+
+  // Use demo coordinates if in demo mode or coords are invalid
+  const effectivePickupLat = demoMode || !pickupLat ? DEMO_PICKUP.lat : pickupLat
+  const effectivePickupLng = demoMode || !pickupLng ? DEMO_PICKUP.lng : pickupLng
+  const effectiveDropoffLat = demoMode || !dropoffLat ? DEMO_DROPOFF.lat : dropoffLat
+  const effectiveDropoffLng = demoMode || !dropoffLng ? DEMO_DROPOFF.lng : dropoffLng
+
+  // Calculate pilot position along the route based on progress
+  const getDemoPilotPosition = useCallback((progress: number) => {
+    const lat = effectivePickupLat + (effectiveDropoffLat - effectivePickupLat) * progress
+    const lng = effectivePickupLng + (effectiveDropoffLng - effectivePickupLng) * progress
+    return { lat, lng }
+  }, [effectivePickupLat, effectivePickupLng, effectiveDropoffLat, effectiveDropoffLng])
 
   // Initialize map
   useEffect(() => {
@@ -121,16 +143,19 @@ export function TrackingMap({
     if (routeLineRef.current) {
       routeLineRef.current.remove()
     }
+    if (pilotPathRef.current) {
+      pilotPathRef.current.remove()
+    }
 
     // Add pickup marker (green)
-    pickupMarkerRef.current = L.marker([pickupLat, pickupLng], {
+    pickupMarkerRef.current = L.marker([effectivePickupLat, effectivePickupLng], {
       icon: createIcon('#10b981', 28),
     })
       .addTo(map)
       .bindPopup('<strong>Pickup Location</strong>')
 
     // Add dropoff marker (red)
-    dropoffMarkerRef.current = L.marker([dropoffLat, dropoffLng], {
+    dropoffMarkerRef.current = L.marker([effectiveDropoffLat, effectiveDropoffLng], {
       icon: createIcon('#ef4444', 28),
     })
       .addTo(map)
@@ -139,8 +164,8 @@ export function TrackingMap({
     // Add route line
     routeLineRef.current = L.polyline(
       [
-        [pickupLat, pickupLng],
-        [dropoffLat, dropoffLng],
+        [effectivePickupLat, effectivePickupLng],
+        [effectiveDropoffLat, effectiveDropoffLng],
       ],
       {
         color: '#10b981',
@@ -152,8 +177,8 @@ export function TrackingMap({
 
     // Fit bounds to show all points
     const bounds = L.latLngBounds([
-      [pickupLat, pickupLng],
-      [dropoffLat, dropoffLng],
+      [effectivePickupLat, effectivePickupLng],
+      [effectiveDropoffLat, effectiveDropoffLng],
     ])
 
     if (pilotLat && pilotLng) {
@@ -161,12 +186,12 @@ export function TrackingMap({
     }
 
     map.fitBounds(bounds, { padding: [50, 50] })
-  }, [pickupLat, pickupLng, dropoffLat, dropoffLng])
+  }, [effectivePickupLat, effectivePickupLng, effectiveDropoffLat, effectiveDropoffLng, pilotLat, pilotLng])
 
-  // Update pilot marker
+  // Update pilot marker (real location)
   useEffect(() => {
     const map = mapRef.current
-    if (!map) return
+    if (!map || demoMode) return
 
     // Remove existing pilot marker
     if (pilotMarkerRef.current) {
@@ -182,13 +207,90 @@ export function TrackingMap({
         .addTo(map)
         .bindPopup('<strong>Pilot Location</strong><br/>Live tracking active')
     }
-  }, [pilotLat, pilotLng])
+  }, [pilotLat, pilotLng, demoMode])
+
+  // Demo mode animation
+  useEffect(() => {
+    if (!demoMode) return
+
+    const map = mapRef.current
+    if (!map) return
+
+    // Start animation loop
+    let startTime: number | null = null
+    const duration = 15000 // 15 seconds for full journey
+
+    const animate = (currentTime: number) => {
+      if (!startTime) startTime = currentTime
+      const elapsed = currentTime - startTime
+      const progress = Math.min((elapsed % duration) / duration, 1)
+
+      setDemoProgress(progress)
+
+      // Update pilot marker position
+      const pos = getDemoPilotPosition(progress)
+
+      if (pilotMarkerRef.current) {
+        pilotMarkerRef.current.setLatLng([pos.lat, pos.lng])
+      } else {
+        pilotMarkerRef.current = L.marker([pos.lat, pos.lng], {
+          icon: createPilotIcon(),
+        })
+          .addTo(map)
+          .bindPopup('<strong>Pilot Location</strong><br/>Demo tracking active')
+      }
+
+      // Update pilot path (trail showing where pilot has been)
+      if (pilotPathRef.current) {
+        pilotPathRef.current.remove()
+      }
+
+      const pathCoords: [number, number][] = []
+      for (let p = 0; p <= progress; p += 0.05) {
+        const pathPos = getDemoPilotPosition(p)
+        pathCoords.push([pathPos.lat, pathPos.lng])
+      }
+      pathCoords.push([pos.lat, pos.lng])
+
+      pilotPathRef.current = L.polyline(pathCoords, {
+        color: '#3b82f6',
+        weight: 3,
+        opacity: 0.8,
+      }).addTo(map)
+
+      animationRef.current = requestAnimationFrame(animate)
+    }
+
+    animationRef.current = requestAnimationFrame(animate)
+
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current)
+      }
+    }
+  }, [demoMode, getDemoPilotPosition])
 
   return (
-    <div
-      ref={mapContainerRef}
-      className={`w-full h-full min-h-[400px] rounded-xl overflow-hidden ${className}`}
-      style={{ background: '#1a1a2e' }}
-    />
+    <div className="relative">
+      <div
+        ref={mapContainerRef}
+        className={`w-full h-full min-h-[400px] rounded-xl overflow-hidden ${className}`}
+        style={{ background: '#1a1a2e' }}
+      />
+      {demoMode && (
+        <div className="absolute bottom-4 left-4 right-4 glass-card rounded-lg p-3">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground">Demo Mode - Simulated Tracking</span>
+            <span className="font-medium text-primary">{Math.round(demoProgress * 100)}% Complete</span>
+          </div>
+          <div className="mt-2 h-1.5 bg-muted rounded-full overflow-hidden">
+            <div
+              className="h-full bg-primary transition-all duration-200 rounded-full"
+              style={{ width: `${demoProgress * 100}%` }}
+            />
+          </div>
+        </div>
+      )}
+    </div>
   )
 }
