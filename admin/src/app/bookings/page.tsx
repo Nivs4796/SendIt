@@ -35,6 +35,7 @@ import { Label } from '@/components/ui/label'
 import { adminApi } from '@/lib/api'
 import type { Booking, BookingStatus, Pilot, PaginationMeta } from '@/types'
 import { format } from 'date-fns'
+import { toast } from 'sonner'
 
 const statusColors: Record<BookingStatus, 'default' | 'secondary' | 'destructive' | 'outline'> = {
   PENDING: 'secondary',
@@ -96,6 +97,10 @@ export default function BookingsPage() {
       queryClient.invalidateQueries({ queryKey: ['bookings'] })
       setIsCancelOpen(false)
       setCancelReason('')
+      toast.success('Booking cancelled')
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Failed to cancel booking')
     },
   })
 
@@ -106,6 +111,10 @@ export default function BookingsPage() {
       queryClient.invalidateQueries({ queryKey: ['bookings'] })
       setIsAssignOpen(false)
       setSelectedPilotId('')
+      toast.success('Pilot assigned successfully')
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Failed to assign pilot')
     },
   })
 

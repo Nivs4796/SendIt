@@ -40,6 +40,7 @@ import {
 import { Label } from '@/components/ui/label'
 import { adminApi } from '@/lib/api'
 import type { Vehicle, PaginationMeta } from '@/types'
+import { toast } from 'sonner'
 
 export default function VehiclesPage() {
   const queryClient = useQueryClient()
@@ -71,10 +72,14 @@ export default function VehiclesPage() {
   const verifyMutation = useMutation({
     mutationFn: ({ vehicleId, isVerified, reason }: { vehicleId: string; isVerified: boolean; reason?: string }) =>
       adminApi.verifyVehicle(vehicleId, isVerified, reason),
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['vehicles'] })
       setIsVerifyOpen(false)
       setVerifyAction({ isVerified: true, reason: '' })
+      toast.success(variables.isVerified ? 'Vehicle verified' : 'Vehicle rejected')
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Failed to update vehicle')
     },
   })
 

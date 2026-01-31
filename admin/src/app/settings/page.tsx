@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/dialog'
 import { adminApi } from '@/lib/api'
 import type { Setting } from '@/types'
+import { toast } from 'sonner'
 
 export default function SettingsPage() {
   const queryClient = useQueryClient()
@@ -43,6 +44,10 @@ export default function SettingsPage() {
       adminApi.updateSetting(key, value, description),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['settings'] })
+      toast.success('Setting updated')
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Failed to update setting')
     },
   })
 
@@ -53,6 +58,10 @@ export default function SettingsPage() {
       queryClient.invalidateQueries({ queryKey: ['settings'] })
       setIsAddOpen(false)
       setNewSetting({ key: '', value: '', description: '' })
+      toast.success('Setting added')
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Failed to add setting')
     },
   })
 

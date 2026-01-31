@@ -35,6 +35,7 @@ import { Label } from '@/components/ui/label'
 import { adminApi } from '@/lib/api'
 import type { Pilot, PilotStatus, PaginationMeta } from '@/types'
 import { format } from 'date-fns'
+import { toast } from 'sonner'
 
 const statusColors: Record<PilotStatus, 'default' | 'secondary' | 'destructive' | 'outline'> = {
   PENDING: 'secondary',
@@ -76,6 +77,10 @@ export default function PilotsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pilots'] })
       setIsStatusDialogOpen(false)
+      toast.success('Pilot status updated')
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Failed to update pilot status')
     },
   })
 

@@ -40,6 +40,7 @@ import { Label } from '@/components/ui/label'
 import { adminApi } from '@/lib/api'
 import type { User, PaginationMeta } from '@/types'
 import { format } from 'date-fns'
+import { toast } from 'sonner'
 
 export default function UsersPage() {
   const queryClient = useQueryClient()
@@ -70,6 +71,10 @@ export default function UsersPage() {
       adminApi.updateUserStatus(userId, isActive),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] })
+      toast.success('User status updated')
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Failed to update user status')
     },
   })
 
@@ -79,6 +84,10 @@ export default function UsersPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] })
       setIsEditOpen(false)
+      toast.success('User updated successfully')
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Failed to update user')
     },
   })
 
