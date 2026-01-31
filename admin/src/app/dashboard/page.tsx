@@ -1,6 +1,7 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
+import Link from 'next/link'
 import { Users, Bike, Package, DollarSign, Clock, CheckCircle, TrendingUp, Activity } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -211,7 +212,7 @@ export default function DashboardPage() {
               <CardDescription>Common administrative tasks</CardDescription>
             </CardHeader>
             <CardContent className="grid gap-2">
-              <a
+              <Link
                 href="/pilots?status=PENDING"
                 className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
               >
@@ -222,8 +223,8 @@ export default function DashboardPage() {
                     {displayStats.pendingPilots} pilots awaiting approval
                   </p>
                 </div>
-              </a>
-              <a
+              </Link>
+              <Link
                 href="/bookings?status=PENDING"
                 className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
               >
@@ -232,8 +233,8 @@ export default function DashboardPage() {
                   <p className="font-medium">Manage Pending Bookings</p>
                   <p className="text-sm text-muted-foreground">View and assign bookings</p>
                 </div>
-              </a>
-              <a
+              </Link>
+              <Link
                 href="/analytics"
                 className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
               >
@@ -242,7 +243,7 @@ export default function DashboardPage() {
                   <p className="font-medium">View Analytics</p>
                   <p className="text-sm text-muted-foreground">Detailed reports and trends</p>
                 </div>
-              </a>
+              </Link>
             </CardContent>
           </Card>
         </div>
