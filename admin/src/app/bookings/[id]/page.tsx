@@ -261,7 +261,7 @@ export default function BookingDetailsPage() {
                   ) : null}
                 </h2>
               </div>
-              <div className="h-[400px] md:h-[500px]">
+              <div style={{ height: '500px' }} className="relative">
                 <TrackingMap
                   pickupLat={coords.pickupLat}
                   pickupLng={coords.pickupLng}

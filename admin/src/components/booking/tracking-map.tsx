@@ -122,6 +122,11 @@ export function TrackingMap({
 
     mapRef.current = map
 
+    // Force map to recalculate size after render
+    setTimeout(() => {
+      map.invalidateSize()
+    }, 100)
+
     return () => {
       map.remove()
       mapRef.current = null
@@ -271,14 +276,14 @@ export function TrackingMap({
   }, [demoMode, getDemoPilotPosition])
 
   return (
-    <div className="relative">
+    <div className={`relative w-full h-full min-h-[400px] ${className}`} style={{ height: '100%' }}>
       <div
         ref={mapContainerRef}
-        className={`w-full h-full min-h-[400px] rounded-xl overflow-hidden ${className}`}
-        style={{ background: '#1a1a2e' }}
+        className="w-full h-full"
+        style={{ background: '#1a1a2e', position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
       />
       {demoMode && (
-        <div className="absolute bottom-4 left-4 right-4 glass-card rounded-lg p-3">
+        <div className="absolute bottom-4 left-4 right-4 glass-card rounded-lg p-3 z-[1000]">
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">Demo Mode - Simulated Tracking</span>
             <span className="font-medium text-primary">{Math.round(demoProgress * 100)}% Complete</span>
