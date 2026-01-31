@@ -98,11 +98,15 @@ export default function UsersPage() {
   }
 
   const handleView = async (userId: string) => {
-    const response = await adminApi.getUserDetails(userId)
-    // API returns { user: {...}, bookingStats: [...] }
-    const userData = (response.data as { user: User }).user
-    setSelectedUser(userData)
-    setIsViewOpen(true)
+    try {
+      const response = await adminApi.getUserDetails(userId)
+      // API returns { user: {...}, bookingStats: [...] }
+      const userData = (response.data as { user: User }).user
+      setSelectedUser(userData)
+      setIsViewOpen(true)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to load user details')
+    }
   }
 
   const handleSaveEdit = () => {

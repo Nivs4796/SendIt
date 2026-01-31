@@ -119,9 +119,13 @@ export default function BookingsPage() {
   })
 
   const handleView = async (bookingId: string) => {
-    const response = await adminApi.getBookingDetails(bookingId)
-    setSelectedBooking((response.data as { booking: Booking }).booking)
-    setIsViewOpen(true)
+    try {
+      const response = await adminApi.getBookingDetails(bookingId)
+      setSelectedBooking((response.data as { booking: Booking }).booking)
+      setIsViewOpen(true)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to load booking details')
+    }
   }
 
   const openCancelDialog = (booking: Booking) => {

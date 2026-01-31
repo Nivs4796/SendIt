@@ -100,11 +100,15 @@ export default function PilotsPage() {
   })
 
   const handleView = async (pilotId: string) => {
-    const response = await adminApi.getPilotDetails(pilotId)
-    // API returns { pilot: {...}, bookingStats: [...], totalEarnings: ... }
-    const pilotData = (response.data as { pilot: Pilot }).pilot
-    setSelectedPilot(pilotData)
-    setIsViewOpen(true)
+    try {
+      const response = await adminApi.getPilotDetails(pilotId)
+      // API returns { pilot: {...}, bookingStats: [...], totalEarnings: ... }
+      const pilotData = (response.data as { pilot: Pilot }).pilot
+      setSelectedPilot(pilotData)
+      setIsViewOpen(true)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to load pilot details')
+    }
   }
 
   const openStatusDialog = (pilot: Pilot, status: PilotStatus) => {

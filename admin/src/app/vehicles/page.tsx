@@ -84,9 +84,13 @@ export default function VehiclesPage() {
   })
 
   const handleView = async (vehicleId: string) => {
-    const response = await adminApi.getVehicleDetails(vehicleId)
-    setSelectedVehicle((response.data as { vehicle: Vehicle }).vehicle)
-    setIsViewOpen(true)
+    try {
+      const response = await adminApi.getVehicleDetails(vehicleId)
+      setSelectedVehicle((response.data as { vehicle: Vehicle }).vehicle)
+      setIsViewOpen(true)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to load vehicle details')
+    }
   }
 
   const openVerifyDialog = (vehicle: Vehicle, isVerified: boolean) => {
