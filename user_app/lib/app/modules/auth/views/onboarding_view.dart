@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/constants/app_assets.dart';
 import '../controllers/auth_controller.dart';
 
 class OnboardingView extends GetView<AuthController> {
@@ -14,16 +15,16 @@ class OnboardingView extends GetView<AuthController> {
 
     final pages = [
       _OnboardingPage(
-        icon: Icons.local_shipping_rounded,
-        title: 'Fast Delivery',
-        description: 'Get your packages delivered quickly and safely with our reliable delivery network.',
+        imagePath: AppAssets.logo,
+        title: 'Welcome to SendIt',
+        description: 'Your trusted partner for fast, reliable package delivery across the city.',
         color: AppColors.primary,
       ),
       _OnboardingPage(
         icon: Icons.location_on_rounded,
         title: 'Real-Time Tracking',
         description: 'Track your delivery in real-time and know exactly when it will arrive.',
-        color: AppColors.secondary,
+        color: AppColors.info,
       ),
       _OnboardingPage(
         icon: Icons.security_rounded,
@@ -111,13 +112,15 @@ class OnboardingView extends GetView<AuthController> {
 }
 
 class _OnboardingPage extends StatelessWidget {
-  final IconData icon;
+  final IconData? icon;
+  final String? imagePath;
   final String title;
   final String description;
   final Color color;
 
   const _OnboardingPage({
-    required this.icon,
+    this.icon,
+    this.imagePath,
     required this.title,
     required this.description,
     required this.color,
@@ -131,17 +134,25 @@ class _OnboardingPage extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            width: 160,
-            height: 160,
+            width: 180,
+            height: 180,
             decoration: BoxDecoration(
               color: color.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(
-              icon,
-              size: 80,
-              color: color,
-            ),
+            child: imagePath != null
+                ? Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Image.asset(
+                      imagePath!,
+                      fit: BoxFit.contain,
+                    ),
+                  )
+                : Icon(
+                    icon,
+                    size: 80,
+                    color: color,
+                  ),
           ),
           const SizedBox(height: 48),
           Text(
