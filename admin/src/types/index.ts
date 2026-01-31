@@ -92,7 +92,8 @@ export interface Vehicle {
   id: string
   pilotId: string
   vehicleTypeId: string
-  plateNumber: string
+  plateNumber?: string       // Keep for backward compat
+  registrationNo?: string    // Backend field name
   model: string
   color: string
   year: number

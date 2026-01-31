@@ -155,7 +155,9 @@ export default function VehiclesPage() {
               ) : (
                 vehicles.map((vehicle) => (
                   <TableRow key={vehicle.id}>
-                    <TableCell className="font-mono font-medium">{vehicle.plateNumber}</TableCell>
+                    <TableCell className="font-mono font-medium">
+                      {vehicle.registrationNo || vehicle.plateNumber || '-'}
+                    </TableCell>
                     <TableCell>{vehicle.model}</TableCell>
                     <TableCell>{vehicle.color}</TableCell>
                     <TableCell>{vehicle.year}</TableCell>
@@ -252,7 +254,9 @@ export default function VehiclesPage() {
                   </div>
                   <div>
                     <h3 className="font-bold text-lg">{selectedVehicle.model}</h3>
-                    <p className="text-muted-foreground font-mono">{selectedVehicle.plateNumber}</p>
+                    <p className="text-muted-foreground font-mono">
+                      {selectedVehicle.registrationNo || selectedVehicle.plateNumber || '-'}
+                    </p>
                   </div>
                 </div>
 
