@@ -31,7 +31,12 @@ export default function SettingsPage() {
     queryFn: () => adminApi.getSettings(),
   })
 
-  const settings = (data?.data as { settings: Setting[] })?.settings || []
+  const settingsObj = (data?.data as { settings: Record<string, string> })?.settings || {}
+  const settings: Setting[] = Object.entries(settingsObj).map(([key, value]) => ({
+    key,
+    value,
+    description: undefined, // Backend doesn't return descriptions in list
+  }))
 
   const updateMutation = useMutation({
     mutationFn: ({ key, value, description }: { key: string; value: string; description?: string }) =>
