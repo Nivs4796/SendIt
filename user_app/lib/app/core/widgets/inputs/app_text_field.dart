@@ -371,7 +371,6 @@ class _AppTextFieldState extends State<AppTextField> {
         Container(
           margin: const EdgeInsets.symmetric(horizontal: 2),
           decoration: BoxDecoration(
-            color: widget.fillColor ?? AppColors.white,
             borderRadius: BorderRadius.circular(widget.borderRadius ?? AppTheme.radiusMedium),
             border: Border.all(
               color: hasError
@@ -389,64 +388,70 @@ class _AppTextFieldState extends State<AppTextField> {
               ),
             ],
           ),
-          child: Row(
-            children: [
-              // Country Code
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-                decoration: const BoxDecoration(
-                  border: Border(
-                    right: BorderSide(color: AppColors.grey300, width: 1.5),
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (widget.countryFlag != null)
-                      Text(widget.countryFlag!, style: const TextStyle(fontSize: 18)),
-                    const SizedBox(width: 8),
-                    Text(
-                      widget.countryCode ?? '+91',
-                      style: AppTextStyles.bodyLarge.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular((widget.borderRadius ?? AppTheme.radiusMedium) - 2),
+            child: Container(
+              color: widget.fillColor ?? AppColors.white,
+              child: Row(
+                children: [
+                  // Country Code
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                    decoration: const BoxDecoration(
+                      border: Border(
+                        right: BorderSide(color: AppColors.grey300, width: 1.5),
                       ),
                     ),
-                  ],
-                ),
-              ),
-              // Phone Number
-              Expanded(
-                child: TextField(
-                  controller: widget.controller,
-                  focusNode: _focusNode,
-                  enabled: widget.enabled,
-                  readOnly: widget.readOnly,
-                  autofocus: widget.autofocus,
-                  keyboardType: TextInputType.phone,
-                  maxLength: widget.maxLength,
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  style: AppTextStyles.bodyLarge.copyWith(
-                    fontWeight: FontWeight.w500,
-                    letterSpacing: 1.2,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (widget.countryFlag != null)
+                          Text(widget.countryFlag!, style: const TextStyle(fontSize: 18)),
+                        const SizedBox(width: 8),
+                        Text(
+                          widget.countryCode ?? '+91',
+                          style: AppTextStyles.bodyLarge.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  onChanged: widget.onChanged,
-                  onTap: widget.onTap,
-                  onEditingComplete: widget.onEditingComplete,
-                  onSubmitted: widget.onSubmitted,
-                  decoration: InputDecoration(
-                    hintText: widget.hint,
-                    hintStyle: AppTextStyles.bodyLarge.copyWith(color: AppColors.textHint),
-                    counterText: '',
-                    border: InputBorder.none,
-                    enabledBorder: InputBorder.none,
-                    focusedBorder: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-                    suffixIcon: widget.suffixIcon,
+                  // Phone Number
+                  Expanded(
+                    child: TextField(
+                      controller: widget.controller,
+                      focusNode: _focusNode,
+                      enabled: widget.enabled,
+                      readOnly: widget.readOnly,
+                      autofocus: widget.autofocus,
+                      keyboardType: TextInputType.phone,
+                      maxLength: widget.maxLength,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      style: AppTextStyles.bodyLarge.copyWith(
+                        fontWeight: FontWeight.w500,
+                        letterSpacing: 1.2,
+                      ),
+                      onChanged: widget.onChanged,
+                      onTap: widget.onTap,
+                      onEditingComplete: widget.onEditingComplete,
+                      onSubmitted: widget.onSubmitted,
+                      decoration: InputDecoration(
+                        hintText: widget.hint,
+                        hintStyle: AppTextStyles.bodyLarge.copyWith(color: AppColors.textHint),
+                        counterText: '',
+                        border: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                        suffixIcon: widget.suffixIcon,
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
         if (hasError) ...[
