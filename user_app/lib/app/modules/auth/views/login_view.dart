@@ -129,6 +129,7 @@ class _LoginContentState extends State<_LoginContent>
 
                       // Phone Input - High contrast border
                       Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 2),
                         decoration: BoxDecoration(
                           color: AppColors.white,
                           borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
