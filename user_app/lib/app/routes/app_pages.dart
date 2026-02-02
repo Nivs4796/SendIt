@@ -23,6 +23,22 @@ import '../modules/profile/views/addresses_view.dart';
 import '../modules/wallet/bindings/wallet_binding.dart';
 import '../modules/wallet/views/wallet_view.dart';
 
+// Booking Module Imports
+import '../modules/booking/bindings/booking_binding.dart';
+import '../modules/booking/views/create_booking_view.dart';
+import '../modules/booking/views/vehicle_selection_view.dart';
+import '../modules/booking/views/payment_view.dart';
+import '../modules/booking/views/finding_driver_view.dart';
+
+// Orders Module Imports
+import '../modules/orders/bindings/orders_binding.dart';
+import '../modules/orders/views/orders_view.dart';
+import '../modules/orders/views/order_details_view.dart';
+
+// Tracking Module Imports
+import '../modules/tracking/bindings/tracking_binding.dart';
+import '../modules/tracking/views/tracking_view.dart';
+
 /// Application page configuration for GetX routing
 class AppPages {
   AppPages._();
@@ -96,6 +112,54 @@ class AppPages {
       name: Routes.wallet,
       page: () => const WalletView(),
       binding: WalletBinding(),
+      transition: Transition.rightToLeft,
+    ),
+
+    // Booking Routes
+    GetPage(
+      name: Routes.createBooking,
+      page: () => const CreateBookingView(),
+      binding: BookingBinding(),
+      transition: Transition.rightToLeft,
+    ),
+    GetPage(
+      name: Routes.vehicleSelection,
+      page: () => const VehicleSelectionView(),
+      binding: BookingBinding(),
+      transition: Transition.rightToLeft,
+    ),
+    GetPage(
+      name: Routes.payment,
+      page: () => const PaymentView(),
+      binding: BookingBinding(),
+      transition: Transition.rightToLeft,
+    ),
+    GetPage(
+      name: Routes.findingDriver,
+      page: () => const FindingDriverView(),
+      binding: BookingBinding(),
+      transition: Transition.fadeIn,
+    ),
+
+    // Orders Routes
+    GetPage(
+      name: Routes.orders,
+      page: () => const OrdersView(),
+      binding: OrdersBinding(),
+      transition: Transition.rightToLeft,
+    ),
+    GetPage(
+      name: Routes.orderDetails,
+      page: () => const OrderDetailsView(),
+      binding: OrdersBinding(),
+      transition: Transition.rightToLeft,
+    ),
+
+    // Tracking Route
+    GetPage(
+      name: Routes.tracking,
+      page: () => const TrackingView(),
+      binding: TrackingBinding(),
       transition: Transition.rightToLeft,
     ),
   ];

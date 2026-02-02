@@ -31,6 +31,9 @@ abstract class Routes {
 
   // ==================== Booking Flow Routes ====================
 
+  /// Create new booking
+  static const createBooking = '/booking/create';
+
   /// Select pickup location
   static const pickupLocation = '/booking/pickup';
 
@@ -43,6 +46,9 @@ abstract class Routes {
   /// Select type of goods being delivered
   static const goodsType = '/booking/goods-type';
 
+  /// Payment screen
+  static const payment = '/booking/payment';
+
   /// Review booking details before confirmation
   static const reviewBooking = '/booking/review';
 
@@ -51,6 +57,11 @@ abstract class Routes {
 
   /// Live order tracking with map
   static const orderTracking = '/booking/tracking';
+
+  // ==================== Tracking Routes ====================
+
+  /// Real-time delivery tracking
+  static const tracking = '/tracking';
 
   /// Delivery completion and rating screen
   static const deliveryComplete = '/booking/complete';
