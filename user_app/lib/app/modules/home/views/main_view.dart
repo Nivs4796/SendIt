@@ -166,49 +166,41 @@ class MainView extends GetView<HomeController> {
   Widget _buildOffersBanner(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
-          child: Text(
-            'Offers & Deals',
-            style: AppTextStyles.h4.copyWith(
-              color: theme.colorScheme.onSurface,
+    return Obx(() {
+      // Hide section completely when no coupons and not loading
+      if (!controller.isLoadingCoupons.value && controller.availableCoupons.isEmpty) {
+        return const SizedBox.shrink();
+      }
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
+            child: Text(
+              'Offers & Deals',
+              style: AppTextStyles.h4.copyWith(
+                color: theme.colorScheme.onSurface,
+              ),
             ),
           ),
-        ),
-        SizedBox(
-          height: 140,
-          child: Obx(() {
-            if (controller.isLoadingCoupons.value) {
-              return const Center(child: CircularProgressIndicator());
-            }
-
-            if (controller.availableCoupons.isEmpty) {
-              return Center(
-                child: Text(
-                  'No offers available',
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
+          SizedBox(
+            height: 140,
+            child: controller.isLoadingCoupons.value
+                ? const Center(child: CircularProgressIndicator())
+                : ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    itemCount: controller.availableCoupons.length,
+                    itemBuilder: (context, index) {
+                      final coupon = controller.availableCoupons[index];
+                      return _buildDynamicOfferCard(context, coupon, index);
+                    },
                   ),
-                ),
-              );
-            }
-
-            return ListView.builder(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              itemCount: controller.availableCoupons.length,
-              itemBuilder: (context, index) {
-                final coupon = controller.availableCoupons[index];
-                return _buildDynamicOfferCard(context, coupon, index);
-              },
-            );
-          }),
-        ),
-      ],
-    );
+          ),
+        ],
+      );
+    });
   }
 
   Widget _buildDynamicOfferCard(BuildContext context, CouponModel coupon, int index) {
