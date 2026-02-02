@@ -294,30 +294,26 @@ class MainView extends GetView<HomeController> {
   Widget _buildVehicleTypeSection(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
-          child: Text(
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
             'Choose Vehicle',
             style: AppTextStyles.h4.copyWith(
               color: theme.colorScheme.onSurface,
             ),
           ),
-        ),
-        SizedBox(
-          height: 120,
-          child: Obx(() {
+          const SizedBox(height: 12),
+          Obx(() {
             if (controller.isLoadingVehicles.value) {
               return const Center(child: CircularProgressIndicator());
             }
 
             if (controller.vehicleTypes.isEmpty) {
               // Show default vehicle types
-              return ListView(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 12),
+              return Column(
                 children: [
                   _VehicleTypeCard(
                     icon: Icons.two_wheeler,
@@ -351,12 +347,8 @@ class MainView extends GetView<HomeController> {
               );
             }
 
-            return ListView.builder(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              itemCount: controller.vehicleTypes.length,
-              itemBuilder: (context, index) {
-                final vehicle = controller.vehicleTypes[index];
+            return Column(
+              children: controller.vehicleTypes.map((vehicle) {
                 return _VehicleTypeCard(
                   icon: _getVehicleIcon(vehicle.name),
                   name: vehicle.name,
@@ -364,11 +356,11 @@ class MainView extends GetView<HomeController> {
                   price: vehicle.basePriceDisplay,
                   onTap: () => controller.goToCreateBookingWithVehicle(vehicle),
                 );
-              },
+              }).toList(),
             );
           }),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -589,38 +581,26 @@ class MainView extends GetView<HomeController> {
             ),
           ),
           const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: _QuickServiceCard(
-                  icon: Icons.flash_on,
-                  title: 'Express',
-                  subtitle: 'Same day',
-                  color: Colors.orange,
-                  onTap: controller.goToCreateBooking,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _QuickServiceCard(
-                  icon: Icons.schedule,
-                  title: 'Schedule',
-                  subtitle: 'Plan ahead',
-                  color: Colors.blue,
-                  onTap: controller.goToCreateBooking,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _QuickServiceCard(
-                  icon: Icons.repeat,
-                  title: 'Rebook',
-                  subtitle: 'Past orders',
-                  color: Colors.purple,
-                  onTap: controller.goToOrders,
-                ),
-              ),
-            ],
+          _QuickServiceCard(
+            icon: Icons.flash_on,
+            title: 'Express',
+            subtitle: 'Same day delivery',
+            color: Colors.orange,
+            onTap: controller.goToCreateBooking,
+          ),
+          _QuickServiceCard(
+            icon: Icons.schedule,
+            title: 'Schedule',
+            subtitle: 'Plan ahead for later',
+            color: Colors.blue,
+            onTap: controller.goToCreateBooking,
+          ),
+          _QuickServiceCard(
+            icon: Icons.repeat,
+            title: 'Rebook',
+            subtitle: 'Repeat past orders',
+            color: Colors.purple,
+            onTap: controller.goToOrders,
           ),
         ],
       ),
@@ -793,8 +773,7 @@ class _VehicleTypeCard extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Container(
-      width: 100,
-      margin: const EdgeInsets.symmetric(horizontal: 4),
+      margin: const EdgeInsets.only(bottom: 8),
       child: Material(
         color: theme.cardColor,
         borderRadius: BorderRadius.circular(12),
@@ -807,8 +786,7 @@ class _VehicleTypeCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: theme.dividerColor),
             ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+            child: Row(
               children: [
                 Container(
                   padding: const EdgeInsets.all(10),
@@ -822,25 +800,39 @@ class _VehicleTypeCard extends StatelessWidget {
                     size: 24,
                   ),
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  name,
-                  style: AppTextStyles.labelMedium.copyWith(
-                    color: theme.colorScheme.onSurface,
-                    fontWeight: FontWeight.w600,
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        name,
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: theme.colorScheme.onSurface,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      Text(
+                        description,
+                        style: AppTextStyles.caption.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
                   ),
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
                 Text(
-                  description,
-                  style: AppTextStyles.caption.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                    fontSize: 10,
+                  price,
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: theme.colorScheme.primary,
+                    fontWeight: FontWeight.bold,
                   ),
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
+                ),
+                const SizedBox(width: 8),
+                Icon(
+                  Icons.chevron_right,
+                  color: theme.colorScheme.onSurfaceVariant,
+                  size: 20,
                 ),
               ],
             ),
@@ -871,48 +863,62 @@ class _QuickServiceCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Material(
-      color: theme.cardColor,
-      borderRadius: BorderRadius.circular(12),
-      child: InkWell(
-        onTap: onTap,
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      child: Material(
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(12),
-        child: Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: theme.dividerColor),
-          ),
-          child: Column(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: theme.dividerColor),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(
+                    icon,
+                    color: color,
+                    size: 22,
+                  ),
                 ),
-                child: Icon(
-                  icon,
-                  color: color,
-                  size: 22,
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: theme.colorScheme.onSurface,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      Text(
+                        subtitle,
+                        style: AppTextStyles.caption.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                title,
-                style: AppTextStyles.labelMedium.copyWith(
-                  color: theme.colorScheme.onSurface,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              Text(
-                subtitle,
-                style: AppTextStyles.caption.copyWith(
+                Icon(
+                  Icons.chevron_right,
                   color: theme.colorScheme.onSurfaceVariant,
-                  fontSize: 10,
+                  size: 20,
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
