@@ -116,90 +116,8 @@ router.get(
   couponController.getCouponStats
 )
 
-/**
- * @swagger
- * /coupons/{id}:
- *   get:
- *     summary: Get coupon by ID
- *     tags: [Coupons]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Coupon details
- */
-router.get(
-  '/:id',
-  authenticate,
-  authorize('admin'),
-  couponController.getCoupon
-)
-
-/**
- * @swagger
- * /coupons/{id}:
- *   put:
- *     summary: Update a coupon
- *     tags: [Coupons]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *     responses:
- *       200:
- *         description: Coupon updated
- */
-router.put(
-  '/:id',
-  authenticate,
-  authorize('admin'),
-  validate(updateCouponSchema),
-  couponController.updateCoupon
-)
-
-/**
- * @swagger
- * /coupons/{id}:
- *   delete:
- *     summary: Delete a coupon
- *     tags: [Coupons]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Coupon deleted
- */
-router.delete(
-  '/:id',
-  authenticate,
-  authorize('admin'),
-  couponController.deleteCoupon
-)
-
 // ============================================
-// USER ROUTES
+// USER ROUTES (must be before /:id to avoid route conflicts)
 // ============================================
 
 /**
@@ -293,6 +211,92 @@ router.get(
   authenticate,
   authorize('user'),
   couponController.getCouponHistory
+)
+
+// ============================================
+// ADMIN ROUTES (parameterized routes must be last)
+// ============================================
+
+/**
+ * @swagger
+ * /coupons/{id}:
+ *   get:
+ *     summary: Get coupon by ID
+ *     tags: [Coupons]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Coupon details
+ */
+router.get(
+  '/:id',
+  authenticate,
+  authorize('admin'),
+  couponController.getCoupon
+)
+
+/**
+ * @swagger
+ * /coupons/{id}:
+ *   put:
+ *     summary: Update a coupon
+ *     tags: [Coupons]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       200:
+ *         description: Coupon updated
+ */
+router.put(
+  '/:id',
+  authenticate,
+  authorize('admin'),
+  validate(updateCouponSchema),
+  couponController.updateCoupon
+)
+
+/**
+ * @swagger
+ * /coupons/{id}:
+ *   delete:
+ *     summary: Delete a coupon
+ *     tags: [Coupons]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Coupon deleted
+ */
+router.delete(
+  '/:id',
+  authenticate,
+  authorize('admin'),
+  couponController.deleteCoupon
 )
 
 export default router

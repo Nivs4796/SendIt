@@ -335,13 +335,24 @@ export const getAvailableCoupons = async (
   const now = new Date()
 
   // Get all active coupons that haven't expired
+  // Handle both null startsAt (legacy) and valid startsAt dates
   const coupons = await prisma.coupon.findMany({
     where: {
       isActive: true,
-      startsAt: { lte: now },
-      OR: [
-        { expiresAt: null },
-        { expiresAt: { gt: now } },
+      AND: [
+        // startsAt: either null (legacy) or <= now
+        {
+          OR: [
+            { startsAt: { lte: now } },
+          ],
+        },
+        // expiresAt: either null (no expiry) or > now
+        {
+          OR: [
+            { expiresAt: null },
+            { expiresAt: { gt: now } },
+          ],
+        },
       ],
     },
     orderBy: { discountValue: 'desc' },
