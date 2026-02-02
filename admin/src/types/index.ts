@@ -232,3 +232,60 @@ export interface AuthState {
   isAuthenticated: boolean
   isLoading: boolean
 }
+
+// Coupon Types
+export type DiscountType = 'PERCENTAGE' | 'FIXED'
+
+export interface Coupon {
+  id: string
+  code: string
+  description?: string
+  discountType: DiscountType
+  discountValue: number
+  minOrderAmount?: number
+  maxDiscount?: number
+  usageLimit?: number
+  usageCount: number
+  perUserLimit: number
+  vehicleTypeIds: string[]
+  isActive: boolean
+  startsAt: string
+  expiresAt?: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface CouponStats {
+  totalCoupons: number
+  activeCoupons: number
+  totalRedemptions: number
+  totalDiscountGiven: number
+}
+
+export interface CreateCouponDto {
+  code: string
+  description?: string
+  discountType?: DiscountType
+  discountValue: number
+  minOrderAmount?: number
+  maxDiscount?: number
+  usageLimit?: number
+  perUserLimit?: number
+  vehicleTypeIds?: string[]
+  startsAt?: string
+  expiresAt?: string
+}
+
+export interface UpdateCouponDto {
+  description?: string
+  discountType?: DiscountType
+  discountValue?: number
+  minOrderAmount?: number
+  maxDiscount?: number
+  usageLimit?: number
+  perUserLimit?: number
+  vehicleTypeIds?: string[]
+  isActive?: boolean
+  startsAt?: string
+  expiresAt?: string
+}

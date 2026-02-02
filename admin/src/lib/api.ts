@@ -145,6 +145,16 @@ export const adminApi = {
   // Analytics
   getBookingAnalytics: (days?: number) => api.get('/admin/analytics/bookings', { days }),
   getRevenueAnalytics: (days?: number) => api.get('/admin/analytics/revenue', { days }),
+
+  // Coupons
+  listCoupons: (params?: { page?: number; limit?: number; active?: boolean; search?: string }) =>
+    api.get('/coupons', params),
+  getCoupon: (id: string) => api.get(`/coupons/${id}`),
+  createCoupon: (data: import('@/types').CreateCouponDto) => api.post('/coupons', data),
+  updateCoupon: (id: string, data: import('@/types').UpdateCouponDto) =>
+    api.put(`/coupons/${id}`, data),
+  deleteCoupon: (id: string) => api.delete(`/coupons/${id}`),
+  getCouponStats: () => api.get('/coupons/stats'),
 }
 
 // Auth API
