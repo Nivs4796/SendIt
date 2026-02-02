@@ -298,7 +298,7 @@ class _AppTextFieldState extends State<AppTextField> {
           child: ClipRRect(
             borderRadius: BorderRadius.circular((widget.borderRadius ?? AppTheme.radiusMedium) - 2),
             child: Container(
-              color: widget.fillColor ?? Theme.of(context).colorScheme.surface,
+              color: widget.fillColor ?? Theme.of(context).cardColor,
               child: TextField(
             controller: widget.controller,
             focusNode: _focusNode,
@@ -312,14 +312,14 @@ class _AppTextFieldState extends State<AppTextField> {
             textInputAction: widget.textInputAction,
             textCapitalization: widget.textCapitalization,
             inputFormatters: _getInputFormatters(),
-            style: AppTextStyles.bodyLarge,
+            style: AppTextStyles.bodyLarge.copyWith(color: Theme.of(context).colorScheme.onSurface),
             onChanged: widget.onChanged,
             onTap: widget.onTap,
             onEditingComplete: widget.onEditingComplete,
             onSubmitted: widget.onSubmitted,
             decoration: InputDecoration(
               hintText: widget.hint,
-              hintStyle: AppTextStyles.bodyLarge.copyWith(color: Theme.of(context).hintColor),
+              hintStyle: AppTextStyles.bodyLarge.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
               counterText: '',
               border: InputBorder.none,
               enabledBorder: InputBorder.none,
@@ -400,7 +400,7 @@ class _AppTextFieldState extends State<AppTextField> {
           child: ClipRRect(
             borderRadius: BorderRadius.circular((widget.borderRadius ?? AppTheme.radiusMedium) - 2),
             child: Container(
-              color: widget.fillColor ?? Theme.of(context).colorScheme.surface,
+              color: widget.fillColor ?? Theme.of(context).cardColor,
               child: Row(
                 children: [
                   // Country Code
@@ -444,6 +444,7 @@ class _AppTextFieldState extends State<AppTextField> {
                       style: AppTextStyles.bodyLarge.copyWith(
                         fontWeight: FontWeight.w500,
                         letterSpacing: 1.2,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                       onChanged: widget.onChanged,
                       onTap: widget.onTap,
@@ -451,7 +452,7 @@ class _AppTextFieldState extends State<AppTextField> {
                       onSubmitted: widget.onSubmitted,
                       decoration: InputDecoration(
                         hintText: widget.hint,
-                        hintStyle: AppTextStyles.bodyLarge.copyWith(color: Theme.of(context).hintColor),
+                        hintStyle: AppTextStyles.bodyLarge.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
                         counterText: '',
                         border: InputBorder.none,
                         enabledBorder: InputBorder.none,

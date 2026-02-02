@@ -50,6 +50,7 @@ class _AppDropdownState<T> extends State<AppDropdown<T>> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final bool hasError = widget.errorText != null && widget.errorText!.isNotEmpty;
 
 
@@ -61,7 +62,7 @@ class _AppDropdownState<T> extends State<AppDropdown<T>> {
           Text(
             widget.label!,
             style: AppTextStyles.labelMedium.copyWith(
-              color: hasError ? AppColors.error : AppColors.textPrimary,
+              color: hasError ? AppColors.error : theme.colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 8),
@@ -78,8 +79,8 @@ class _AppDropdownState<T> extends State<AppDropdown<T>> {
                 color: hasError
                     ? AppColors.error
                     : _isFocused
-                        ? (widget.focusedBorderColor ?? AppColors.primary)
-                        : (widget.borderColor ?? AppColors.grey300),
+                        ? (widget.focusedBorderColor ?? theme.colorScheme.primary)
+                        : (widget.borderColor ?? theme.dividerColor),
                 width: _isFocused || hasError ? 2.0 : 1.5,
               ),
             ),
@@ -87,8 +88,8 @@ class _AppDropdownState<T> extends State<AppDropdown<T>> {
               borderRadius: BorderRadius.circular((widget.borderRadius ?? AppTheme.radiusMedium) - 2),
               child: Container(
                 color: widget.enabled
-                    ? (widget.fillColor ?? AppColors.white)
-                    : AppColors.grey100,
+                    ? (widget.fillColor ?? theme.cardColor)
+                    : theme.colorScheme.surfaceContainerHighest,
                 child: DropdownButtonHideUnderline(
               child: ButtonTheme(
                 alignedDropdown: true,
@@ -96,17 +97,17 @@ class _AppDropdownState<T> extends State<AppDropdown<T>> {
                   value: widget.value,
                   hint: Text(
                     widget.hint ?? '',
-                    style: AppTextStyles.bodyLarge.copyWith(color: AppColors.textHint),
+                    style: AppTextStyles.bodyLarge.copyWith(color: theme.colorScheme.onSurfaceVariant),
                   ),
                   icon: Icon(
                     Icons.arrow_drop_down_rounded,
-                    color: widget.enabled ? AppColors.textSecondary : AppColors.grey400,
+                    color: widget.enabled ? theme.colorScheme.onSurfaceVariant : theme.colorScheme.outline,
                     size: 24,
                   ),
                   isExpanded: true,
                   isDense: false,
-                  style: AppTextStyles.bodyLarge,
-                  dropdownColor: AppColors.white,
+                  style: AppTextStyles.bodyLarge.copyWith(color: theme.colorScheme.onSurface),
+                  dropdownColor: theme.cardColor,
                   borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
                   padding: EdgeInsets.only(
                     left: widget.prefixIcon != null ? 8 : 20,
@@ -131,14 +132,14 @@ class _AppDropdownState<T> extends State<AppDropdown<T>> {
                                 Text(
                                   widget.itemLabelBuilder?.call(item.value) ?? item.label,
                                   style: AppTextStyles.bodyLarge.copyWith(
-                                    color: item.enabled ? AppColors.textPrimary : AppColors.grey400,
+                                    color: item.enabled ? theme.colorScheme.onSurface : theme.colorScheme.outline,
                                   ),
                                 ),
                                 if (item.subtitle != null)
                                   Text(
                                     item.subtitle!,
                                     style: AppTextStyles.caption.copyWith(
-                                      color: AppColors.textSecondary,
+                                      color: theme.colorScheme.onSurfaceVariant,
                                     ),
                                   ),
                               ],
@@ -158,7 +159,7 @@ class _AppDropdownState<T> extends State<AppDropdown<T>> {
                                 Expanded(
                                   child: Text(
                                     widget.itemLabelBuilder?.call(item.value) ?? item.label,
-                                    style: AppTextStyles.bodyLarge,
+                                    style: AppTextStyles.bodyLarge.copyWith(color: theme.colorScheme.onSurface),
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
@@ -192,7 +193,7 @@ class _AppDropdownState<T> extends State<AppDropdown<T>> {
           const SizedBox(height: 6),
           Text(
             widget.helperText!,
-            style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
+            style: AppTextStyles.caption.copyWith(color: theme.colorScheme.onSurfaceVariant),
           ),
         ],
       ],

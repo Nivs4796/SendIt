@@ -94,6 +94,7 @@ class AppOtpField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final bool hasError = errorText != null && errorText!.isNotEmpty;
     final double width = pinWidth ?? 56;
     final double height = pinHeight ?? 60;
@@ -103,12 +104,12 @@ class AppOtpField extends StatelessWidget {
     final defaultPinTheme = PinTheme(
       width: width,
       height: height,
-      textStyle: AppTextStyles.h3.copyWith(color: AppColors.textPrimary),
+      textStyle: AppTextStyles.h3.copyWith(color: theme.colorScheme.onSurface),
       decoration: BoxDecoration(
-        color: fillColor ?? AppColors.white,
+        color: fillColor ?? theme.cardColor,
         borderRadius: BorderRadius.circular(radius),
         border: Border.all(
-          color: borderColor ?? AppColors.grey300,
+          color: borderColor ?? theme.dividerColor,
           width: 1.5,
         ),
       ),
@@ -117,15 +118,15 @@ class AppOtpField extends StatelessWidget {
     // Focused pin theme
     final focusedPinTheme = defaultPinTheme.copyWith(
       decoration: BoxDecoration(
-        color: fillColor ?? AppColors.white,
+        color: fillColor ?? theme.cardColor,
         borderRadius: BorderRadius.circular(radius),
         border: Border.all(
-          color: focusedBorderColor ?? AppColors.primary,
+          color: focusedBorderColor ?? theme.colorScheme.primary,
           width: 2,
         ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.15),
+            color: theme.colorScheme.primary.withValues(alpha: 0.15),
             blurRadius: 8,
             spreadRadius: 2,
           ),
@@ -136,10 +137,10 @@ class AppOtpField extends StatelessWidget {
     // Submitted pin theme
     final submittedPinTheme = defaultPinTheme.copyWith(
       decoration: BoxDecoration(
-        color: AppColors.primaryContainer,
+        color: theme.colorScheme.primaryContainer,
         borderRadius: BorderRadius.circular(radius),
         border: Border.all(
-          color: AppColors.primary,
+          color: theme.colorScheme.primary,
           width: 1.5,
         ),
       ),

@@ -93,6 +93,7 @@ class _AppDatePickerState extends State<AppDatePicker> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final bool hasError = widget.errorText != null && widget.errorText!.isNotEmpty;
     final String displayText = widget.value != null
         ? DateFormat(widget.dateFormat).format(widget.value!)
@@ -106,7 +107,7 @@ class _AppDatePickerState extends State<AppDatePicker> {
           Text(
             widget.label!,
             style: AppTextStyles.labelMedium.copyWith(
-              color: hasError ? AppColors.error : AppColors.textPrimary,
+              color: hasError ? AppColors.error : theme.colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 8),
@@ -120,21 +121,21 @@ class _AppDatePickerState extends State<AppDatePicker> {
             height: 56,
             decoration: BoxDecoration(
               color: widget.enabled
-                  ? (widget.fillColor ?? AppColors.white)
-                  : AppColors.grey100,
+                  ? (widget.fillColor ?? theme.cardColor)
+                  : theme.colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(widget.borderRadius ?? AppTheme.radiusMedium),
               border: Border.all(
                 color: hasError
                     ? AppColors.error
                     : _isFocused
-                        ? (widget.focusedBorderColor ?? AppColors.primary)
-                        : (widget.borderColor ?? AppColors.grey300),
+                        ? (widget.focusedBorderColor ?? theme.colorScheme.primary)
+                        : (widget.borderColor ?? theme.dividerColor),
                 width: _isFocused || hasError ? 2.0 : 1.5,
               ),
               boxShadow: _isFocused
                   ? [
                       BoxShadow(
-                        color: (hasError ? AppColors.error : AppColors.primary).withValues(alpha: 0.1),
+                        color: (hasError ? AppColors.error : theme.colorScheme.primary).withValues(alpha: 0.1),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
@@ -153,7 +154,7 @@ class _AppDatePickerState extends State<AppDatePicker> {
                     padding: const EdgeInsets.only(left: 16),
                     child: Icon(
                       Icons.calendar_today_rounded,
-                      color: widget.enabled ? AppColors.textSecondary : AppColors.grey400,
+                      color: widget.enabled ? theme.colorScheme.onSurfaceVariant : theme.colorScheme.outline,
                       size: 20,
                     ),
                   ),
@@ -162,8 +163,8 @@ class _AppDatePickerState extends State<AppDatePicker> {
                   child: Text(
                     displayText.isNotEmpty ? displayText : (widget.hint ?? ''),
                     style: displayText.isNotEmpty
-                        ? AppTextStyles.bodyLarge
-                        : AppTextStyles.bodyLarge.copyWith(color: AppColors.textHint),
+                        ? AppTextStyles.bodyLarge.copyWith(color: theme.colorScheme.onSurface)
+                        : AppTextStyles.bodyLarge.copyWith(color: theme.colorScheme.onSurfaceVariant),
                   ),
                 ),
                 if (widget.suffixIcon != null)
@@ -176,7 +177,7 @@ class _AppDatePickerState extends State<AppDatePicker> {
                     padding: const EdgeInsets.only(right: 16),
                     child: Icon(
                       Icons.arrow_drop_down_rounded,
-                      color: widget.enabled ? AppColors.textSecondary : AppColors.grey400,
+                      color: widget.enabled ? theme.colorScheme.onSurfaceVariant : theme.colorScheme.outline,
                       size: 24,
                     ),
                   ),
@@ -202,7 +203,7 @@ class _AppDatePickerState extends State<AppDatePicker> {
           const SizedBox(height: 6),
           Text(
             widget.helperText!,
-            style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
+            style: AppTextStyles.caption.copyWith(color: theme.colorScheme.onSurfaceVariant),
           ),
         ],
       ],
@@ -210,6 +211,7 @@ class _AppDatePickerState extends State<AppDatePicker> {
   }
 
   Future<void> _showDatePicker() async {
+    final theme = Theme.of(context);
     final DateTime now = DateTime.now();
     final DateTime firstDate = widget.firstDate ?? DateTime(1900);
     final DateTime lastDate = widget.lastDate ?? DateTime(2100);
@@ -221,15 +223,15 @@ class _AppDatePickerState extends State<AppDatePicker> {
       lastDate: lastDate,
       builder: (context, child) {
         return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: AppColors.primary,
-              onPrimary: AppColors.white,
-              surface: AppColors.white,
-              onSurface: AppColors.textPrimary,
+          data: theme.copyWith(
+            colorScheme: theme.colorScheme.copyWith(
+              primary: theme.colorScheme.primary,
+              onPrimary: theme.colorScheme.onPrimary,
+              surface: theme.colorScheme.surface,
+              onSurface: theme.colorScheme.onSurface,
             ),
-            dialogTheme: const DialogThemeData(
-              backgroundColor: AppColors.white,
+            dialogTheme: DialogThemeData(
+              backgroundColor: theme.colorScheme.surface,
             ),
           ),
           child: child!,

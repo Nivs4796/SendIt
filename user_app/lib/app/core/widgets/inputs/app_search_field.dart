@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../theme/app_colors.dart';
 import '../../theme/app_text_styles.dart';
 import '../../theme/app_theme.dart';
 
@@ -97,6 +96,7 @@ class _AppSearchFieldState extends State<AppSearchField> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final radius = widget.borderRadius ?? AppTheme.radiusMedium;
 
     return Container(
@@ -106,14 +106,14 @@ class _AppSearchFieldState extends State<AppSearchField> {
         borderRadius: BorderRadius.circular(radius),
         border: Border.all(
           color: _isFocused
-              ? (widget.focusedBorderColor ?? AppColors.primary)
-              : (widget.borderColor ?? AppColors.grey300),
+              ? (widget.focusedBorderColor ?? theme.colorScheme.primary)
+              : (widget.borderColor ?? theme.dividerColor),
           width: _isFocused ? 2.0 : 1.5,
         ),
         boxShadow: _isFocused
             ? [
                 BoxShadow(
-                  color: AppColors.primary.withValues(alpha: 0.1),
+                  color: theme.colorScheme.primary.withValues(alpha: 0.1),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -123,7 +123,7 @@ class _AppSearchFieldState extends State<AppSearchField> {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(radius - 2),
         child: Container(
-          color: widget.fillColor ?? AppColors.white,
+          color: widget.fillColor ?? theme.cardColor,
           child: Row(
             children: [
               Padding(
@@ -131,8 +131,8 @@ class _AppSearchFieldState extends State<AppSearchField> {
                 child: Icon(
                   Icons.search_rounded,
                   color: _isFocused
-                      ? (widget.iconColor ?? AppColors.primary)
-                      : AppColors.textSecondary,
+                      ? (widget.iconColor ?? theme.colorScheme.primary)
+                      : theme.colorScheme.onSurfaceVariant,
                   size: 22,
                 ),
               ),
@@ -143,12 +143,12 @@ class _AppSearchFieldState extends State<AppSearchField> {
                   enabled: widget.enabled,
                   autofocus: widget.autofocus,
                   textInputAction: TextInputAction.search,
-                  style: AppTextStyles.bodyLarge,
+                  style: AppTextStyles.bodyLarge.copyWith(color: theme.colorScheme.onSurface),
                   onChanged: widget.onChanged,
                   onSubmitted: widget.onSubmitted,
                   decoration: InputDecoration(
                     hintText: widget.hint,
-                    hintStyle: AppTextStyles.bodyLarge.copyWith(color: AppColors.textHint),
+                    hintStyle: AppTextStyles.bodyLarge.copyWith(color: theme.colorScheme.onSurfaceVariant),
                     border: InputBorder.none,
                     enabledBorder: InputBorder.none,
                     focusedBorder: InputBorder.none,
@@ -162,7 +162,7 @@ class _AppSearchFieldState extends State<AppSearchField> {
                   padding: const EdgeInsets.only(right: 8),
                   child: IconButton(
                     icon: const Icon(Icons.close_rounded, size: 20),
-                    color: AppColors.textSecondary,
+                    color: theme.colorScheme.onSurfaceVariant,
                     onPressed: _onClear,
                     splashRadius: 20,
                   ),

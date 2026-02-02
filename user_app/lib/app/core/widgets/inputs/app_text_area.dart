@@ -151,6 +151,7 @@ class _AppTextAreaState extends State<AppTextArea> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final bool hasError = widget.errorText != null && widget.errorText!.isNotEmpty;
 
     return Column(
@@ -164,7 +165,7 @@ class _AppTextAreaState extends State<AppTextArea> {
               Text(
                 widget.label!,
                 style: AppTextStyles.labelMedium.copyWith(
-                  color: hasError ? AppColors.error : AppColors.textPrimary,
+                  color: hasError ? AppColors.error : theme.colorScheme.onSurface,
                 ),
               ),
               if (widget.showCharacterCount && widget.maxLength != null)
@@ -173,7 +174,7 @@ class _AppTextAreaState extends State<AppTextArea> {
                   style: AppTextStyles.caption.copyWith(
                     color: _characterCount > (widget.maxLength ?? 0)
                         ? AppColors.error
-                        : AppColors.textSecondary,
+                        : theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
             ],
@@ -188,14 +189,14 @@ class _AppTextAreaState extends State<AppTextArea> {
               color: hasError
                   ? AppColors.error
                   : _isFocused
-                      ? (widget.focusedBorderColor ?? AppColors.primary)
-                      : (widget.borderColor ?? AppColors.grey300),
+                      ? (widget.focusedBorderColor ?? theme.colorScheme.primary)
+                      : (widget.borderColor ?? theme.dividerColor),
               width: _isFocused || hasError ? 2.0 : 1.5,
             ),
             boxShadow: _isFocused
                 ? [
                     BoxShadow(
-                      color: (hasError ? AppColors.error : AppColors.primary).withValues(alpha: 0.1),
+                      color: (hasError ? AppColors.error : theme.colorScheme.primary).withValues(alpha: 0.1),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -205,7 +206,7 @@ class _AppTextAreaState extends State<AppTextArea> {
           child: ClipRRect(
             borderRadius: BorderRadius.circular((widget.borderRadius ?? AppTheme.radiusMedium) - 2),
             child: Container(
-              color: widget.fillColor ?? AppColors.white,
+              color: widget.fillColor ?? theme.cardColor,
               child: TextField(
                 controller: widget.controller,
                 focusNode: _focusNode,
@@ -218,12 +219,12 @@ class _AppTextAreaState extends State<AppTextArea> {
                 keyboardType: TextInputType.multiline,
                 textInputAction: widget.textInputAction ?? TextInputAction.newline,
                 textCapitalization: widget.textCapitalization,
-                style: AppTextStyles.bodyLarge,
+                style: AppTextStyles.bodyLarge.copyWith(color: theme.colorScheme.onSurface),
                 onChanged: _onChanged,
                 onTap: widget.onTap,
                 decoration: InputDecoration(
                   hintText: widget.hint,
-                  hintStyle: AppTextStyles.bodyLarge.copyWith(color: AppColors.textHint),
+                  hintStyle: AppTextStyles.bodyLarge.copyWith(color: theme.colorScheme.onSurfaceVariant),
                   counterText: '',
                   border: InputBorder.none,
                   enabledBorder: InputBorder.none,
@@ -252,7 +253,7 @@ class _AppTextAreaState extends State<AppTextArea> {
           const SizedBox(height: 6),
           Text(
             widget.helperText!,
-            style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
+            style: AppTextStyles.caption.copyWith(color: theme.colorScheme.onSurfaceVariant),
           ),
         ],
       ],

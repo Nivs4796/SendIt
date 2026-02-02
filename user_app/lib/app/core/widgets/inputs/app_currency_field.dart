@@ -146,6 +146,7 @@ class _AppCurrencyFieldState extends State<AppCurrencyField> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final bool hasError = widget.errorText != null && widget.errorText!.isNotEmpty;
 
     return Column(
@@ -156,7 +157,7 @@ class _AppCurrencyFieldState extends State<AppCurrencyField> {
           Text(
             widget.label!,
             style: AppTextStyles.labelMedium.copyWith(
-              color: hasError ? AppColors.error : AppColors.textPrimary,
+              color: hasError ? AppColors.error : theme.colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 8),
@@ -169,14 +170,14 @@ class _AppCurrencyFieldState extends State<AppCurrencyField> {
               color: hasError
                   ? AppColors.error
                   : _isFocused
-                      ? (widget.focusedBorderColor ?? AppColors.primary)
-                      : (widget.borderColor ?? AppColors.grey300),
+                      ? (widget.focusedBorderColor ?? theme.colorScheme.primary)
+                      : (widget.borderColor ?? theme.dividerColor),
               width: _isFocused || hasError ? 2.0 : 1.5,
             ),
             boxShadow: _isFocused
                 ? [
                     BoxShadow(
-                      color: (hasError ? AppColors.error : AppColors.primary).withValues(alpha: 0.1),
+                      color: (hasError ? AppColors.error : theme.colorScheme.primary).withValues(alpha: 0.1),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -186,21 +187,21 @@ class _AppCurrencyFieldState extends State<AppCurrencyField> {
           child: ClipRRect(
             borderRadius: BorderRadius.circular((widget.borderRadius ?? AppTheme.radiusMedium) - 2),
             child: Container(
-              color: widget.fillColor ?? AppColors.white,
+              color: widget.fillColor ?? theme.cardColor,
               child: Row(
                 children: [
                   // Currency Symbol
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       border: Border(
-                        right: BorderSide(color: AppColors.grey300, width: 1),
+                        right: BorderSide(color: theme.dividerColor, width: 1),
                       ),
                     ),
                     child: Text(
                       widget.currencySymbol,
                       style: AppTextStyles.h4.copyWith(
-                        color: AppColors.textSecondary,
+                        color: theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ),
@@ -227,6 +228,7 @@ class _AppCurrencyFieldState extends State<AppCurrencyField> {
                       ],
                       style: AppTextStyles.h4.copyWith(
                         fontWeight: FontWeight.w600,
+                        color: theme.colorScheme.onSurface,
                       ),
                       textAlign: TextAlign.left,
                       onChanged: _onChanged,
@@ -235,7 +237,7 @@ class _AppCurrencyFieldState extends State<AppCurrencyField> {
                       decoration: InputDecoration(
                         hintText: widget.hint,
                         hintStyle: AppTextStyles.h4.copyWith(
-                          color: AppColors.textHint,
+                          color: theme.colorScheme.onSurfaceVariant,
                           fontWeight: FontWeight.w400,
                         ),
                         border: InputBorder.none,
@@ -268,7 +270,7 @@ class _AppCurrencyFieldState extends State<AppCurrencyField> {
           const SizedBox(height: 6),
           Text(
             widget.helperText!,
-            style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
+            style: AppTextStyles.caption.copyWith(color: theme.colorScheme.onSurfaceVariant),
           ),
         ],
       ],
