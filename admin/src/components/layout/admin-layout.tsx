@@ -23,6 +23,7 @@ import {
   X,
   Wifi,
   WifiOff,
+  Ticket,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -35,6 +36,7 @@ const navItems = [
   { href: '/users', label: 'Users', icon: Users },
   { href: '/pilots', label: 'Pilots', icon: UserCog },
   { href: '/bookings', label: 'Bookings', icon: CalendarCheck },
+  { href: '/coupons', label: 'Coupons', icon: Ticket },
   { href: '/vehicles', label: 'Vehicles', icon: Car },
   { href: '/wallet', label: 'Wallet', icon: Wallet },
   { href: '/analytics', label: 'Analytics', icon: BarChart3 },
