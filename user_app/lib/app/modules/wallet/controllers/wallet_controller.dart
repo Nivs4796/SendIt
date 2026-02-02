@@ -64,14 +64,43 @@ class WalletController extends GetxController {
       if (response.success && response.data != null) {
         balance.value = response.data!;
       } else {
-        errorMessage.value = response.message ?? 'Failed to fetch balance';
+        final message = response.message ?? 'Failed to fetch balance';
+        errorMessage.value = message;
+        Get.snackbar(
+          'Error',
+          message,
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
       }
     } on ApiException catch (e) {
       errorMessage.value = e.message;
+      Get.snackbar(
+        'Error',
+        e.message,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     } on NetworkException {
       errorMessage.value = 'No internet connection';
+      Get.snackbar(
+        'Error',
+        'No internet connection',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     } catch (e) {
       errorMessage.value = 'Something went wrong';
+      Get.snackbar(
+        'Error',
+        'Something went wrong',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     }
   }
 
@@ -128,15 +157,43 @@ class WalletController extends GetxController {
           }
         }
       } else {
-        errorMessage.value =
-            response.message ?? 'Failed to fetch transactions';
+        final message = response.message ?? 'Failed to fetch transactions';
+        errorMessage.value = message;
+        Get.snackbar(
+          'Error',
+          message,
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
       }
     } on ApiException catch (e) {
       errorMessage.value = e.message;
+      Get.snackbar(
+        'Error',
+        e.message,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     } on NetworkException {
       errorMessage.value = 'No internet connection';
+      Get.snackbar(
+        'Error',
+        'No internet connection',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     } catch (e) {
       errorMessage.value = 'Something went wrong';
+      Get.snackbar(
+        'Error',
+        'Something went wrong',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     } finally {
       isLoading.value = false;
       isLoadingMore.value = false;
@@ -209,14 +266,43 @@ class WalletController extends GetxController {
         // Refresh transactions to show the new one
         fetchTransactions(refresh: true);
       } else {
-        errorMessage.value = response.message ?? 'Failed to add money';
+        final message = response.message ?? 'Failed to add money';
+        errorMessage.value = message;
+        Get.snackbar(
+          'Error',
+          message,
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
       }
     } on ApiException catch (e) {
       errorMessage.value = e.message;
+      Get.snackbar(
+        'Error',
+        e.message,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     } on NetworkException {
       errorMessage.value = 'No internet connection';
+      Get.snackbar(
+        'Error',
+        'No internet connection',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     } catch (e) {
       errorMessage.value = 'Something went wrong';
+      Get.snackbar(
+        'Error',
+        'Something went wrong',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     } finally {
       isAddingMoney.value = false;
     }

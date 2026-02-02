@@ -75,14 +75,43 @@ class ProfileController extends GetxController {
         _storage.user = response.data!.toJson();
         _populateTextControllers();
       } else {
-        errorMessage.value = response.message ?? 'Failed to fetch profile';
+        final message = response.message ?? 'Failed to fetch profile';
+        errorMessage.value = message;
+        Get.snackbar(
+          'Error',
+          message,
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
       }
     } on ApiException catch (e) {
       errorMessage.value = e.message;
+      Get.snackbar(
+        'Error',
+        e.message,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     } on NetworkException {
       errorMessage.value = 'No internet connection';
+      Get.snackbar(
+        'Error',
+        'No internet connection',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     } catch (e) {
       errorMessage.value = 'Something went wrong';
+      Get.snackbar(
+        'Error',
+        'Something went wrong',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     } finally {
       isLoading.value = false;
     }
@@ -256,14 +285,43 @@ class ProfileController extends GetxController {
 
         Get.back();
       } else {
-        errorMessage.value = response.message ?? 'Failed to update profile';
+        final message = response.message ?? 'Failed to update profile';
+        errorMessage.value = message;
+        Get.snackbar(
+          'Error',
+          message,
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
       }
     } on ApiException catch (e) {
       errorMessage.value = e.message;
+      Get.snackbar(
+        'Error',
+        e.message,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     } on NetworkException {
       errorMessage.value = 'No internet connection';
+      Get.snackbar(
+        'Error',
+        'No internet connection',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     } catch (e) {
       errorMessage.value = 'Something went wrong';
+      Get.snackbar(
+        'Error',
+        'Something went wrong',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     } finally {
       isUpdating.value = false;
     }
@@ -313,14 +371,43 @@ class ProfileController extends GetxController {
 
         Get.offAllNamed(Routes.login);
       } else {
-        errorMessage.value = response.message ?? 'Failed to delete account';
+        final message = response.message ?? 'Failed to delete account';
+        errorMessage.value = message;
+        Get.snackbar(
+          'Error',
+          message,
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
       }
     } on ApiException catch (e) {
       errorMessage.value = e.message;
+      Get.snackbar(
+        'Error',
+        e.message,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     } on NetworkException {
       errorMessage.value = 'No internet connection';
+      Get.snackbar(
+        'Error',
+        'No internet connection',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     } catch (e) {
       errorMessage.value = 'Something went wrong';
+      Get.snackbar(
+        'Error',
+        'Something went wrong',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     } finally {
       isLoading.value = false;
     }

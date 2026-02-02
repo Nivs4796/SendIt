@@ -82,14 +82,43 @@ class AddressController extends GetxController {
       if (response.success && response.data != null) {
         addresses.value = response.data!;
       } else {
-        errorMessage.value = response.message ?? 'Failed to fetch addresses';
+        final message = response.message ?? 'Failed to fetch addresses';
+        errorMessage.value = message;
+        Get.snackbar(
+          'Error',
+          message,
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
       }
     } on ApiException catch (e) {
       errorMessage.value = e.message;
+      Get.snackbar(
+        'Error',
+        e.message,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     } on NetworkException {
       errorMessage.value = 'No internet connection';
+      Get.snackbar(
+        'Error',
+        'No internet connection',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     } catch (e) {
       errorMessage.value = 'Something went wrong';
+      Get.snackbar(
+        'Error',
+        'Something went wrong',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     } finally {
       isLoading.value = false;
     }
@@ -193,6 +222,7 @@ class AddressController extends GetxController {
         );
 
         if (response.success) {
+          Get.back();
           Get.snackbar(
             'Success',
             'Address updated successfully',
@@ -202,9 +232,16 @@ class AddressController extends GetxController {
           );
           clearForm();
           await fetchAddresses();
-          Get.back();
         } else {
-          errorMessage.value = response.message ?? 'Failed to update address';
+          final message = response.message ?? 'Failed to update address';
+          errorMessage.value = message;
+          Get.snackbar(
+            'Error',
+            message,
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+          );
         }
       } else {
         // Create new address
@@ -221,6 +258,7 @@ class AddressController extends GetxController {
         );
 
         if (response.success) {
+          Get.back();
           Get.snackbar(
             'Success',
             'Address saved successfully',
@@ -230,17 +268,45 @@ class AddressController extends GetxController {
           );
           clearForm();
           await fetchAddresses();
-          Get.back();
         } else {
-          errorMessage.value = response.message ?? 'Failed to save address';
+          final message = response.message ?? 'Failed to save address';
+          errorMessage.value = message;
+          Get.snackbar(
+            'Error',
+            message,
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+          );
         }
       }
     } on ApiException catch (e) {
       errorMessage.value = e.message;
+      Get.snackbar(
+        'Error',
+        e.message,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     } on NetworkException {
       errorMessage.value = 'No internet connection';
+      Get.snackbar(
+        'Error',
+        'No internet connection',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     } catch (e) {
       errorMessage.value = 'Something went wrong';
+      Get.snackbar(
+        'Error',
+        'Something went wrong',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     } finally {
       isSaving.value = false;
     }
@@ -287,14 +353,43 @@ class AddressController extends GetxController {
           colorText: Colors.white,
         );
       } else {
-        errorMessage.value = response.message ?? 'Failed to delete address';
+        final message = response.message ?? 'Failed to delete address';
+        errorMessage.value = message;
+        Get.snackbar(
+          'Error',
+          message,
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
       }
     } on ApiException catch (e) {
       errorMessage.value = e.message;
+      Get.snackbar(
+        'Error',
+        e.message,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     } on NetworkException {
       errorMessage.value = 'No internet connection';
+      Get.snackbar(
+        'Error',
+        'No internet connection',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     } catch (e) {
       errorMessage.value = 'Something went wrong';
+      Get.snackbar(
+        'Error',
+        'Something went wrong',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     } finally {
       isLoading.value = false;
     }
@@ -324,14 +419,43 @@ class AddressController extends GetxController {
           colorText: Colors.white,
         );
       } else {
-        errorMessage.value = response.message ?? 'Failed to set default address';
+        final message = response.message ?? 'Failed to set default address';
+        errorMessage.value = message;
+        Get.snackbar(
+          'Error',
+          message,
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
       }
     } on ApiException catch (e) {
       errorMessage.value = e.message;
+      Get.snackbar(
+        'Error',
+        e.message,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     } on NetworkException {
       errorMessage.value = 'No internet connection';
+      Get.snackbar(
+        'Error',
+        'No internet connection',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     } catch (e) {
       errorMessage.value = 'Something went wrong';
+      Get.snackbar(
+        'Error',
+        'Something went wrong',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     } finally {
       isLoading.value = false;
     }

@@ -23,6 +23,9 @@ class EditProfileView extends GetView<ProfileController> {
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
+            // Error Message
+            _buildErrorMessage(),
+
             // Avatar Section
             _buildAvatarSection(),
 
@@ -39,6 +42,50 @@ class EditProfileView extends GetView<ProfileController> {
         ),
       ),
     );
+  }
+
+  Widget _buildErrorMessage() {
+    return Obx(() {
+      if (controller.errorMessage.value.isEmpty) {
+        return const SizedBox.shrink();
+      }
+      return Container(
+        width: double.infinity,
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: const Color(0xFFFEE2E2),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
+        ),
+        child: Row(
+          children: [
+            const Icon(
+              Icons.error_outline_rounded,
+              color: Colors.red,
+              size: 20,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                controller.errorMessage.value,
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: Colors.red,
+                ),
+              ),
+            ),
+            GestureDetector(
+              onTap: controller.clearError,
+              child: const Icon(
+                Icons.close_rounded,
+                color: Colors.red,
+                size: 18,
+              ),
+            ),
+          ],
+        ),
+      );
+    });
   }
 
   Widget _buildAvatarSection() {
