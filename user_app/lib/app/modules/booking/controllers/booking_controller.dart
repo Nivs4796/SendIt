@@ -104,6 +104,13 @@ class BookingController extends GetxController {
   /// The current booking being created/tracked
   final Rx<BookingModel?> currentBooking = Rx<BookingModel?>(null);
 
+  // Step Tracking State (for unified booking flow)
+  /// Current step in the booking flow (0: Locations, 1: Package, 2: Vehicle)
+  final RxInt currentStep = 0.obs;
+
+  /// Whether each step is expanded in the UI
+  final RxList<bool> expandedSteps = <bool>[true, false, false].obs;
+
   // Saved Address State (for API calls with address IDs)
   /// Selected pickup address (saved address with ID for API)
   final Rx<AddressModel?> selectedPickupAddress = Rx<AddressModel?>(null);
@@ -584,6 +591,9 @@ class BookingController extends GetxController {
     currentBooking.value = null;
     bookingState.value = BookingState.idle;
     errorMessage.value = '';
+
+    // Reset step tracking
+    resetSteps();
   }
 
   // ============================================
@@ -666,5 +676,122 @@ class BookingController extends GetxController {
   /// Refreshes wallet balance.
   Future<void> refreshWalletBalance() async {
     await _checkWalletBalance();
+  }
+
+  // ============================================
+  // Step Navigation Methods (Unified Booking Flow)
+  // ============================================
+
+  /// Moves to a specific step if allowed.
+  void goToStep(int step) {
+    if (step < 0 || step > 2) return;
+
+    // Can always go back to previous steps
+    if (step < currentStep.value) {
+      _collapseAllExcept(step);
+      currentStep.value = step;
+      return;
+    }
+
+    // Validate before moving forward
+    if (step == 1 && !canProceedToStep1) return;
+    if (step == 2 && !canProceedToStep2) return;
+
+    _collapseAllExcept(step);
+    currentStep.value = step;
+  }
+
+  /// Advances to the next step if validation passes.
+  void nextStep() {
+    if (currentStep.value == 0 && canProceedToStep1) {
+      goToStep(1);
+    } else if (currentStep.value == 1) {
+      // Package step is optional, always allow proceeding
+      goToStep(2);
+      // Auto-select first vehicle if none selected and trigger price calculation
+      if (selectedVehicle.value == null && vehicleTypes.isNotEmpty) {
+        selectVehicle(vehicleTypes.first);
+      }
+    }
+  }
+
+  /// Goes back to the previous step.
+  void previousStep() {
+    if (currentStep.value > 0) {
+      goToStep(currentStep.value - 1);
+    }
+  }
+
+  /// Toggles expansion of a step.
+  void toggleStepExpansion(int step) {
+    // Only allow toggling completed or current steps
+    if (step <= currentStep.value) {
+      expandedSteps[step] = !expandedSteps[step];
+    }
+  }
+
+  /// Collapses all steps except the specified one.
+  void _collapseAllExcept(int step) {
+    for (int i = 0; i < expandedSteps.length; i++) {
+      expandedSteps[i] = (i == step);
+    }
+  }
+
+  /// Returns true if user can proceed to step 1 (Package Details).
+  bool get canProceedToStep1 =>
+      selectedPickupAddress.value != null &&
+      selectedDropAddress.value != null;
+
+  /// Returns true if user can proceed to step 2 (Vehicle Selection).
+  bool get canProceedToStep2 => canProceedToStep1;
+
+  /// Returns true if booking can be created.
+  bool get canCreateBooking => canProceedToPayment;
+
+  /// Gets the appropriate button text based on current step.
+  String getButtonText() {
+    switch (currentStep.value) {
+      case 0:
+        return 'Continue';
+      case 1:
+        return 'Select Vehicle';
+      case 2:
+        if (priceCalculation.value != null) {
+          return 'Book Now • ${priceCalculation.value!.totalDisplay}';
+        }
+        return 'Select a Vehicle';
+      default:
+        return 'Continue';
+    }
+  }
+
+  /// Returns true if the bottom button should be enabled.
+  bool get isButtonEnabled {
+    switch (currentStep.value) {
+      case 0:
+        return canProceedToStep1;
+      case 1:
+        return true; // Package details are optional
+      case 2:
+        return canCreateBooking;
+      default:
+        return false;
+    }
+  }
+
+  /// Handles the main action button press.
+  void onActionButtonPressed() {
+    if (currentStep.value < 2) {
+      nextStep();
+    } else if (canCreateBooking) {
+      // Navigate to payment screen
+      Get.toNamed(Routes.payment);
+    }
+  }
+
+  /// Resets the step tracking state.
+  void resetSteps() {
+    currentStep.value = 0;
+    expandedSteps.value = [true, false, false];
   }
 }
