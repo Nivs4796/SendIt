@@ -47,7 +47,7 @@ class AuthController extends GetxController {
 
   // Check auth state and navigate accordingly
   Future<void> checkAuthState() async {
-    await Future.delayed(const Duration(seconds: 2)); // Splash delay
+    await Future.delayed(const Duration(milliseconds: 1500)); // Smooth splash delay
 
     if (!_storage.hasCompletedOnboarding) {
       Get.offAllNamed(Routes.onboarding);
