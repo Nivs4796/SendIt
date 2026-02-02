@@ -71,10 +71,8 @@ class _AppDropdownState<T> extends State<AppDropdown<T>> {
           onTapUp: (_) => setState(() => _isFocused = false),
           onTapCancel: () => setState(() => _isFocused = false),
           child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 2),
             decoration: BoxDecoration(
-              color: widget.enabled
-                  ? (widget.fillColor ?? AppColors.white)
-                  : AppColors.grey100,
               borderRadius: BorderRadius.circular(widget.borderRadius ?? AppTheme.radiusMedium),
               border: Border.all(
                 color: hasError
@@ -85,7 +83,13 @@ class _AppDropdownState<T> extends State<AppDropdown<T>> {
                 width: _isFocused || hasError ? 2.0 : 1.5,
               ),
             ),
-            child: DropdownButtonHideUnderline(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular((widget.borderRadius ?? AppTheme.radiusMedium) - 2),
+              child: Container(
+                color: widget.enabled
+                    ? (widget.fillColor ?? AppColors.white)
+                    : AppColors.grey100,
+                child: DropdownButtonHideUnderline(
               child: ButtonTheme(
                 alignedDropdown: true,
                 child: DropdownButton<T>(
@@ -164,6 +168,8 @@ class _AppDropdownState<T> extends State<AppDropdown<T>> {
                         }
                       : null,
                 ),
+              ),
+            ),
               ),
             ),
           ),

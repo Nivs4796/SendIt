@@ -97,11 +97,13 @@ class _AppSearchFieldState extends State<AppSearchField> {
 
   @override
   Widget build(BuildContext context) {
+    final radius = widget.borderRadius ?? AppTheme.radiusMedium;
+
     return Container(
       height: widget.height ?? 52,
+      margin: const EdgeInsets.symmetric(horizontal: 2),
       decoration: BoxDecoration(
-        color: widget.fillColor ?? AppColors.white,
-        borderRadius: BorderRadius.circular(widget.borderRadius ?? AppTheme.radiusMedium),
+        borderRadius: BorderRadius.circular(radius),
         border: Border.all(
           color: _isFocused
               ? (widget.focusedBorderColor ?? AppColors.primary)
@@ -118,50 +120,56 @@ class _AppSearchFieldState extends State<AppSearchField> {
               ]
             : null,
       ),
-      child: Row(
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 16),
-            child: Icon(
-              Icons.search_rounded,
-              color: _isFocused
-                  ? (widget.iconColor ?? AppColors.primary)
-                  : AppColors.textSecondary,
-              size: 22,
-            ),
-          ),
-          Expanded(
-            child: TextField(
-              controller: _controller,
-              focusNode: _focusNode,
-              enabled: widget.enabled,
-              autofocus: widget.autofocus,
-              textInputAction: TextInputAction.search,
-              style: AppTextStyles.bodyLarge,
-              onChanged: widget.onChanged,
-              onSubmitted: widget.onSubmitted,
-              decoration: InputDecoration(
-                hintText: widget.hint,
-                hintStyle: AppTextStyles.bodyLarge.copyWith(color: AppColors.textHint),
-                border: InputBorder.none,
-                enabledBorder: InputBorder.none,
-                focusedBorder: InputBorder.none,
-                contentPadding: widget.contentPadding ??
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(radius - 2),
+        child: Container(
+          color: widget.fillColor ?? AppColors.white,
+          child: Row(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(left: 16),
+                child: Icon(
+                  Icons.search_rounded,
+                  color: _isFocused
+                      ? (widget.iconColor ?? AppColors.primary)
+                      : AppColors.textSecondary,
+                  size: 22,
+                ),
               ),
-            ),
-          ),
-          if (widget.showClearButton && _hasText)
-            Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: IconButton(
-                icon: const Icon(Icons.close_rounded, size: 20),
-                color: AppColors.textSecondary,
-                onPressed: _onClear,
-                splashRadius: 20,
+              Expanded(
+                child: TextField(
+                  controller: _controller,
+                  focusNode: _focusNode,
+                  enabled: widget.enabled,
+                  autofocus: widget.autofocus,
+                  textInputAction: TextInputAction.search,
+                  style: AppTextStyles.bodyLarge,
+                  onChanged: widget.onChanged,
+                  onSubmitted: widget.onSubmitted,
+                  decoration: InputDecoration(
+                    hintText: widget.hint,
+                    hintStyle: AppTextStyles.bodyLarge.copyWith(color: AppColors.textHint),
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    contentPadding: widget.contentPadding ??
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                  ),
+                ),
               ),
-            ),
-        ],
+              if (widget.showClearButton && _hasText)
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: IconButton(
+                    icon: const Icon(Icons.close_rounded, size: 20),
+                    color: AppColors.textSecondary,
+                    onPressed: _onClear,
+                    splashRadius: 20,
+                  ),
+                ),
+            ],
+          ),
+        ),
       ),
     );
   }

@@ -181,8 +181,8 @@ class _AppTextAreaState extends State<AppTextArea> {
           const SizedBox(height: 8),
         ],
         Container(
+          margin: const EdgeInsets.symmetric(horizontal: 2),
           decoration: BoxDecoration(
-            color: widget.fillColor ?? AppColors.white,
             borderRadius: BorderRadius.circular(widget.borderRadius ?? AppTheme.radiusMedium),
             border: Border.all(
               color: hasError
@@ -202,29 +202,35 @@ class _AppTextAreaState extends State<AppTextArea> {
                   ]
                 : null,
           ),
-          child: TextField(
-            controller: widget.controller,
-            focusNode: _focusNode,
-            enabled: widget.enabled,
-            readOnly: widget.readOnly,
-            autofocus: widget.autofocus,
-            minLines: widget.minLines,
-            maxLines: widget.maxLines,
-            maxLength: widget.maxLength,
-            keyboardType: TextInputType.multiline,
-            textInputAction: widget.textInputAction ?? TextInputAction.newline,
-            textCapitalization: widget.textCapitalization,
-            style: AppTextStyles.bodyLarge,
-            onChanged: _onChanged,
-            onTap: widget.onTap,
-            decoration: InputDecoration(
-              hintText: widget.hint,
-              hintStyle: AppTextStyles.bodyLarge.copyWith(color: AppColors.textHint),
-              counterText: '',
-              border: InputBorder.none,
-              enabledBorder: InputBorder.none,
-              focusedBorder: InputBorder.none,
-              contentPadding: widget.contentPadding ?? const EdgeInsets.all(16),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular((widget.borderRadius ?? AppTheme.radiusMedium) - 2),
+            child: Container(
+              color: widget.fillColor ?? AppColors.white,
+              child: TextField(
+                controller: widget.controller,
+                focusNode: _focusNode,
+                enabled: widget.enabled,
+                readOnly: widget.readOnly,
+                autofocus: widget.autofocus,
+                minLines: widget.minLines,
+                maxLines: widget.maxLines,
+                maxLength: widget.maxLength,
+                keyboardType: TextInputType.multiline,
+                textInputAction: widget.textInputAction ?? TextInputAction.newline,
+                textCapitalization: widget.textCapitalization,
+                style: AppTextStyles.bodyLarge,
+                onChanged: _onChanged,
+                onTap: widget.onTap,
+                decoration: InputDecoration(
+                  hintText: widget.hint,
+                  hintStyle: AppTextStyles.bodyLarge.copyWith(color: AppColors.textHint),
+                  counterText: '',
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  contentPadding: widget.contentPadding ?? const EdgeInsets.all(16),
+                ),
+              ),
             ),
           ),
         ),

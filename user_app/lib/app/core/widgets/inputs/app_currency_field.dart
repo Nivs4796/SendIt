@@ -162,8 +162,8 @@ class _AppCurrencyFieldState extends State<AppCurrencyField> {
           const SizedBox(height: 8),
         ],
         Container(
+          margin: const EdgeInsets.symmetric(horizontal: 2),
           decoration: BoxDecoration(
-            color: widget.fillColor ?? AppColors.white,
             borderRadius: BorderRadius.circular(widget.borderRadius ?? AppTheme.radiusMedium),
             border: Border.all(
               color: hasError
@@ -183,65 +183,71 @@ class _AppCurrencyFieldState extends State<AppCurrencyField> {
                   ]
                 : null,
           ),
-          child: Row(
-            children: [
-              // Currency Symbol
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-                decoration: const BoxDecoration(
-                  border: Border(
-                    right: BorderSide(color: AppColors.grey300, width: 1),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular((widget.borderRadius ?? AppTheme.radiusMedium) - 2),
+            child: Container(
+              color: widget.fillColor ?? AppColors.white,
+              child: Row(
+                children: [
+                  // Currency Symbol
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+                    decoration: const BoxDecoration(
+                      border: Border(
+                        right: BorderSide(color: AppColors.grey300, width: 1),
+                      ),
+                    ),
+                    child: Text(
+                      widget.currencySymbol,
+                      style: AppTextStyles.h4.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
                   ),
-                ),
-                child: Text(
-                  widget.currencySymbol,
-                  style: AppTextStyles.h4.copyWith(
-                    color: AppColors.textSecondary,
+                  // Amount Input
+                  Expanded(
+                    child: TextField(
+                      controller: widget.controller,
+                      focusNode: _focusNode,
+                      enabled: widget.enabled,
+                      readOnly: widget.readOnly,
+                      autofocus: widget.autofocus,
+                      keyboardType: TextInputType.numberWithOptions(
+                        decimal: widget.decimalPlaces > 0,
+                      ),
+                      textInputAction: widget.textInputAction,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(
+                          RegExp(r'^\d*\.?\d{0,' + widget.decimalPlaces.toString() + r'}'),
+                        ),
+                        _CurrencyInputFormatter(
+                          minValue: widget.minValue,
+                          maxValue: widget.maxValue,
+                        ),
+                      ],
+                      style: AppTextStyles.h4.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                      textAlign: TextAlign.left,
+                      onChanged: _onChanged,
+                      onTap: widget.onTap,
+                      onEditingComplete: widget.onEditingComplete,
+                      decoration: InputDecoration(
+                        hintText: widget.hint,
+                        hintStyle: AppTextStyles.h4.copyWith(
+                          color: AppColors.textHint,
+                          fontWeight: FontWeight.w400,
+                        ),
+                        border: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
-              // Amount Input
-              Expanded(
-                child: TextField(
-                  controller: widget.controller,
-                  focusNode: _focusNode,
-                  enabled: widget.enabled,
-                  readOnly: widget.readOnly,
-                  autofocus: widget.autofocus,
-                  keyboardType: TextInputType.numberWithOptions(
-                    decimal: widget.decimalPlaces > 0,
-                  ),
-                  textInputAction: widget.textInputAction,
-                  inputFormatters: [
-                    FilteringTextInputFormatter.allow(
-                      RegExp(r'^\d*\.?\d{0,' + widget.decimalPlaces.toString() + r'}'),
-                    ),
-                    _CurrencyInputFormatter(
-                      minValue: widget.minValue,
-                      maxValue: widget.maxValue,
-                    ),
-                  ],
-                  style: AppTextStyles.h4.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                  textAlign: TextAlign.left,
-                  onChanged: _onChanged,
-                  onTap: widget.onTap,
-                  onEditingComplete: widget.onEditingComplete,
-                  decoration: InputDecoration(
-                    hintText: widget.hint,
-                    hintStyle: AppTextStyles.h4.copyWith(
-                      color: AppColors.textHint,
-                      fontWeight: FontWeight.w400,
-                    ),
-                    border: InputBorder.none,
-                    enabledBorder: InputBorder.none,
-                    focusedBorder: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
         ),
         if (hasError) ...[

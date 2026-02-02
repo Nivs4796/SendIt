@@ -273,8 +273,8 @@ class _AppTextFieldState extends State<AppTextField> {
           const SizedBox(height: 8),
         ],
         Container(
+          margin: const EdgeInsets.symmetric(horizontal: 2),
           decoration: BoxDecoration(
-            color: widget.fillColor ?? AppColors.white,
             borderRadius: BorderRadius.circular(widget.borderRadius ?? AppTheme.radiusMedium),
             border: Border.all(
               color: hasError
@@ -294,7 +294,11 @@ class _AppTextFieldState extends State<AppTextField> {
                   ]
                 : null,
           ),
-          child: TextField(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular((widget.borderRadius ?? AppTheme.radiusMedium) - 2),
+            child: Container(
+              color: widget.fillColor ?? AppColors.white,
+              child: TextField(
             controller: widget.controller,
             focusNode: _focusNode,
             enabled: widget.enabled,
@@ -326,6 +330,8 @@ class _AppTextFieldState extends State<AppTextField> {
               prefixText: widget.prefixText,
               suffixText: widget.suffixText,
               suffixIcon: _buildSuffixIcon(),
+            ),
+          ),
             ),
           ),
         ),
