@@ -31,6 +31,7 @@ class ApiConstants {
   static const String walletBalance = '/wallet/balance';
   static const String walletTransactions = '/wallet/transactions';
   static const String addMoney = '/wallet/add';
+  static const String checkBalance = '/wallet/check';
 
   // Coupon Endpoints
   static const String validateCoupon = '/coupons/validate';
