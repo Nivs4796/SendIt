@@ -127,20 +127,20 @@ class _LoginContentState extends State<_LoginContent>
 
                       const SizedBox(height: 40),
 
-                      // Phone Input - Better visibility
+                      // Phone Input - High contrast border
                       Container(
                         decoration: BoxDecoration(
                           color: AppColors.white,
                           borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
                           border: Border.all(
-                            color: AppColors.primary.withValues(alpha: 0.3),
-                            width: 1.5,
+                            color: AppColors.grey300, // Grey border for clear visibility
+                            width: 2.0,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: AppColors.primary.withValues(alpha: 0.08),
-                              blurRadius: 12,
-                              offset: const Offset(0, 4),
+                              color: AppColors.black.withValues(alpha: 0.06),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
                             ),
                           ],
                         ),
@@ -152,10 +152,11 @@ class _LoginContentState extends State<_LoginContent>
                                 horizontal: 20,
                                 vertical: 18,
                               ),
-                              decoration: BoxDecoration(
+                              decoration: const BoxDecoration(
                                 border: Border(
                                   right: BorderSide(
-                                    color: AppColors.primary.withValues(alpha: 0.2),
+                                    color: AppColors.grey300, // Visible divider
+                                    width: 1.5,
                                   ),
                                 ),
                               ),
