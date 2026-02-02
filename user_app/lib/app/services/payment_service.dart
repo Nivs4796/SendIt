@@ -55,6 +55,20 @@ class PaymentService extends GetxService {
   /// Currently selected payment method
   final Rx<PaymentMethod> selectedMethod = PaymentMethod.wallet.obs;
 
+  /// Get current wallet balance
+  /// Returns the balance as double, or 0.0 on error
+  Future<double> getWalletBalance() async {
+    try {
+      final response = await _walletRepository.getBalance();
+      if (response.success && response.data != null) {
+        return response.data!;
+      }
+      return 0.0;
+    } catch (e) {
+      return 0.0;
+    }
+  }
+
   /// Check if wallet has sufficient balance for the given amount
   /// Returns a Map with:
   /// - hasSufficientBalance: bool

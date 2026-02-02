@@ -9,6 +9,7 @@ import '../../../data/models/price_calculation_model.dart';
 import '../../../data/models/vehicle_type_model.dart';
 import '../../../data/providers/api_exceptions.dart';
 import '../../../data/repositories/booking_repository.dart';
+import '../../../routes/app_routes.dart';
 import '../../../services/location_service.dart';
 import '../../../services/payment_service.dart';
 
@@ -103,6 +104,13 @@ class BookingController extends GetxController {
   /// The current booking being created/tracked
   final Rx<BookingModel?> currentBooking = Rx<BookingModel?>(null);
 
+  // Saved Address State (for API calls with address IDs)
+  /// Selected pickup address (saved address with ID for API)
+  final Rx<AddressModel?> selectedPickupAddress = Rx<AddressModel?>(null);
+
+  /// Selected drop address (saved address with ID for API)
+  final Rx<AddressModel?> selectedDropAddress = Rx<AddressModel?>(null);
+
   // ============================================
   // Getters
   // ============================================
@@ -115,12 +123,10 @@ class BookingController extends GetxController {
       bookingState.value == BookingState.findingDriver;
 
   /// Returns true if user can proceed to vehicle selection
-  /// Requires both pickup and drop locations to be set
+  /// Requires both pickup and drop saved addresses to be selected
   bool get canProceedToVehicle =>
-      pickupLocation.value != null &&
-      dropLocation.value != null &&
-      pickupAddress.value.isNotEmpty &&
-      dropAddress.value.isNotEmpty;
+      selectedPickupAddress.value != null &&
+      selectedDropAddress.value != null;
 
   /// Returns true if user can proceed to payment
   /// Requires vehicle to be selected and price to be calculated
@@ -209,8 +215,9 @@ class BookingController extends GetxController {
   /// Checks the current wallet balance.
   Future<void> _checkWalletBalance() async {
     try {
-      final balanceCheck = await _paymentService.checkWalletBalance(0);
-      walletBalance.value = balanceCheck['currentBalance'] as double? ?? 0.0;
+      // Use getWalletBalance() to avoid the API validation error
+      // that requires a positive amount
+      walletBalance.value = await _paymentService.getWalletBalance();
 
       // Update sufficient balance status if we have a price
       if (priceCalculation.value != null) {
@@ -260,11 +267,16 @@ class BookingController extends GetxController {
   }
 
   /// Sets the pickup location with coordinates and address.
+  /// Note: This clears the saved address - you must use setFromSavedAddress()
+  /// for the booking API to work properly.
   void setPickupLocation({
     required LatLng location,
     required String address,
     String? landmark,
   }) {
+    // Clear saved address since raw coordinates don't have IDs
+    selectedPickupAddress.value = null;
+
     pickupLocation.value = location;
     pickupAddress.value = address;
     pickupController.text = address;
@@ -277,11 +289,16 @@ class BookingController extends GetxController {
   }
 
   /// Sets the drop location with coordinates and address.
+  /// Note: This clears the saved address - you must use setFromSavedAddress()
+  /// for the booking API to work properly.
   void setDropLocation({
     required LatLng location,
     required String address,
     String? landmark,
   }) {
+    // Clear saved address since raw coordinates don't have IDs
+    selectedDropAddress.value = null;
+
     dropLocation.value = location;
     dropAddress.value = address;
     dropController.text = address;
@@ -294,6 +311,7 @@ class BookingController extends GetxController {
   }
 
   /// Sets location from a saved address.
+  /// This stores the full AddressModel (with ID) for API calls.
   void setFromSavedAddress({
     required AddressModel address,
     required bool isPickup,
@@ -301,18 +319,25 @@ class BookingController extends GetxController {
     final latLng = LatLng(address.lat, address.lng);
 
     if (isPickup) {
-      setPickupLocation(
-        location: latLng,
-        address: address.fullAddress,
-        landmark: address.landmark,
-      );
+      // Store the full address model for API calls
+      selectedPickupAddress.value = address;
+      // Also update display fields for UI
+      pickupLocation.value = latLng;
+      pickupAddress.value = address.fullAddress;
+      pickupController.text = address.fullAddress;
+      pickupLandmark.value = address.landmark ?? '';
     } else {
-      setDropLocation(
-        location: latLng,
-        address: address.fullAddress,
-        landmark: address.landmark,
-      );
+      // Store the full address model for API calls
+      selectedDropAddress.value = address;
+      // Also update display fields for UI
+      dropLocation.value = latLng;
+      dropAddress.value = address.fullAddress;
+      dropController.text = address.fullAddress;
+      dropLandmark.value = address.landmark ?? '';
     }
+
+    // Reset price calculation when address changes
+    _resetPriceCalculation();
   }
 
   // ============================================
@@ -335,9 +360,10 @@ class BookingController extends GetxController {
   }
 
   /// Calculates the price for the current booking configuration.
+  /// Uses saved address IDs for the API call.
   Future<void> calculatePrice() async {
     if (!canProceedToVehicle || selectedVehicle.value == null) {
-      _showError('Please select pickup, drop locations and vehicle type');
+      _showError('Please select pickup, drop addresses and vehicle type');
       return;
     }
 
@@ -346,11 +372,9 @@ class BookingController extends GetxController {
       errorMessage.value = '';
 
       final response = await _bookingRepository.calculatePrice(
-        pickupLat: pickupLocation.value!.latitude,
-        pickupLng: pickupLocation.value!.longitude,
-        dropLat: dropLocation.value!.latitude,
-        dropLng: dropLocation.value!.longitude,
         vehicleTypeId: selectedVehicle.value!.id,
+        pickupAddressId: selectedPickupAddress.value!.id,
+        dropAddressId: selectedDropAddress.value!.id,
       );
 
       if (response.success && response.data != null) {
@@ -446,18 +470,11 @@ class BookingController extends GetxController {
       bookingState.value = BookingState.creatingBooking;
       errorMessage.value = '';
 
-      // Create booking request
+      // Create booking request using saved address IDs
       final request = CreateBookingRequest(
-        pickupLat: pickupLocation.value!.latitude,
-        pickupLng: pickupLocation.value!.longitude,
-        pickupAddress: pickupAddress.value,
-        pickupLandmark:
-            pickupLandmark.value.isNotEmpty ? pickupLandmark.value : null,
-        dropLat: dropLocation.value!.latitude,
-        dropLng: dropLocation.value!.longitude,
-        dropAddress: dropAddress.value,
-        dropLandmark: dropLandmark.value.isNotEmpty ? dropLandmark.value : null,
         vehicleTypeId: selectedVehicle.value!.id,
+        pickupAddressId: selectedPickupAddress.value!.id,
+        dropAddressId: selectedDropAddress.value!.id,
         packageType: _packageTypeToString(selectedPackageType.value),
         packageDescription: packageDescription.value.isNotEmpty
             ? packageDescription.value
@@ -472,6 +489,8 @@ class BookingController extends GetxController {
         currentBooking.value = response.data!;
         bookingState.value = BookingState.findingDriver;
         _showSuccess('Booking created! Finding a driver...');
+        // Navigate to finding driver screen
+        Get.offNamed(Routes.findingDriver);
       } else {
         bookingState.value = BookingState.idle;
         _showError(response.message ?? 'Failed to create booking');
@@ -489,9 +508,15 @@ class BookingController extends GetxController {
   }
 
   /// Cancels the current booking.
-  Future<void> cancelBooking({String? reason}) async {
+  /// Reason is required by the API.
+  Future<void> cancelBooking({required String reason}) async {
     if (currentBooking.value == null) {
       _showError('No active booking to cancel');
+      return;
+    }
+
+    if (reason.isEmpty) {
+      _showError('Please provide a reason for cancellation');
       return;
     }
 
@@ -527,7 +552,11 @@ class BookingController extends GetxController {
 
   /// Resets all booking state to initial values.
   void resetBooking() {
-    // Reset location
+    // Reset saved addresses
+    selectedPickupAddress.value = null;
+    selectedDropAddress.value = null;
+
+    // Reset location display fields
     pickupLocation.value = null;
     dropLocation.value = null;
     pickupAddress.value = '';

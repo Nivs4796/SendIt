@@ -397,9 +397,9 @@ class CreateBookingView extends GetView<BookingController> {
   /// Navigates to location picker based on pickup/drop selection
   void _showLocationPicker(BuildContext context, {required bool isPickup}) {
     if (isPickup) {
-      Get.toNamed(Routes.pickupLocation);
+      Get.toNamed(Routes.pickupLocation, arguments: {'isPickup': true});
     } else {
-      Get.toNamed(Routes.dropLocation);
+      Get.toNamed(Routes.dropLocation, arguments: {'isPickup': false});
     }
   }
 

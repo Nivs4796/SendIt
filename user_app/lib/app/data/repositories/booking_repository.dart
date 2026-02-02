@@ -10,219 +10,262 @@ class BookingRepository {
 
   /// Get all available vehicle types
   /// GET /vehicles/types
-  /// Response: { "success": true, "data": [...] }
+  /// Response: { "success": true, "data": { "types": [...] } }
   Future<ApiResponse<List<VehicleTypeModel>>> getVehicleTypes() async {
-    final response = await _apiClient.get(ApiConstants.vehicleTypes);
+    try {
+      final response = await _apiClient.get(ApiConstants.vehicleTypes);
 
-    final apiResponse = ApiResponse<List<dynamic>>.fromJson(
-      response.data,
-      (data) => data as List<dynamic>,
-    );
+      final apiResponse = ApiResponse<Map<String, dynamic>>.fromJson(
+        response.data,
+        (data) => data as Map<String, dynamic>,
+      );
 
-    if (apiResponse.success && apiResponse.data != null) {
-      final vehicleTypes = apiResponse.data!
-          .map((json) => VehicleTypeModel.fromJson(json))
-          .toList();
+      if (apiResponse.success && apiResponse.data != null) {
+        // Backend wraps types in { types: [...] }
+        final typesData = apiResponse.data!['types'] as List<dynamic>? ?? [];
+        final vehicleTypes = typesData
+            .map((json) => VehicleTypeModel.fromJson(json))
+            .toList();
+
+        return ApiResponse(
+          success: true,
+          message: apiResponse.message,
+          data: vehicleTypes,
+        );
+      }
 
       return ApiResponse(
-        success: true,
-        message: apiResponse.message,
-        data: vehicleTypes,
+        success: false,
+        message: apiResponse.message ?? 'Failed to get vehicle types',
+      );
+    } catch (e) {
+      return ApiResponse(
+        success: false,
+        message: e.toString(),
       );
     }
-
-    return ApiResponse(
-      success: false,
-      message: apiResponse.message ?? 'Failed to get vehicle types',
-    );
   }
 
-  /// Calculate price for a booking
+  /// Calculate price for a booking using saved address IDs
   /// POST /bookings/calculate-price
-  /// Body: { "pickupLat": 23.0, "pickupLng": 72.5, "dropLat": 23.1, "dropLng": 72.6, "vehicleTypeId": "..." }
+  /// Body: { "vehicleTypeId": "...", "pickupAddressId": "...", "dropAddressId": "..." }
   /// Response: { "success": true, "data": { "distance": 5.2, "baseFare": 50, ... } }
   Future<ApiResponse<PriceCalculationModel>> calculatePrice({
-    required double pickupLat,
-    required double pickupLng,
-    required double dropLat,
-    required double dropLng,
     required String vehicleTypeId,
+    required String pickupAddressId,
+    required String dropAddressId,
   }) async {
-    final response = await _apiClient.post(
-      ApiConstants.calculatePrice,
-      data: {
-        'pickupLat': pickupLat,
-        'pickupLng': pickupLng,
-        'dropLat': dropLat,
-        'dropLng': dropLng,
-        'vehicleTypeId': vehicleTypeId,
-      },
-    );
+    try {
+      final response = await _apiClient.post(
+        ApiConstants.calculatePrice,
+        data: {
+          'vehicleTypeId': vehicleTypeId,
+          'pickupAddressId': pickupAddressId,
+          'dropAddressId': dropAddressId,
+        },
+      );
 
-    final apiResponse = ApiResponse<Map<String, dynamic>>.fromJson(
-      response.data,
-      (data) => data as Map<String, dynamic>,
-    );
+      final apiResponse = ApiResponse<Map<String, dynamic>>.fromJson(
+        response.data,
+        (data) => data as Map<String, dynamic>,
+      );
 
-    if (apiResponse.success && apiResponse.data != null) {
-      final priceCalculation =
-          PriceCalculationModel.fromJson(apiResponse.data!);
+      if (apiResponse.success && apiResponse.data != null) {
+        final priceCalculation =
+            PriceCalculationModel.fromJson(apiResponse.data!);
+
+        return ApiResponse(
+          success: true,
+          message: apiResponse.message,
+          data: priceCalculation,
+        );
+      }
 
       return ApiResponse(
-        success: true,
-        message: apiResponse.message,
-        data: priceCalculation,
+        success: false,
+        message: apiResponse.message ?? 'Failed to calculate price',
+      );
+    } catch (e) {
+      return ApiResponse(
+        success: false,
+        message: e.toString(),
       );
     }
-
-    return ApiResponse(
-      success: false,
-      message: apiResponse.message ?? 'Failed to calculate price',
-    );
   }
 
   /// Create a new booking
   /// POST /bookings
   /// Body: CreateBookingRequest
-  /// Response: { "success": true, "data": { "id": "...", "bookingNumber": "...", ... } }
+  /// Response: { "success": true, "data": { "booking": {...} } }
   Future<ApiResponse<BookingModel>> createBooking(
       CreateBookingRequest request) async {
-    final response = await _apiClient.post(
-      ApiConstants.bookings,
-      data: request.toJson(),
-    );
+    try {
+      final response = await _apiClient.post(
+        ApiConstants.bookings,
+        data: request.toJson(),
+      );
 
-    final apiResponse = ApiResponse<Map<String, dynamic>>.fromJson(
-      response.data,
-      (data) => data as Map<String, dynamic>,
-    );
+      final apiResponse = ApiResponse<Map<String, dynamic>>.fromJson(
+        response.data,
+        (data) => data as Map<String, dynamic>,
+      );
 
-    if (apiResponse.success && apiResponse.data != null) {
-      final booking = BookingModel.fromJson(apiResponse.data!);
+      if (apiResponse.success && apiResponse.data != null) {
+        // Backend wraps booking in { booking: {...} }
+        final bookingData = apiResponse.data!['booking'] ?? apiResponse.data!;
+        final booking = BookingModel.fromJson(bookingData);
+
+        return ApiResponse(
+          success: true,
+          message: apiResponse.message,
+          data: booking,
+        );
+      }
 
       return ApiResponse(
-        success: true,
-        message: apiResponse.message,
-        data: booking,
+        success: false,
+        message: apiResponse.message ?? 'Failed to create booking',
+      );
+    } catch (e) {
+      return ApiResponse(
+        success: false,
+        message: e.toString(),
       );
     }
-
-    return ApiResponse(
-      success: false,
-      message: apiResponse.message ?? 'Failed to create booking',
-    );
   }
 
   /// Get a specific booking by ID
   /// GET /bookings/{id}
-  /// Response: { "success": true, "data": { "id": "...", "bookingNumber": "...", ... } }
+  /// Response: { "success": true, "data": { "booking": {...} } }
   Future<ApiResponse<BookingModel>> getBooking(String id) async {
-    final response = await _apiClient.get('${ApiConstants.bookings}/$id');
+    try {
+      final response = await _apiClient.get('${ApiConstants.bookings}/$id');
 
-    final apiResponse = ApiResponse<Map<String, dynamic>>.fromJson(
-      response.data,
-      (data) => data as Map<String, dynamic>,
-    );
+      final apiResponse = ApiResponse<Map<String, dynamic>>.fromJson(
+        response.data,
+        (data) => data as Map<String, dynamic>,
+      );
 
-    if (apiResponse.success && apiResponse.data != null) {
-      final booking = BookingModel.fromJson(apiResponse.data!);
+      if (apiResponse.success && apiResponse.data != null) {
+        // Backend wraps booking in { booking: {...} }
+        final bookingData = apiResponse.data!['booking'] ?? apiResponse.data!;
+        final booking = BookingModel.fromJson(bookingData);
+
+        return ApiResponse(
+          success: true,
+          message: apiResponse.message,
+          data: booking,
+        );
+      }
 
       return ApiResponse(
-        success: true,
-        message: apiResponse.message,
-        data: booking,
+        success: false,
+        message: apiResponse.message ?? 'Failed to get booking',
+      );
+    } catch (e) {
+      return ApiResponse(
+        success: false,
+        message: e.toString(),
       );
     }
-
-    return ApiResponse(
-      success: false,
-      message: apiResponse.message ?? 'Failed to get booking',
-    );
   }
 
   /// Get current user's bookings with pagination and optional status filter
   /// GET /bookings/my-bookings?page=1&limit=10&status=PENDING
-  /// Response: { "success": true, "data": [...], "meta": { "page": 1, "totalPages": 5 } }
+  /// Response: { "success": true, "data": { "bookings": [...], "pagination": {...} } }
   Future<ApiResponse<List<BookingModel>>> getMyBookings({
     int page = 1,
     int limit = 10,
     String? status,
   }) async {
-    final queryParams = <String, dynamic>{
-      'page': page,
-      'limit': limit,
-    };
+    try {
+      final queryParams = <String, dynamic>{
+        'page': page,
+        'limit': limit,
+      };
 
-    if (status != null && status.isNotEmpty) {
-      queryParams['status'] = status;
-    }
+      if (status != null && status.isNotEmpty) {
+        queryParams['status'] = status;
+      }
 
-    final response = await _apiClient.get(
-      ApiConstants.myBookings,
-      queryParameters: queryParams,
-    );
+      final response = await _apiClient.get(
+        ApiConstants.myBookings,
+        queryParameters: queryParams,
+      );
 
-    final apiResponse = ApiResponse<List<dynamic>>.fromJson(
-      response.data,
-      (data) => data as List<dynamic>,
-    );
+      final apiResponse = ApiResponse<Map<String, dynamic>>.fromJson(
+        response.data,
+        (data) => data as Map<String, dynamic>,
+      );
 
-    if (apiResponse.success && apiResponse.data != null) {
-      final bookings = apiResponse.data!
-          .map((json) => BookingModel.fromJson(json))
-          .toList();
+      if (apiResponse.success && apiResponse.data != null) {
+        // Backend returns { bookings: [...], pagination: {...} }
+        final bookingsData = apiResponse.data!['bookings'] as List<dynamic>? ?? [];
+        final bookings = bookingsData
+            .map((json) => BookingModel.fromJson(json))
+            .toList();
+
+        return ApiResponse(
+          success: true,
+          message: apiResponse.message,
+          data: bookings,
+          meta: apiResponse.data!['pagination'],
+        );
+      }
 
       return ApiResponse(
-        success: true,
-        message: apiResponse.message,
-        data: bookings,
-        meta: apiResponse.meta,
+        success: false,
+        message: apiResponse.message ?? 'Failed to get bookings',
+      );
+    } catch (e) {
+      return ApiResponse(
+        success: false,
+        message: e.toString(),
       );
     }
-
-    return ApiResponse(
-      success: false,
-      message: apiResponse.message ?? 'Failed to get bookings',
-    );
   }
 
   /// Cancel a booking
   /// POST /bookings/{id}/cancel
-  /// Body: { "reason": "..." } (optional)
-  /// Response: { "success": true, "data": { "id": "...", "status": "CANCELLED", ... } }
+  /// Body: { "reason": "..." }
+  /// Response: { "success": true, "data": { "booking": {...} } }
   Future<ApiResponse<BookingModel>> cancelBooking(
     String id, {
-    String? reason,
+    required String reason,
   }) async {
-    final data = <String, dynamic>{};
-    if (reason != null && reason.isNotEmpty) {
-      data['reason'] = reason;
-    }
+    try {
+      final response = await _apiClient.post(
+        '${ApiConstants.bookings}/$id/cancel',
+        data: {'reason': reason},
+      );
 
-    final response = await _apiClient.post(
-      '${ApiConstants.bookings}/$id/cancel',
-      data: data.isNotEmpty ? data : null,
-    );
+      final apiResponse = ApiResponse<Map<String, dynamic>>.fromJson(
+        response.data,
+        (data) => data as Map<String, dynamic>,
+      );
 
-    final apiResponse = ApiResponse<Map<String, dynamic>>.fromJson(
-      response.data,
-      (data) => data as Map<String, dynamic>,
-    );
+      if (apiResponse.success && apiResponse.data != null) {
+        // Backend wraps booking in { booking: {...} }
+        final bookingData = apiResponse.data!['booking'] ?? apiResponse.data!;
+        final booking = BookingModel.fromJson(bookingData);
 
-    if (apiResponse.success && apiResponse.data != null) {
-      final booking = BookingModel.fromJson(apiResponse.data!);
+        return ApiResponse(
+          success: true,
+          message: apiResponse.message,
+          data: booking,
+        );
+      }
 
       return ApiResponse(
-        success: true,
-        message: apiResponse.message,
-        data: booking,
+        success: false,
+        message: apiResponse.message ?? 'Failed to cancel booking',
+      );
+    } catch (e) {
+      return ApiResponse(
+        success: false,
+        message: e.toString(),
       );
     }
-
-    return ApiResponse(
-      success: false,
-      message: apiResponse.message ?? 'Failed to cancel booking',
-    );
   }
 
   /// Rate a delivery
@@ -234,33 +277,40 @@ class BookingRepository {
     required int rating,
     String? review,
   }) async {
-    final data = <String, dynamic>{
-      'rating': rating,
-    };
-    if (review != null && review.isNotEmpty) {
-      data['review'] = review;
-    }
+    try {
+      final data = <String, dynamic>{
+        'rating': rating,
+      };
+      if (review != null && review.isNotEmpty) {
+        data['review'] = review;
+      }
 
-    final response = await _apiClient.post(
-      '${ApiConstants.bookings}/$bookingId/rate',
-      data: data,
-    );
+      final response = await _apiClient.post(
+        '${ApiConstants.bookings}/$bookingId/rate',
+        data: data,
+      );
 
-    final apiResponse = ApiResponse<void>.fromJson(
-      response.data,
-      null,
-    );
+      final apiResponse = ApiResponse<void>.fromJson(
+        response.data,
+        null,
+      );
 
-    if (apiResponse.success) {
+      if (apiResponse.success) {
+        return ApiResponse(
+          success: true,
+          message: apiResponse.message ?? 'Rating submitted successfully',
+        );
+      }
+
       return ApiResponse(
-        success: true,
-        message: apiResponse.message ?? 'Rating submitted successfully',
+        success: false,
+        message: apiResponse.message ?? 'Failed to submit rating',
+      );
+    } catch (e) {
+      return ApiResponse(
+        success: false,
+        message: e.toString(),
       );
     }
-
-    return ApiResponse(
-      success: false,
-      message: apiResponse.message ?? 'Failed to submit rating',
-    );
   }
 }

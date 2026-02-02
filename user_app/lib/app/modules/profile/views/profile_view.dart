@@ -47,6 +47,11 @@ class ProfileView extends GetView<ProfileController> {
                     onTap: () => Get.toNamed(Routes.personalInfo),
                   ),
                   _MenuItem(
+                    icon: Icons.receipt_long_outlined,
+                    title: 'My Orders',
+                    onTap: () => Get.toNamed(Routes.orders),
+                  ),
+                  _MenuItem(
                     icon: Icons.location_on_outlined,
                     title: 'Saved Addresses',
                     onTap: () => Get.toNamed(Routes.savedAddresses),

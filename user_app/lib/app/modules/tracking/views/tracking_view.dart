@@ -330,24 +330,28 @@ class TrackingView extends GetView<TrackingController> {
                         size: 24,
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'ETA',
-                          style: AppTextStyles.caption.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'ETA',
+                            style: AppTextStyles.caption.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          controller.etaDisplay,
-                          style: AppTextStyles.h4.copyWith(
-                            color: theme.colorScheme.onSurface,
+                          const SizedBox(height: 2),
+                          Text(
+                            controller.etaDisplay,
+                            style: AppTextStyles.h4.copyWith(
+                              color: theme.colorScheme.onSurface,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -377,24 +381,28 @@ class TrackingView extends GetView<TrackingController> {
                         size: 24,
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Distance',
-                          style: AppTextStyles.caption.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Distance',
+                            style: AppTextStyles.caption.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          controller.distanceDisplay,
-                          style: AppTextStyles.h4.copyWith(
-                            color: theme.colorScheme.onSurface,
+                          const SizedBox(height: 2),
+                          Text(
+                            controller.distanceDisplay,
+                            style: AppTextStyles.h4.copyWith(
+                              color: theme.colorScheme.onSurface,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ],
                 ),

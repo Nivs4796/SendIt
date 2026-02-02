@@ -57,13 +57,13 @@ class PriceCalculationModel {
     return '$hours hr $minutes min';
   }
 
-  String get totalDisplay => '${_currencySymbol}${totalAmount.toStringAsFixed(2)}';
+  String get totalDisplay => '$_currencySymbol${totalAmount.toStringAsFixed(2)}';
 
-  String get baseFareDisplay => '${_currencySymbol}${baseFare.toStringAsFixed(2)}';
+  String get baseFareDisplay => '$_currencySymbol${baseFare.toStringAsFixed(2)}';
 
-  String get distanceFareDisplay => '${_currencySymbol}${distanceFare.toStringAsFixed(2)}';
+  String get distanceFareDisplay => '$_currencySymbol${distanceFare.toStringAsFixed(2)}';
 
-  String get taxesDisplay => '${_currencySymbol}${taxes.toStringAsFixed(2)}';
+  String get taxesDisplay => '$_currencySymbol${taxes.toStringAsFixed(2)}';
 
   String get _currencySymbol {
     switch (currency) {
@@ -82,16 +82,11 @@ class PriceCalculationModel {
 }
 
 /// Request model for creating a new booking.
+/// Uses saved address IDs rather than raw coordinates.
 class CreateBookingRequest {
-  final double pickupLat;
-  final double pickupLng;
-  final String pickupAddress;
-  final String? pickupLandmark;
-  final double dropLat;
-  final double dropLng;
-  final String dropAddress;
-  final String? dropLandmark;
   final String vehicleTypeId;
+  final String pickupAddressId;
+  final String dropAddressId;
   final String packageType;
   final String? packageDescription;
   final double? packageWeight;
@@ -100,15 +95,9 @@ class CreateBookingRequest {
   final DateTime? scheduledAt;
 
   CreateBookingRequest({
-    required this.pickupLat,
-    required this.pickupLng,
-    required this.pickupAddress,
-    this.pickupLandmark,
-    required this.dropLat,
-    required this.dropLng,
-    required this.dropAddress,
-    this.dropLandmark,
     required this.vehicleTypeId,
+    required this.pickupAddressId,
+    required this.dropAddressId,
     required this.packageType,
     this.packageDescription,
     this.packageWeight,
@@ -119,30 +108,20 @@ class CreateBookingRequest {
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{
-      'pickupLat': pickupLat,
-      'pickupLng': pickupLng,
-      'pickupAddress': pickupAddress,
-      'dropLat': dropLat,
-      'dropLng': dropLng,
-      'dropAddress': dropAddress,
       'vehicleTypeId': vehicleTypeId,
-      'packageType': packageType,
-      'paymentMethod': paymentMethod,
+      'pickupAddressId': pickupAddressId,
+      'dropAddressId': dropAddressId,
+      'packageType': packageType.toUpperCase(),
+      'paymentMethod': paymentMethod.toUpperCase(),
     };
 
-    if (pickupLandmark != null) {
-      json['pickupLandmark'] = pickupLandmark;
-    }
-    if (dropLandmark != null) {
-      json['dropLandmark'] = dropLandmark;
-    }
-    if (packageDescription != null) {
+    if (packageDescription != null && packageDescription!.isNotEmpty) {
       json['packageDescription'] = packageDescription;
     }
     if (packageWeight != null) {
       json['packageWeight'] = packageWeight;
     }
-    if (couponCode != null) {
+    if (couponCode != null && couponCode!.isNotEmpty) {
       json['couponCode'] = couponCode;
     }
     if (scheduledAt != null) {

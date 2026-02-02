@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../data/models/vehicle_type_model.dart';
+import '../../../routes/app_routes.dart';
 import '../controllers/booking_controller.dart';
 
 /// View for selecting vehicle type and viewing price calculation.
@@ -674,7 +675,7 @@ class VehicleSelectionView extends GetView<BookingController> {
           isDisabled: !canProceed,
           onPressed: () {
             // Navigate to payment view
-            Get.toNamed('/payment');
+            Get.toNamed(Routes.payment);
           },
           suffixIcon: Icons.arrow_forward_rounded,
         );

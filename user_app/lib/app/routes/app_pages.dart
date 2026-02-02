@@ -26,6 +26,7 @@ import '../modules/wallet/views/wallet_view.dart';
 // Booking Module Imports
 import '../modules/booking/bindings/booking_binding.dart';
 import '../modules/booking/views/create_booking_view.dart';
+import '../modules/booking/views/address_picker_view.dart';
 import '../modules/booking/views/vehicle_selection_view.dart';
 import '../modules/booking/views/payment_view.dart';
 import '../modules/booking/views/finding_driver_view.dart';
@@ -119,6 +120,18 @@ class AppPages {
     GetPage(
       name: Routes.createBooking,
       page: () => const CreateBookingView(),
+      binding: BookingBinding(),
+      transition: Transition.rightToLeft,
+    ),
+    GetPage(
+      name: Routes.pickupLocation,
+      page: () => const AddressPickerView(),
+      binding: BookingBinding(),
+      transition: Transition.rightToLeft,
+    ),
+    GetPage(
+      name: Routes.dropLocation,
+      page: () => const AddressPickerView(),
       binding: BookingBinding(),
       transition: Transition.rightToLeft,
     ),
