@@ -1,11 +1,15 @@
 import 'package:get/get.dart';
 import '../../../data/models/booking_model.dart';
+import '../../../data/models/vehicle_type_model.dart';
+import '../../../data/models/coupon_model.dart';
 import '../../../data/repositories/booking_repository.dart';
+import '../../../data/repositories/coupon_repository.dart';
 import '../../../routes/app_routes.dart';
 import '../../../core/constants/app_constants.dart';
 
 class HomeController extends GetxController {
   final BookingRepository _bookingRepository = BookingRepository();
+  final CouponRepository _couponRepository = CouponRepository();
 
   // Active deliveries (in progress)
   final activeDeliveries = <BookingModel>[].obs;
@@ -15,14 +19,59 @@ class HomeController extends GetxController {
   final recentOrders = <BookingModel>[].obs;
   final isLoadingRecent = false.obs;
 
+  // Vehicle types for quick selection
+  final vehicleTypes = <VehicleTypeModel>[].obs;
+  final isLoadingVehicles = false.obs;
+
+  // Available coupons/offers
+  final availableCoupons = <CouponModel>[].obs;
+  final isLoadingCoupons = false.obs;
+
   // Error state
   final errorMessage = Rx<String?>(null);
 
   @override
   void onInit() {
     super.onInit();
+    fetchVehicleTypes();
     fetchActiveDeliveries();
     fetchRecentOrders();
+    fetchAvailableCoupons();
+  }
+
+  /// Fetch available vehicle types
+  Future<void> fetchVehicleTypes() async {
+    try {
+      isLoadingVehicles.value = true;
+      final response = await _bookingRepository.getVehicleTypes();
+      if (response.success && response.data != null) {
+        vehicleTypes.value = response.data!;
+      }
+    } catch (e) {
+      // Silent fail for vehicle types
+    } finally {
+      isLoadingVehicles.value = false;
+    }
+  }
+
+  /// Fetch available coupons for offers section
+  Future<void> fetchAvailableCoupons() async {
+    try {
+      isLoadingCoupons.value = true;
+      final response = await _couponRepository.getAvailableCoupons();
+      if (response.success && response.data != null) {
+        availableCoupons.value = response.data!;
+      }
+    } catch (e) {
+      // Silent fail for coupons
+    } finally {
+      isLoadingCoupons.value = false;
+    }
+  }
+
+  /// Navigate to booking with selected vehicle type
+  void goToCreateBookingWithVehicle(VehicleTypeModel vehicle) {
+    Get.toNamed(Routes.createBooking, arguments: {'selectedVehicle': vehicle});
   }
 
   @override
@@ -84,8 +133,10 @@ class HomeController extends GetxController {
   /// Refresh all data
   Future<void> refreshData() async {
     await Future.wait([
+      fetchVehicleTypes(),
       fetchActiveDeliveries(),
       fetchRecentOrders(),
+      fetchAvailableCoupons(),
     ]);
   }
 
