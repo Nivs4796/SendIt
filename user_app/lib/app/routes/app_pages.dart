@@ -13,6 +13,16 @@ import '../modules/auth/views/profile_setup_view.dart';
 import '../modules/home/bindings/home_binding.dart';
 import '../modules/home/views/main_view.dart';
 
+// Profile Module Imports
+import '../modules/profile/bindings/profile_binding.dart';
+import '../modules/profile/views/profile_view.dart';
+import '../modules/profile/views/edit_profile_view.dart';
+import '../modules/profile/views/addresses_view.dart';
+
+// Wallet Module Imports
+import '../modules/wallet/bindings/wallet_binding.dart';
+import '../modules/wallet/views/wallet_view.dart';
+
 /// Application page configuration for GetX routing
 class AppPages {
   AppPages._();
@@ -59,6 +69,34 @@ class AppPages {
       page: () => const MainView(),
       binding: HomeBinding(),
       transition: Transition.fadeIn,
+    ),
+
+    // Profile Routes
+    GetPage(
+      name: Routes.profile,
+      page: () => const ProfileView(),
+      binding: ProfileBinding(),
+      transition: Transition.rightToLeft,
+    ),
+    GetPage(
+      name: Routes.personalInfo,
+      page: () => const EditProfileView(),
+      binding: ProfileBinding(),
+      transition: Transition.rightToLeft,
+    ),
+    GetPage(
+      name: Routes.savedAddresses,
+      page: () => const AddressesView(),
+      binding: ProfileBinding(),
+      transition: Transition.rightToLeft,
+    ),
+
+    // Wallet Routes
+    GetPage(
+      name: Routes.wallet,
+      page: () => const WalletView(),
+      binding: WalletBinding(),
+      transition: Transition.rightToLeft,
     ),
   ];
 }
