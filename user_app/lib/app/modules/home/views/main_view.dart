@@ -69,11 +69,11 @@ class MainView extends GetView<HomeController> {
                 return const SizedBox.shrink();
               }),
 
+              // Quick Services
+              _buildQuickServicesSection(context),
+
               // Vehicle Type Selection
               _buildVehicleTypeSection(context),
-
-              // Quick Services Grid
-              _buildQuickServicesSection(context),
 
               // Recent Deliveries
               Obx(() {
