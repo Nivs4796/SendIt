@@ -45,6 +45,9 @@ dependencies:
   permission_handler: ^11.3.0
   connectivity_plus: ^5.0.2
 
+  # Image Picker
+  image_picker: ^1.0.7
+
   # Icons
   cupertino_icons: ^1.0.6
   flutter_iconly: ^1.0.2

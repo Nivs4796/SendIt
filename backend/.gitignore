@@ -19,3 +19,6 @@ logs/
 # IDE
 .idea/
 .vscode/
+
+# Uploads (user-generated content)
+uploads/

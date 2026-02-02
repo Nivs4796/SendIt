@@ -1,8 +1,11 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../data/models/user_model.dart';
 import '../../../data/repositories/auth_repository.dart';
+import '../../../data/repositories/upload_repository.dart';
 import '../../../data/providers/api_exceptions.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../routes/app_routes.dart';
@@ -10,16 +13,21 @@ import '../../../services/storage_service.dart';
 
 class AuthController extends GetxController {
   final AuthRepository _authRepository = AuthRepository();
+  final UploadRepository _uploadRepository = UploadRepository();
   final StorageService _storage = Get.find<StorageService>();
+  final ImagePicker _imagePicker = ImagePicker();
 
   // Observable state
   final isLoading = false.obs;
+  final isUploadingAvatar = false.obs;
   final countryCode = '+91'.obs;
   final phone = ''.obs;
   final otp = ''.obs;
   final name = ''.obs;
   final email = ''.obs;
   final errorMessage = ''.obs;
+  final Rx<File?> selectedAvatarFile = Rx<File?>(null);
+  final avatarUrl = ''.obs;
 
   // OTP Timer
   final canResendOtp = false.obs;
@@ -196,9 +204,19 @@ class AuthController extends GetxController {
       isLoading.value = true;
       errorMessage.value = '';
 
+      // Upload avatar first if selected
+      if (selectedAvatarFile.value != null) {
+        final uploaded = await uploadAvatar();
+        if (!uploaded) {
+          isLoading.value = false;
+          return;
+        }
+      }
+
       final response = await _authRepository.updateProfile(
         name: name.value,
         email: email.value.isNotEmpty ? email.value : null,
+        avatar: avatarUrl.value.isNotEmpty ? avatarUrl.value : null,
       );
 
       if (response.success && response.data != null) {
@@ -216,6 +234,128 @@ class AuthController extends GetxController {
     }
   }
 
+  // Pick Avatar from Gallery or Camera
+  Future<void> pickAvatar({bool fromCamera = false}) async {
+    try {
+      final XFile? image = await _imagePicker.pickImage(
+        source: fromCamera ? ImageSource.camera : ImageSource.gallery,
+        maxWidth: 512,
+        maxHeight: 512,
+        imageQuality: 85,
+      );
+
+      if (image != null) {
+        selectedAvatarFile.value = File(image.path);
+      }
+    } catch (e) {
+      errorMessage.value = 'Failed to pick image';
+    }
+  }
+
+  // Show Avatar Source Picker
+  void showAvatarPicker() {
+    Get.bottomSheet(
+      Container(
+        padding: const EdgeInsets.all(24),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Choose Photo',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _buildAvatarOption(
+                  icon: Icons.camera_alt_rounded,
+                  label: 'Camera',
+                  onTap: () {
+                    Get.back();
+                    pickAvatar(fromCamera: true);
+                  },
+                ),
+                _buildAvatarOption(
+                  icon: Icons.photo_library_rounded,
+                  label: 'Gallery',
+                  onTap: () {
+                    Get.back();
+                    pickAvatar(fromCamera: false);
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAvatarOption({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade100,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, size: 28, color: Colors.grey.shade700),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey.shade700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Upload Avatar
+  Future<bool> uploadAvatar() async {
+    if (selectedAvatarFile.value == null) return true; // No avatar to upload
+
+    try {
+      isUploadingAvatar.value = true;
+
+      final response = await _uploadRepository.uploadAvatar(selectedAvatarFile.value!);
+
+      if (response.success && response.data != null) {
+        avatarUrl.value = response.data!;
+        return true;
+      } else {
+        errorMessage.value = response.message ?? 'Failed to upload avatar';
+        return false;
+      }
+    } catch (e) {
+      errorMessage.value = 'Failed to upload avatar';
+      return false;
+    } finally {
+      isUploadingAvatar.value = false;
+    }
+  }
+
   // Logout
   void logout() {
     _authRepository.logout();
@@ -224,6 +364,8 @@ class AuthController extends GetxController {
     otp.value = '';
     name.value = '';
     email.value = '';
+    selectedAvatarFile.value = null;
+    avatarUrl.value = '';
     Get.offAllNamed(Routes.login);
   }
 

@@ -3,6 +3,22 @@ import { z } from 'zod'
 const phoneRegex = /^(\+91)?[6-9]\d{9}$/
 const genders = ['MALE', 'FEMALE', 'OTHER'] as const
 
+// Custom validator for avatar that accepts both full URLs and relative paths
+const avatarSchema = z.string().refine(
+  (val) => {
+    // Accept relative paths starting with /uploads/
+    if (val.startsWith('/uploads/')) return true
+    // Accept full URLs
+    try {
+      new URL(val)
+      return true
+    } catch {
+      return false
+    }
+  },
+  { message: 'Invalid avatar URL or path' }
+)
+
 export const registerPilotSchema = z.object({
   body: z.object({
     phone: z.string().regex(phoneRegex, 'Invalid Indian phone number'),
@@ -17,7 +33,7 @@ export const updatePilotSchema = z.object({
   body: z.object({
     name: z.string().min(2).optional(),
     email: z.string().email().optional(),
-    avatar: z.string().url().optional(),
+    avatar: avatarSchema.optional(),
     dateOfBirth: z.string().datetime().optional(),
     gender: z.enum(genders).optional(),
     aadhaarNumber: z.string().regex(/^\d{12}$/, 'Aadhaar must be 12 digits').optional(),

@@ -108,6 +108,83 @@ class _ProfileSetupContentState extends State<_ProfileSetupContent>
 
                           const SizedBox(height: 32),
 
+                          // Profile Picture with animation
+                          Center(
+                            child: TweenAnimationBuilder<double>(
+                              tween: Tween(begin: 0.8, end: 1.0),
+                              duration: const Duration(milliseconds: 400),
+                              curve: Curves.easeOutBack,
+                              builder: (context, value, child) {
+                                return Transform.scale(
+                                  scale: value,
+                                  child: child,
+                                );
+                              },
+                              child: GestureDetector(
+                                onTap: controller.showAvatarPicker,
+                                child: Obx(() => Stack(
+                                  children: [
+                                    Container(
+                                      width: 100,
+                                      height: 100,
+                                      decoration: BoxDecoration(
+                                        color: AppColors.primaryContainer,
+                                        shape: BoxShape.circle,
+                                        border: Border.all(
+                                          color: AppColors.primary.withValues(alpha: 0.3),
+                                          width: 3,
+                                        ),
+                                        image: controller.selectedAvatarFile.value != null
+                                            ? DecorationImage(
+                                                image: FileImage(controller.selectedAvatarFile.value!),
+                                                fit: BoxFit.cover,
+                                              )
+                                            : null,
+                                      ),
+                                      child: controller.selectedAvatarFile.value == null
+                                          ? const Icon(
+                                              Icons.person_rounded,
+                                              size: 50,
+                                              color: AppColors.primary,
+                                            )
+                                          : null,
+                                    ),
+                                    Positioned(
+                                      bottom: 0,
+                                      right: 0,
+                                      child: Container(
+                                        width: 36,
+                                        height: 36,
+                                        decoration: BoxDecoration(
+                                          color: AppColors.primary,
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                            color: AppColors.white,
+                                            width: 3,
+                                          ),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: AppColors.primary.withValues(alpha: 0.3),
+                                              blurRadius: 8,
+                                              offset: const Offset(0, 2),
+                                            ),
+                                          ],
+                                        ),
+                                        child: const Icon(
+                                          Icons.camera_alt_rounded,
+                                          size: 18,
+                                          color: AppColors.white,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                )),
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 32),
+
                           // Name Input - Using AppTextField.name
                           Obx(() => AppTextField.name(
                             controller: _nameController,

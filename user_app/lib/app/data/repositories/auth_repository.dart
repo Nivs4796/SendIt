@@ -82,10 +82,12 @@ class AuthRepository {
   Future<ApiResponse<UserModel>> updateProfile({
     String? name,
     String? email,
+    String? avatar,
   }) async {
     final data = <String, dynamic>{};
     if (name != null) data['name'] = name;
     if (email != null) data['email'] = email;
+    if (avatar != null) data['avatar'] = avatar;
 
     final response = await _apiClient.patch(
       ApiConstants.userProfile,
