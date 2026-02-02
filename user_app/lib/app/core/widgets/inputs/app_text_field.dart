@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../theme/app_colors.dart';
 import '../../theme/app_text_styles.dart';
 import '../../theme/app_theme.dart';
 
@@ -267,7 +266,9 @@ class _AppTextFieldState extends State<AppTextField> {
           Text(
             widget.label!,
             style: AppTextStyles.labelMedium.copyWith(
-              color: hasError ? AppColors.error : AppColors.textPrimary,
+              color: hasError
+                  ? Theme.of(context).colorScheme.error
+                  : Theme.of(context).colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 8),
@@ -278,16 +279,16 @@ class _AppTextFieldState extends State<AppTextField> {
             borderRadius: BorderRadius.circular(widget.borderRadius ?? AppTheme.radiusMedium),
             border: Border.all(
               color: hasError
-                  ? AppColors.error
+                  ? Theme.of(context).colorScheme.error
                   : _isFocused
-                      ? (widget.focusedBorderColor ?? AppColors.primary)
-                      : (widget.borderColor ?? AppColors.grey300),
+                      ? (widget.focusedBorderColor ?? Theme.of(context).colorScheme.primary)
+                      : (widget.borderColor ?? Theme.of(context).dividerColor),
               width: _isFocused || hasError ? 2.0 : 1.5,
             ),
             boxShadow: _isFocused
                 ? [
                     BoxShadow(
-                      color: (hasError ? AppColors.error : AppColors.primary).withValues(alpha: 0.1),
+                      color: (hasError ? Theme.of(context).colorScheme.error : Theme.of(context).colorScheme.primary).withValues(alpha: 0.1),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -297,7 +298,7 @@ class _AppTextFieldState extends State<AppTextField> {
           child: ClipRRect(
             borderRadius: BorderRadius.circular((widget.borderRadius ?? AppTheme.radiusMedium) - 2),
             child: Container(
-              color: widget.fillColor ?? AppColors.white,
+              color: widget.fillColor ?? Theme.of(context).colorScheme.surface,
               child: TextField(
             controller: widget.controller,
             focusNode: _focusNode,
@@ -318,7 +319,7 @@ class _AppTextFieldState extends State<AppTextField> {
             onSubmitted: widget.onSubmitted,
             decoration: InputDecoration(
               hintText: widget.hint,
-              hintStyle: AppTextStyles.bodyLarge.copyWith(color: AppColors.textHint),
+              hintStyle: AppTextStyles.bodyLarge.copyWith(color: Theme.of(context).hintColor),
               counterText: '',
               border: InputBorder.none,
               enabledBorder: InputBorder.none,
@@ -339,12 +340,12 @@ class _AppTextFieldState extends State<AppTextField> {
           const SizedBox(height: 6),
           Row(
             children: [
-              const Icon(Icons.error_outline_rounded, size: 14, color: AppColors.error),
+              Icon(Icons.error_outline_rounded, size: 14, color: Theme.of(context).colorScheme.error),
               const SizedBox(width: 4),
               Expanded(
                 child: Text(
                   widget.errorText!,
-                  style: AppTextStyles.caption.copyWith(color: AppColors.error),
+                  style: AppTextStyles.caption.copyWith(color: Theme.of(context).colorScheme.error),
                 ),
               ),
             ],
@@ -353,7 +354,7 @@ class _AppTextFieldState extends State<AppTextField> {
           const SizedBox(height: 6),
           Text(
             widget.helperText!,
-            style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
+            style: AppTextStyles.caption.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
           ),
         ],
       ],
@@ -369,7 +370,9 @@ class _AppTextFieldState extends State<AppTextField> {
           Text(
             widget.label!,
             style: AppTextStyles.labelMedium.copyWith(
-              color: hasError ? AppColors.error : AppColors.textPrimary,
+              color: hasError
+                  ? Theme.of(context).colorScheme.error
+                  : Theme.of(context).colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 8),
@@ -380,15 +383,15 @@ class _AppTextFieldState extends State<AppTextField> {
             borderRadius: BorderRadius.circular(widget.borderRadius ?? AppTheme.radiusMedium),
             border: Border.all(
               color: hasError
-                  ? AppColors.error
+                  ? Theme.of(context).colorScheme.error
                   : _isFocused
-                      ? (widget.focusedBorderColor ?? AppColors.primary)
-                      : (widget.borderColor ?? AppColors.grey300),
+                      ? (widget.focusedBorderColor ?? Theme.of(context).colorScheme.primary)
+                      : (widget.borderColor ?? Theme.of(context).dividerColor),
               width: _isFocused || hasError ? 2.0 : 2.0,
             ),
             boxShadow: [
               BoxShadow(
-                color: AppColors.black.withValues(alpha: 0.06),
+                color: Theme.of(context).shadowColor.withValues(alpha: 0.06),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -397,15 +400,18 @@ class _AppTextFieldState extends State<AppTextField> {
           child: ClipRRect(
             borderRadius: BorderRadius.circular((widget.borderRadius ?? AppTheme.radiusMedium) - 2),
             child: Container(
-              color: widget.fillColor ?? AppColors.white,
+              color: widget.fillColor ?? Theme.of(context).colorScheme.surface,
               child: Row(
                 children: [
                   // Country Code
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       border: Border(
-                        right: BorderSide(color: AppColors.grey300, width: 1.5),
+                        right: BorderSide(
+                          color: Theme.of(context).dividerColor,
+                          width: 1.5,
+                        ),
                       ),
                     ),
                     child: Row(
@@ -418,7 +424,7 @@ class _AppTextFieldState extends State<AppTextField> {
                           widget.countryCode ?? '+91',
                           style: AppTextStyles.bodyLarge.copyWith(
                             fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
                       ],
@@ -445,7 +451,7 @@ class _AppTextFieldState extends State<AppTextField> {
                       onSubmitted: widget.onSubmitted,
                       decoration: InputDecoration(
                         hintText: widget.hint,
-                        hintStyle: AppTextStyles.bodyLarge.copyWith(color: AppColors.textHint),
+                        hintStyle: AppTextStyles.bodyLarge.copyWith(color: Theme.of(context).hintColor),
                         counterText: '',
                         border: InputBorder.none,
                         enabledBorder: InputBorder.none,
@@ -464,12 +470,12 @@ class _AppTextFieldState extends State<AppTextField> {
           const SizedBox(height: 6),
           Row(
             children: [
-              const Icon(Icons.error_outline_rounded, size: 14, color: AppColors.error),
+              Icon(Icons.error_outline_rounded, size: 14, color: Theme.of(context).colorScheme.error),
               const SizedBox(width: 4),
               Expanded(
                 child: Text(
                   widget.errorText!,
-                  style: AppTextStyles.caption.copyWith(color: AppColors.error),
+                  style: AppTextStyles.caption.copyWith(color: Theme.of(context).colorScheme.error),
                 ),
               ),
             ],
@@ -478,7 +484,7 @@ class _AppTextFieldState extends State<AppTextField> {
           const SizedBox(height: 6),
           Text(
             widget.helperText!,
-            style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
+            style: AppTextStyles.caption.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
           ),
         ],
       ],
@@ -490,7 +496,7 @@ class _AppTextFieldState extends State<AppTextField> {
       return IconButton(
         icon: Icon(
           _obscureText ? Icons.visibility_outlined : Icons.visibility_off_outlined,
-          color: AppColors.textSecondary,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
         ),
         onPressed: () {
           setState(() {

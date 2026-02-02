@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/constants/api_constants.dart';
+import '../../../core/controllers/theme_controller.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../routes/app_routes.dart';
@@ -81,6 +82,11 @@ class ProfileView extends GetView<ProfileController> {
                   ),
                 ],
               ),
+
+              const SizedBox(height: 16),
+
+              // Settings Section
+              _buildSettingsSection(context),
 
               const SizedBox(height: 16),
 
@@ -315,6 +321,152 @@ class ProfileView extends GetView<ProfileController> {
     // Remove '/api/v1' from baseUrl and append avatar path
     final baseUrl = ApiConstants.baseUrl.replaceAll('/api/v1', '');
     return '$baseUrl$avatar';
+  }
+
+  Widget _buildSettingsSection(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+            child: Text(
+              'Settings',
+              style: AppTextStyles.labelLarge.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ),
+          Obx(() => ListTile(
+                leading: Icon(
+                  ThemeController.to.themeIcon,
+                  color: Theme.of(context).colorScheme.primary,
+                  size: 24,
+                ),
+                title: Text(
+                  'Theme',
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: Theme.of(context).textTheme.bodyLarge?.color,
+                  ),
+                ),
+                subtitle: Text(
+                  ThemeController.to.themeModeName,
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                trailing: const Icon(
+                  Icons.chevron_right_rounded,
+                  color: AppColors.textSecondary,
+                  size: 24,
+                ),
+                onTap: () => _showThemeSelector(context),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+              )),
+        ],
+      ),
+    );
+  }
+
+  void _showThemeSelector(BuildContext context) {
+    Get.bottomSheet(
+      Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: Theme.of(context).scaffoldBackgroundColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Choose Theme',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+            ),
+            const SizedBox(height: 16),
+            Obx(() => _buildThemeOption(
+                  context,
+                  icon: Icons.dark_mode_rounded,
+                  title: 'Dark',
+                  subtitle: 'Always use dark theme',
+                  isSelected:
+                      ThemeController.to.themeMode.value == ThemeMode.dark,
+                  onTap: () {
+                    ThemeController.to.setDark();
+                    Get.back();
+                  },
+                )),
+            Obx(() => _buildThemeOption(
+                  context,
+                  icon: Icons.light_mode_rounded,
+                  title: 'Light',
+                  subtitle: 'Always use light theme',
+                  isSelected:
+                      ThemeController.to.themeMode.value == ThemeMode.light,
+                  onTap: () {
+                    ThemeController.to.setLight();
+                    Get.back();
+                  },
+                )),
+            Obx(() => _buildThemeOption(
+                  context,
+                  icon: Icons.brightness_auto_rounded,
+                  title: 'System',
+                  subtitle: 'Follow system settings',
+                  isSelected:
+                      ThemeController.to.themeMode.value == ThemeMode.system,
+                  onTap: () {
+                    ThemeController.to.setSystem();
+                    Get.back();
+                  },
+                )),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildThemeOption(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return ListTile(
+      leading: Icon(
+        icon,
+        color: isSelected
+            ? Theme.of(context).colorScheme.primary
+            : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+      ),
+      title: Text(title),
+      subtitle: Text(subtitle),
+      trailing: isSelected
+          ? Icon(
+              Icons.check_circle_rounded,
+              color: Theme.of(context).colorScheme.primary,
+            )
+          : null,
+      onTap: onTap,
+    );
   }
 
   void _showComingSoon(String feature) {

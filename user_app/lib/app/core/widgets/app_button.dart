@@ -5,6 +5,7 @@ import '../theme/app_theme.dart';
 
 /// Configurable button widget with multiple variants
 /// Primary, Secondary, Outline, Text, and Icon button types
+/// Theme-aware: adapts colors based on light/dark mode
 class AppButton extends StatelessWidget {
   final String? text;
   final VoidCallback? onPressed;
@@ -20,6 +21,7 @@ class AppButton extends StatelessWidget {
   final Color? borderColor;
   final double? borderRadius;
   final EdgeInsets? padding;
+  final bool isDanger;
 
   const AppButton({
     super.key,
@@ -37,6 +39,7 @@ class AppButton extends StatelessWidget {
     this.borderColor,
     this.borderRadius,
     this.padding,
+    this.isDanger = false,
   });
 
   // Named constructors for common variants
@@ -55,7 +58,8 @@ class AppButton extends StatelessWidget {
     this.borderColor,
     this.borderRadius,
     this.padding,
-  }) : variant = AppButtonVariant.primary;
+  })  : variant = AppButtonVariant.primary,
+        isDanger = false;
 
   const AppButton.secondary({
     super.key,
@@ -72,7 +76,8 @@ class AppButton extends StatelessWidget {
     this.borderColor,
     this.borderRadius,
     this.padding,
-  }) : variant = AppButtonVariant.secondary;
+  })  : variant = AppButtonVariant.secondary,
+        isDanger = false;
 
   const AppButton.outline({
     super.key,
@@ -89,7 +94,8 @@ class AppButton extends StatelessWidget {
     this.borderColor,
     this.borderRadius,
     this.padding,
-  }) : variant = AppButtonVariant.outline;
+  })  : variant = AppButtonVariant.outline,
+        isDanger = false;
 
   const AppButton.text({
     super.key,
@@ -106,7 +112,8 @@ class AppButton extends StatelessWidget {
     this.borderColor,
     this.borderRadius,
     this.padding,
-  }) : variant = AppButtonVariant.text;
+  })  : variant = AppButtonVariant.text,
+        isDanger = false;
 
   const AppButton.icon({
     super.key,
@@ -123,7 +130,8 @@ class AppButton extends StatelessWidget {
   })  : variant = AppButtonVariant.icon,
         text = null,
         suffixIcon = null,
-        isFullWidth = false;
+        isFullWidth = false,
+        isDanger = false;
 
   // Danger/destructive button
   const AppButton.danger({
@@ -141,7 +149,8 @@ class AppButton extends StatelessWidget {
     this.padding,
   })  : variant = AppButtonVariant.primary,
         backgroundColor = AppColors.error,
-        textColor = AppColors.white;
+        textColor = AppColors.white,
+        isDanger = true;
 
   @override
   Widget build(BuildContext context) {

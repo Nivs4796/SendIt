@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
+import 'app/core/controllers/theme_controller.dart';
 import 'app/core/theme/app_theme.dart';
 import 'app/routes/app_pages.dart';
 import 'app/services/storage_service.dart';
@@ -36,6 +37,9 @@ void main() async {
 Future<void> initServices() async {
   // Initialize storage service
   await Get.putAsync(() => StorageService().init());
+
+  // Initialize theme controller
+  Get.put(ThemeController());
 }
 
 class SendItApp extends StatelessWidget {
@@ -43,15 +47,15 @@ class SendItApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
+    return Obx(() => GetMaterialApp(
       title: 'SendIt',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.light,
+      themeMode: ThemeController.to.themeMode.value,
       initialRoute: AppPages.initial,
       getPages: AppPages.routes,
       defaultTransition: Transition.cupertino,
-    );
+    ));
   }
 }

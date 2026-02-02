@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 
 /// Configurable text widget with predefined style variants
 /// Uses AppTextStyles for consistent typography across the app
+/// Theme-aware: adapts colors based on light/dark mode
 class AppText extends StatelessWidget {
   final String text;
   final AppTextVariant variant;
@@ -15,6 +15,8 @@ class AppText extends StatelessWidget {
   final double? letterSpacing;
   final FontWeight? fontWeight;
   final TextDecoration? decoration;
+  final bool _isErrorText;
+  final bool _isSecondaryText;
 
   const AppText(
     this.text, {
@@ -28,60 +30,73 @@ class AppText extends StatelessWidget {
     this.letterSpacing,
     this.fontWeight,
     this.decoration,
-  });
+  })  : _isErrorText = false,
+        _isSecondaryText = false;
 
   // Named constructors for common variants
   const AppText.h1(this.text, {super.key, this.color, this.textAlign, this.maxLines, this.overflow, this.softWrap, this.letterSpacing, this.fontWeight, this.decoration})
-      : variant = AppTextVariant.h1;
+      : variant = AppTextVariant.h1, _isErrorText = false, _isSecondaryText = false;
 
   const AppText.h2(this.text, {super.key, this.color, this.textAlign, this.maxLines, this.overflow, this.softWrap, this.letterSpacing, this.fontWeight, this.decoration})
-      : variant = AppTextVariant.h2;
+      : variant = AppTextVariant.h2, _isErrorText = false, _isSecondaryText = false;
 
   const AppText.h3(this.text, {super.key, this.color, this.textAlign, this.maxLines, this.overflow, this.softWrap, this.letterSpacing, this.fontWeight, this.decoration})
-      : variant = AppTextVariant.h3;
+      : variant = AppTextVariant.h3, _isErrorText = false, _isSecondaryText = false;
 
   const AppText.h4(this.text, {super.key, this.color, this.textAlign, this.maxLines, this.overflow, this.softWrap, this.letterSpacing, this.fontWeight, this.decoration})
-      : variant = AppTextVariant.h4;
+      : variant = AppTextVariant.h4, _isErrorText = false, _isSecondaryText = false;
 
   const AppText.bodyLarge(this.text, {super.key, this.color, this.textAlign, this.maxLines, this.overflow, this.softWrap, this.letterSpacing, this.fontWeight, this.decoration})
-      : variant = AppTextVariant.bodyLarge;
+      : variant = AppTextVariant.bodyLarge, _isErrorText = false, _isSecondaryText = false;
 
   const AppText.bodyMedium(this.text, {super.key, this.color, this.textAlign, this.maxLines, this.overflow, this.softWrap, this.letterSpacing, this.fontWeight, this.decoration})
-      : variant = AppTextVariant.bodyMedium;
+      : variant = AppTextVariant.bodyMedium, _isErrorText = false, _isSecondaryText = false;
 
   const AppText.bodySmall(this.text, {super.key, this.color, this.textAlign, this.maxLines, this.overflow, this.softWrap, this.letterSpacing, this.fontWeight, this.decoration})
-      : variant = AppTextVariant.bodySmall;
+      : variant = AppTextVariant.bodySmall, _isErrorText = false, _isSecondaryText = false;
 
   const AppText.label(this.text, {super.key, this.color, this.textAlign, this.maxLines, this.overflow, this.softWrap, this.letterSpacing, this.fontWeight, this.decoration})
-      : variant = AppTextVariant.labelMedium;
+      : variant = AppTextVariant.labelMedium, _isErrorText = false, _isSecondaryText = false;
 
   const AppText.caption(this.text, {super.key, this.color, this.textAlign, this.maxLines, this.overflow, this.softWrap, this.letterSpacing, this.fontWeight, this.decoration})
-      : variant = AppTextVariant.caption;
+      : variant = AppTextVariant.caption, _isErrorText = false, _isSecondaryText = false;
 
   const AppText.button(this.text, {super.key, this.color, this.textAlign, this.maxLines, this.overflow, this.softWrap, this.letterSpacing, this.fontWeight, this.decoration})
-      : variant = AppTextVariant.button;
+      : variant = AppTextVariant.button, _isErrorText = false, _isSecondaryText = false;
 
   const AppText.price(this.text, {super.key, this.color, this.textAlign, this.maxLines, this.overflow, this.softWrap, this.letterSpacing, this.fontWeight, this.decoration})
-      : variant = AppTextVariant.price;
+      : variant = AppTextVariant.price, _isErrorText = false, _isSecondaryText = false;
 
-  // Error text helper
+  // Error text helper - uses theme error color
   const AppText.error(this.text, {super.key, this.textAlign, this.maxLines, this.overflow, this.softWrap, this.letterSpacing, this.fontWeight, this.decoration})
       : variant = AppTextVariant.bodySmall,
-        color = AppColors.error;
+        color = null,
+        _isErrorText = true,
+        _isSecondaryText = false;
 
-  // Secondary text helper
+  // Secondary text helper - uses theme secondary color
   const AppText.secondary(this.text, {super.key, this.textAlign, this.maxLines, this.overflow, this.softWrap, this.letterSpacing, this.fontWeight, this.decoration})
       : variant = AppTextVariant.bodyMedium,
-        color = AppColors.textSecondary;
+        color = null,
+        _isErrorText = false,
+        _isSecondaryText = true;
 
   @override
   Widget build(BuildContext context) {
     TextStyle baseStyle = _getBaseStyle();
 
+    // Determine the effective color
+    Color? effectiveColor = color;
+    if (_isErrorText) {
+      effectiveColor = Theme.of(context).colorScheme.error;
+    } else if (_isSecondaryText) {
+      effectiveColor = Theme.of(context).colorScheme.onSurfaceVariant;
+    }
+
     // Apply overrides
-    if (color != null || letterSpacing != null || fontWeight != null || decoration != null) {
+    if (effectiveColor != null || letterSpacing != null || fontWeight != null || decoration != null) {
       baseStyle = baseStyle.copyWith(
-        color: color,
+        color: effectiveColor,
         letterSpacing: letterSpacing,
         fontWeight: fontWeight,
         decoration: decoration,
