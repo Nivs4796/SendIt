@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../core/theme/app_text_styles.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/theme/app_text_styles.dart';
 import '../../../data/models/booking_model.dart';
+import '../../../data/models/coupon_model.dart';
 import '../controllers/home_controller.dart';
+import '../widgets/offer_details_sheet.dart';
 
 class MainView extends GetView<HomeController> {
   const MainView({super.key});
@@ -15,7 +17,13 @@ class MainView extends GetView<HomeController> {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('SendIt'),
+        title: Text(
+          'SendIt',
+          style: AppTextStyles.h4.copyWith(
+            color: theme.colorScheme.onSurface,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications_outlined),
@@ -41,532 +49,699 @@ class MainView extends GetView<HomeController> {
         onRefresh: controller.refreshData,
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Welcome Card with Book Now CTA
-              _buildWelcomeCard(context),
-              const SizedBox(height: 24),
+              // Location Selection Card
+              _buildLocationCard(context),
 
-              // Active Deliveries Section
+              // Offers Banner Section
+              _buildOffersBanner(context),
+
+              // Active Delivery Section - Show after offers
               Obx(() {
                 if (controller.isLoadingActive.value) {
                   return _buildActiveDeliveriesLoading(context);
                 }
                 if (controller.activeDeliveries.isNotEmpty) {
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildSectionHeader(
-                        context,
-                        'Active Deliveries',
-                        onViewAll: controller.goToOrders,
-                      ),
-                      const SizedBox(height: 12),
-                      ...controller.activeDeliveries
-                          .take(3)
-                          .map((booking) => _buildActiveDeliveryCard(context, booking)),
-                      const SizedBox(height: 24),
-                    ],
-                  );
+                  return _buildActiveDeliverySection(context);
                 }
                 return const SizedBox.shrink();
               }),
 
-              // Quick Actions Section
-              Text(
-                'Quick Actions',
-                style: AppTextStyles.h4.copyWith(
-                  color: theme.colorScheme.onSurface,
-                ),
-              ),
-              const SizedBox(height: 16),
-              _buildQuickActionsGrid(context),
-              const SizedBox(height: 24),
+              // Vehicle Type Selection
+              _buildVehicleTypeSection(context),
 
-              // Recent Orders Section
+              // Quick Services Grid
+              _buildQuickServicesSection(context),
+
+              // Recent Deliveries
               Obx(() {
                 if (controller.recentOrders.isNotEmpty) {
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildSectionHeader(
-                        context,
-                        'Recent Orders',
-                        onViewAll: controller.goToOrders,
-                      ),
-                      const SizedBox(height: 12),
-                      ...controller.recentOrders
-                          .map((order) => _buildRecentOrderCard(context, order)),
-                    ],
-                  );
+                  return _buildRecentDeliveriesSection(context);
                 }
                 return const SizedBox.shrink();
               }),
+
+              const SizedBox(height: 24), // Bottom padding
             ],
           ),
         ),
       ),
-      // Floating Action Button for quick booking
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: controller.goToCreateBooking,
-        backgroundColor: theme.colorScheme.primary,
-        foregroundColor: theme.colorScheme.onPrimary,
-        icon: const Icon(Icons.add),
-        label: const Text('Book Now'),
-      ),
     );
   }
 
-  Widget _buildWelcomeCard(BuildContext context) {
+  Widget _buildLocationCard(BuildContext context) {
     final theme = Theme.of(context);
 
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(24),
+      margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [theme.colorScheme.primary, const Color(0xFF059669)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: theme.colorScheme.primary.withValues(alpha: 0.3),
-            blurRadius: 12,
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 10,
             offset: const Offset(0, 4),
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Send Anything,\nAnywhere',
-                      style: AppTextStyles.h2.copyWith(
-                        color: Colors.white,
-                        fontSize: 24,
-                        height: 1.2,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Fast & reliable delivery at your fingertips',
-                      style: AppTextStyles.bodyMedium.copyWith(
-                        color: Colors.white.withValues(alpha: 0.9),
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  Icons.local_shipping_outlined,
-                  color: Colors.white,
-                  size: 40,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: controller.goToCreateBooking,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-                foregroundColor: theme.colorScheme.primary,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                elevation: 0,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.add_circle_outline, size: 20),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Create New Booking',
-                    style: AppTextStyles.labelLarge.copyWith(
-                      color: theme.colorScheme.primary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSectionHeader(
-    BuildContext context,
-    String title, {
-    VoidCallback? onViewAll,
-  }) {
-    final theme = Theme.of(context);
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          title,
-          style: AppTextStyles.h4.copyWith(
-            color: theme.colorScheme.onSurface,
-          ),
-        ),
-        if (onViewAll != null)
-          TextButton(
-            onPressed: onViewAll,
-            child: Text(
-              'View All',
-              style: AppTextStyles.labelMedium.copyWith(
-                color: theme.colorScheme.primary,
-              ),
-            ),
-          ),
-      ],
-    );
-  }
-
-  Widget _buildActiveDeliveriesLoading(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
-      height: 120,
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: theme.dividerColor),
-      ),
-      child: const Center(
-        child: CircularProgressIndicator(),
-      ),
-    );
-  }
-
-  Widget _buildActiveDeliveryCard(BuildContext context, BookingModel booking) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: theme.colorScheme.primary.withValues(alpha: 0.3),
-          width: 1.5,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: theme.colorScheme.primary.withValues(alpha: isDark ? 0.1 : 0.08),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () => controller.goToTracking(booking.id),
-          borderRadius: BorderRadius.circular(12),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: _getStatusColor(booking.status).withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            _getStatusIcon(booking.status),
-                            size: 14,
-                            color: _getStatusColor(booking.status),
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            controller.getStatusText(booking.status),
-                            style: AppTextStyles.labelSmall.copyWith(
-                              color: _getStatusColor(booking.status),
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const Spacer(),
-                    Text(
-                      '#${booking.bookingNumber.length > 8 ? booking.bookingNumber.substring(0, 8).toUpperCase() : booking.bookingNumber.toUpperCase()}',
-                      style: AppTextStyles.caption.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.circle,
-                      size: 10,
-                      color: theme.colorScheme.primary,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        booking.pickupAddress?.shortAddress ?? 'Pickup Location',
-                        style: AppTextStyles.bodySmall.copyWith(
-                          color: theme.colorScheme.onSurface,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 4),
-                  child: Icon(
-                    Icons.more_vert,
-                    size: 16,
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.location_on,
-                      size: 10,
-                      color: theme.colorScheme.error,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        booking.dropAddress?.shortAddress ?? 'Drop Location',
-                        style: AppTextStyles.bodySmall.copyWith(
-                          color: theme.colorScheme.onSurface,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.route,
-                      size: 14,
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      '${booking.distance.toStringAsFixed(1)} km',
-                      style: AppTextStyles.caption.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Text(
-                      booking.amountDisplay,
-                      style: AppTextStyles.labelMedium.copyWith(
-                        color: theme.colorScheme.primary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const Spacer(),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.primary,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            'Track',
-                            style: AppTextStyles.labelSmall.copyWith(
-                              color: theme.colorScheme.onPrimary,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                          Icon(
-                            Icons.arrow_forward,
-                            size: 14,
-                            color: theme.colorScheme.onPrimary,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildQuickActionsGrid(BuildContext context) {
-    return GridView.count(
-      crossAxisCount: 2,
-      mainAxisSpacing: 12,
-      crossAxisSpacing: 12,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      childAspectRatio: 1.1,
-      children: [
-        _QuickActionCard(
-          icon: Icons.local_shipping,
-          title: 'Book Now',
-          subtitle: 'Send a package',
           onTap: controller.goToCreateBooking,
-        ),
-        _QuickActionCard(
-          icon: Icons.history,
-          title: 'My Orders',
-          subtitle: 'View order history',
-          onTap: controller.goToOrders,
-        ),
-        _QuickActionCard(
-          icon: Icons.account_balance_wallet,
-          title: 'Wallet',
-          subtitle: 'Manage payments',
-          onTap: controller.goToWallet,
-        ),
-        _QuickActionCard(
-          icon: Icons.location_on,
-          title: 'Addresses',
-          subtitle: 'Saved locations',
-          onTap: controller.goToAddresses,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildRecentOrderCard(BuildContext context, BookingModel order) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: theme.dividerColor),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () => controller.goToOrderDetails(order.id),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(20),
             child: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(10),
+                  padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.primaryContainer,
-                    borderRadius: BorderRadius.circular(10),
+                    color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
-                    Icons.check_circle_outline,
+                    Icons.local_shipping,
                     color: theme.colorScheme.primary,
-                    size: 24,
+                    size: 28,
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 16),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        order.dropAddress?.shortAddress ?? 'Delivered',
-                        style: AppTextStyles.labelMedium.copyWith(
+                        'Send a package',
+                        style: AppTextStyles.h4.copyWith(
                           color: theme.colorScheme.onSurface,
+                          fontWeight: FontWeight.bold,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        _formatDate(order.createdAt),
-                        style: AppTextStyles.caption.copyWith(
+                        'Fast & reliable delivery',
+                        style: AppTextStyles.bodySmall.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ],
                   ),
                 ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
+                Icon(
+                  Icons.arrow_forward_ios,
+                  color: theme.colorScheme.primary,
+                  size: 18,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOffersBanner(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
+          child: Text(
+            'Offers & Deals',
+            style: AppTextStyles.h4.copyWith(
+              color: theme.colorScheme.onSurface,
+            ),
+          ),
+        ),
+        SizedBox(
+          height: 140,
+          child: Obx(() {
+            if (controller.isLoadingCoupons.value) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            if (controller.availableCoupons.isEmpty) {
+              return Center(
+                child: Text(
+                  'No offers available',
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              );
+            }
+
+            return ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              itemCount: controller.availableCoupons.length,
+              itemBuilder: (context, index) {
+                final coupon = controller.availableCoupons[index];
+                return _buildDynamicOfferCard(context, coupon, index);
+              },
+            );
+          }),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDynamicOfferCard(BuildContext context, CouponModel coupon, int index) {
+    final gradientColors = coupon.getBannerGradient(index);
+
+    return Container(
+      width: 220,
+      margin: const EdgeInsets.symmetric(horizontal: 4),
+      child: Material(
+        borderRadius: BorderRadius.circular(16),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: () => OfferDetailsSheet.show(context, coupon, gradientColors),
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: gradientColors,
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      order.amountDisplay,
-                      style: AppTextStyles.labelLarge.copyWith(
-                        color: theme.colorScheme.onSurface,
-                        fontWeight: FontWeight.w600,
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Icon(
+                        coupon.bannerIcon,
+                        color: Colors.white,
+                        size: 24,
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    TextButton(
-                      onPressed: () => controller.goToOrderDetails(order.id),
-                      style: TextButton.styleFrom(
-                        padding: EdgeInsets.zero,
-                        minimumSize: Size.zero,
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.25),
+                        borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
-                        'Rebook',
-                        style: AppTextStyles.labelSmall.copyWith(
-                          color: theme.colorScheme.primary,
+                        coupon.code,
+                        style: AppTextStyles.caption.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 10,
                         ),
                       ),
+                    ),
+                  ],
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      coupon.bannerTitle,
+                      style: AppTextStyles.h3.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      coupon.bannerSubtitle,
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: Colors.white.withValues(alpha: 0.9),
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildVehicleTypeSection(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
+          child: Text(
+            'Choose Vehicle',
+            style: AppTextStyles.h4.copyWith(
+              color: theme.colorScheme.onSurface,
+            ),
+          ),
+        ),
+        SizedBox(
+          height: 120,
+          child: Obx(() {
+            if (controller.isLoadingVehicles.value) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            if (controller.vehicleTypes.isEmpty) {
+              // Show default vehicle types
+              return ListView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                children: [
+                  _VehicleTypeCard(
+                    icon: Icons.two_wheeler,
+                    name: 'Bike',
+                    description: 'Up to 10 kg',
+                    price: '₹30',
+                    onTap: controller.goToCreateBooking,
+                  ),
+                  _VehicleTypeCard(
+                    icon: Icons.electric_rickshaw,
+                    name: 'Auto',
+                    description: 'Up to 50 kg',
+                    price: '₹50',
+                    onTap: controller.goToCreateBooking,
+                  ),
+                  _VehicleTypeCard(
+                    icon: Icons.local_shipping,
+                    name: 'Mini Truck',
+                    description: 'Up to 200 kg',
+                    price: '₹100',
+                    onTap: controller.goToCreateBooking,
+                  ),
+                  _VehicleTypeCard(
+                    icon: Icons.fire_truck,
+                    name: 'Truck',
+                    description: 'Up to 500 kg',
+                    price: '₹200',
+                    onTap: controller.goToCreateBooking,
+                  ),
+                ],
+              );
+            }
+
+            return ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              itemCount: controller.vehicleTypes.length,
+              itemBuilder: (context, index) {
+                final vehicle = controller.vehicleTypes[index];
+                return _VehicleTypeCard(
+                  icon: _getVehicleIcon(vehicle.name),
+                  name: vehicle.name,
+                  description: vehicle.weightDisplay,
+                  price: vehicle.basePriceDisplay,
+                  onTap: () => controller.goToCreateBookingWithVehicle(vehicle),
+                );
+              },
+            );
+          }),
+        ),
+      ],
+    );
+  }
+
+  IconData _getVehicleIcon(String name) {
+    final nameLower = name.toLowerCase();
+    if (nameLower.contains('bike') || nameLower.contains('two')) {
+      return Icons.two_wheeler;
+    } else if (nameLower.contains('auto') || nameLower.contains('three')) {
+      return Icons.electric_rickshaw;
+    } else if (nameLower.contains('mini') || nameLower.contains('small')) {
+      return Icons.local_shipping;
+    } else if (nameLower.contains('truck') || nameLower.contains('large')) {
+      return Icons.fire_truck;
+    }
+    return Icons.local_shipping;
+  }
+
+  Widget _buildActiveDeliveriesLoading(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
+      child: Container(
+        height: 100,
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: const Center(child: CircularProgressIndicator()),
+      ),
+    );
+  }
+
+  Widget _buildActiveDeliverySection(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 20, 16, 0),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: 0.3),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: Colors.orange.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(
+                      Icons.local_shipping,
+                      color: Colors.orange,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    'Active Delivery',
+                    style: AppTextStyles.h4.copyWith(
+                      color: theme.colorScheme.onSurface,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              TextButton(
+                onPressed: controller.goToOrders,
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.1),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+                child: Text(
+                  'View All',
+                  style: AppTextStyles.labelMedium.copyWith(
+                    color: theme.colorScheme.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          // Show only first active delivery in compact form
+          ...controller.activeDeliveries
+              .take(1)
+              .map((booking) => _buildCompactActiveDeliveryCard(context, booking)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCompactActiveDeliveryCard(BuildContext context, BookingModel booking) {
+    final theme = Theme.of(context);
+
+    return InkWell(
+      onTap: () => controller.goToTracking(booking.id),
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: theme.cardColor,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: theme.dividerColor),
+        ),
+        child: Row(
+          children: [
+            // Status indicator
+            Container(
+              width: 8,
+              height: 50,
+              decoration: BoxDecoration(
+                color: _getStatusColor(booking.status),
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+            const SizedBox(width: 12),
+            // Route info
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: _getStatusColor(booking.status).withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          controller.getStatusText(booking.status),
+                          style: AppTextStyles.caption.copyWith(
+                            color: _getStatusColor(booking.status),
+                            fontWeight: FontWeight.w600,
+                            fontSize: 10,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        '#${booking.bookingNumber.length > 6 ? booking.bookingNumber.substring(0, 6).toUpperCase() : booking.bookingNumber.toUpperCase()}',
+                        style: AppTextStyles.caption.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                          fontSize: 10,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '${booking.pickupAddress?.shortAddress ?? "Pickup"} → ${booking.dropAddress?.shortAddress ?? "Drop"}',
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: theme.colorScheme.onSurface,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            // Track button
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primary,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.gps_fixed,
+                    size: 14,
+                    color: theme.colorScheme.onPrimary,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    'Track',
+                    style: AppTextStyles.labelSmall.copyWith(
+                      color: theme.colorScheme.onPrimary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuickServicesSection(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Quick Services',
+            style: AppTextStyles.h4.copyWith(
+              color: theme.colorScheme.onSurface,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _QuickServiceCard(
+                  icon: Icons.flash_on,
+                  title: 'Express',
+                  subtitle: 'Same day',
+                  color: Colors.orange,
+                  onTap: controller.goToCreateBooking,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _QuickServiceCard(
+                  icon: Icons.schedule,
+                  title: 'Schedule',
+                  subtitle: 'Plan ahead',
+                  color: Colors.blue,
+                  onTap: controller.goToCreateBooking,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _QuickServiceCard(
+                  icon: Icons.repeat,
+                  title: 'Rebook',
+                  subtitle: 'Past orders',
+                  color: Colors.purple,
+                  onTap: controller.goToOrders,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRecentDeliveriesSection(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Recent Deliveries',
+                style: AppTextStyles.h4.copyWith(
+                  color: theme.colorScheme.onSurface,
+                ),
+              ),
+              TextButton(
+                onPressed: controller.goToOrders,
+                child: Text(
+                  'See All',
+                  style: AppTextStyles.labelMedium.copyWith(
+                    color: theme.colorScheme.primary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        ...controller.recentOrders
+            .map((order) => _buildRecentDeliveryItem(context, order)),
+      ],
+    );
+  }
+
+  Widget _buildRecentDeliveryItem(BuildContext context, BookingModel order) {
+    final theme = Theme.of(context);
+
+    return InkWell(
+      onTap: () => controller.goToOrderDetails(order.id),
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: theme.cardColor,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: theme.dividerColor),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.green.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(
+                Icons.check_circle,
+                color: Colors.green,
+                size: 22,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    order.dropAddress?.shortAddress ?? 'Delivered',
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      color: theme.colorScheme.onSurface,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    _formatDate(order.createdAt),
+                    style: AppTextStyles.caption.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  order.amountDisplay,
+                  style: AppTextStyles.labelMedium.copyWith(
+                    color: theme.colorScheme.onSurface,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Rebook',
+                  style: AppTextStyles.caption.copyWith(
+                    color: theme.colorScheme.primary,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
@@ -577,38 +752,15 @@ class MainView extends GetView<HomeController> {
       case BookingStatus.pending:
         return Colors.orange;
       case BookingStatus.accepted:
-        return Colors.blue;
       case BookingStatus.arrivedPickup:
         return Colors.blue;
       case BookingStatus.pickedUp:
       case BookingStatus.inTransit:
-        return Colors.green;
       case BookingStatus.arrivedDrop:
-        return Colors.green;
       case BookingStatus.delivered:
         return Colors.green;
       case BookingStatus.cancelled:
         return Colors.red;
-    }
-  }
-
-  IconData _getStatusIcon(BookingStatus status) {
-    switch (status) {
-      case BookingStatus.pending:
-        return Icons.hourglass_empty;
-      case BookingStatus.accepted:
-        return Icons.check_circle;
-      case BookingStatus.arrivedPickup:
-        return Icons.place;
-      case BookingStatus.pickedUp:
-      case BookingStatus.inTransit:
-        return Icons.local_shipping;
-      case BookingStatus.arrivedDrop:
-        return Icons.flag;
-      case BookingStatus.delivered:
-        return Icons.done_all;
-      case BookingStatus.cancelled:
-        return Icons.cancel;
     }
   }
 
@@ -628,23 +780,104 @@ class MainView extends GetView<HomeController> {
   }
 }
 
-class _QuickActionCard extends StatelessWidget {
+// Vehicle Type Card Widget
+class _VehicleTypeCard extends StatelessWidget {
   final IconData icon;
-  final String title;
-  final String subtitle;
+  final String name;
+  final String description;
+  final String price;
   final VoidCallback onTap;
 
-  const _QuickActionCard({
+  const _VehicleTypeCard({
     required this.icon,
-    required this.title,
-    required this.subtitle,
+    required this.name,
+    required this.description,
+    required this.price,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+
+    return Container(
+      width: 100,
+      margin: const EdgeInsets.symmetric(horizontal: 4),
+      child: Material(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(12),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: theme.dividerColor),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(
+                    icon,
+                    color: theme.colorScheme.primary,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  name,
+                  style: AppTextStyles.labelMedium.copyWith(
+                    color: theme.colorScheme.onSurface,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(
+                  description,
+                  style: AppTextStyles.caption.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                    fontSize: 10,
+                  ),
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// Quick Service Card Widget
+class _QuickServiceCard extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _QuickServiceCard({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
 
     return Material(
       color: theme.cardColor,
@@ -653,50 +886,38 @@ class _QuickActionCard extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
         child: Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: isDark
-                  ? theme.colorScheme.primary.withValues(alpha: 0.15)
-                  : theme.dividerColor,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
-                blurRadius: isDark ? 8 : 4,
-                offset: const Offset(0, 2),
-              ),
-            ],
+            border: Border.all(color: theme.dividerColor),
           ),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                padding: const EdgeInsets.all(10),
+                padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.primaryContainer,
+                  color: color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
                   icon,
-                  color: theme.colorScheme.primary,
-                  size: 24,
+                  color: color,
+                  size: 22,
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
               Text(
                 title,
-                style: AppTextStyles.labelLarge.copyWith(
+                style: AppTextStyles.labelMedium.copyWith(
                   color: theme.colorScheme.onSurface,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
-              const SizedBox(height: 4),
               Text(
                 subtitle,
                 style: AppTextStyles.caption.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
+                  fontSize: 10,
                 ),
               ),
             ],
@@ -706,3 +927,4 @@ class _QuickActionCard extends StatelessWidget {
     );
   }
 }
+
