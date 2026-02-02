@@ -118,6 +118,15 @@ class AuthRepository {
     );
   }
 
+  Future<ApiResponse> deleteAccount() async {
+    try {
+      final response = await _apiClient.delete(ApiConstants.deleteAccount);
+      return ApiResponse.fromJson(response.data, null);
+    } catch (e) {
+      return ApiResponse(success: false, message: e.toString());
+    }
+  }
+
   void logout() {
     _storage.clearAuth();
   }
