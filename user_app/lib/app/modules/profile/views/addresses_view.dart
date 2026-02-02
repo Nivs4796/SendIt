@@ -14,40 +14,42 @@ class AddressesView extends GetView<AddressController> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('Saved Addresses'),
         centerTitle: true,
-        backgroundColor: AppColors.white,
+        backgroundColor: theme.appBarTheme.backgroundColor,
         elevation: 0,
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showAddressFormSheet(context),
         icon: const Icon(Icons.add_rounded),
         label: const Text('Add Address'),
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.white,
+        backgroundColor: theme.colorScheme.primary,
+        foregroundColor: theme.colorScheme.onPrimary,
       ),
       body: Obx(() {
         // Loading state
         if (controller.isLoading.value && controller.addresses.isEmpty) {
-          return const Center(
+          return Center(
             child: CircularProgressIndicator(
-              color: AppColors.primary,
+              color: theme.colorScheme.primary,
             ),
           );
         }
 
         // Empty state
         if (controller.addresses.isEmpty) {
-          return _buildEmptyState();
+          return _buildEmptyState(context);
         }
 
         // Address list
         return RefreshIndicator(
           onRefresh: controller.fetchAddresses,
-          color: AppColors.primary,
+          color: theme.colorScheme.primary,
           child: ListView.builder(
             padding: const EdgeInsets.all(16),
             itemCount: controller.addresses.length,
@@ -69,7 +71,10 @@ class AddressesView extends GetView<AddressController> {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -78,28 +83,30 @@ class AddressesView extends GetView<AddressController> {
           children: [
             Container(
               padding: const EdgeInsets.all(24),
-              decoration: const BoxDecoration(
-                color: AppColors.grey100,
+              decoration: BoxDecoration(
+                color: isDark
+                    ? theme.colorScheme.surfaceContainerHighest
+                    : theme.colorScheme.surfaceContainerHighest,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.location_off_outlined,
                 size: 64,
-                color: AppColors.grey400,
+                color: theme.hintColor,
               ),
             ),
             const SizedBox(height: 24),
             Text(
               'No saved addresses',
               style: AppTextStyles.h4.copyWith(
-                color: AppColors.textPrimary,
+                color: theme.colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               'Add addresses for quick booking',
               style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.textSecondary,
+                color: theme.colorScheme.onSurfaceVariant,
               ),
               textAlign: TextAlign.center,
             ),
@@ -139,17 +146,24 @@ class _AddressCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
         border: address.isDefault
-            ? Border.all(color: AppColors.primary, width: 2)
-            : null,
+            ? Border.all(color: theme.colorScheme.primary, width: 2)
+            : isDark
+                ? Border.all(
+                    color: theme.colorScheme.primary.withValues(alpha: 0.15),
+                  )
+                : null,
         boxShadow: [
           BoxShadow(
-            color: AppColors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
+            blurRadius: isDark ? 8 : 10,
             offset: const Offset(0, 2),
           ),
         ],
@@ -161,13 +175,17 @@ class _AddressCard extends StatelessWidget {
           height: 48,
           decoration: BoxDecoration(
             color: address.isDefault
-                ? AppColors.primaryContainer
-                : AppColors.grey100,
+                ? theme.colorScheme.primaryContainer
+                : isDark
+                    ? theme.colorScheme.surfaceContainerHighest
+                    : theme.colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(
             _getIconForLabel(address.label),
-            color: address.isDefault ? AppColors.primary : AppColors.grey600,
+            color: address.isDefault
+                ? theme.colorScheme.primary
+                : theme.colorScheme.onSurfaceVariant,
             size: 24,
           ),
         ),
@@ -178,6 +196,7 @@ class _AddressCard extends StatelessWidget {
                 address.label,
                 style: AppTextStyles.labelLarge.copyWith(
                   fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.onSurface,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -188,13 +207,13 @@ class _AddressCard extends StatelessWidget {
                 margin: const EdgeInsets.only(left: 8),
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color: AppColors.primaryContainer,
+                  color: theme.colorScheme.primaryContainer,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
                   'Default',
                   style: AppTextStyles.labelSmall.copyWith(
-                    color: AppColors.primary,
+                    color: theme.colorScheme.primary,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -206,16 +225,16 @@ class _AddressCard extends StatelessWidget {
           child: Text(
             address.fullAddress,
             style: AppTextStyles.bodySmall.copyWith(
-              color: AppColors.textSecondary,
+              color: theme.colorScheme.onSurfaceVariant,
             ),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
         ),
         trailing: PopupMenuButton<String>(
-          icon: const Icon(
+          icon: Icon(
             Icons.more_vert_rounded,
-            color: AppColors.grey500,
+            color: theme.colorScheme.onSurfaceVariant,
           ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -238,15 +257,17 @@ class _AddressCard extends StatelessWidget {
               value: 'edit',
               child: Row(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.edit_outlined,
                     size: 20,
-                    color: AppColors.textPrimary,
+                    color: theme.colorScheme.onSurface,
                   ),
                   const SizedBox(width: 12),
                   Text(
                     'Edit',
-                    style: AppTextStyles.bodyMedium,
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      color: theme.colorScheme.onSurface,
+                    ),
                   ),
                 ],
               ),
@@ -256,15 +277,17 @@ class _AddressCard extends StatelessWidget {
                 value: 'default',
                 child: Row(
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.check_circle_outline_rounded,
                       size: 20,
-                      color: AppColors.textPrimary,
+                      color: theme.colorScheme.onSurface,
                     ),
                     const SizedBox(width: 12),
                     Text(
                       'Set as Default',
-                      style: AppTextStyles.bodyMedium,
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        color: theme.colorScheme.onSurface,
+                      ),
                     ),
                   ],
                 ),
@@ -312,13 +335,15 @@ class _AddressFormSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Container(
       height: screenHeight * 0.85,
-      decoration: const BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.vertical(
+      decoration: BoxDecoration(
+        color: theme.scaffoldBackgroundColor,
+        borderRadius: const BorderRadius.vertical(
           top: Radius.circular(24),
         ),
       ),
@@ -330,7 +355,7 @@ class _AddressFormSheet extends StatelessWidget {
             width: 40,
             height: 4,
             decoration: BoxDecoration(
-              color: AppColors.grey300,
+              color: theme.dividerColor,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -343,23 +368,25 @@ class _AddressFormSheet extends StatelessWidget {
               children: [
                 Obx(() => Text(
                       controller.isEditMode ? 'Edit Address' : 'Add New Address',
-                      style: AppTextStyles.h4,
+                      style: AppTextStyles.h4.copyWith(
+                        color: theme.colorScheme.onSurface,
+                      ),
                     )),
                 IconButton(
                   onPressed: () {
                     controller.clearForm();
                     Get.back();
                   },
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.close_rounded,
-                    color: AppColors.grey600,
+                    color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
               ],
             ),
           ),
 
-          const Divider(color: AppColors.border),
+          Divider(color: theme.dividerColor),
 
           // Form content
           Expanded(
@@ -478,29 +505,35 @@ class _AddressFormSheet extends StatelessWidget {
                   // Set as default switch
                   Obx(() => Container(
                         decoration: BoxDecoration(
-                          color: AppColors.grey50,
+                          color: isDark
+                              ? theme.colorScheme.surfaceContainerHighest
+                              : theme.colorScheme.surfaceContainerHighest,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: SwitchListTile(
                           title: Text(
                             'Set as default address',
-                            style: AppTextStyles.bodyMedium,
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              color: theme.colorScheme.onSurface,
+                            ),
                           ),
                           subtitle: Text(
                             'This address will be auto-selected for bookings',
                             style: AppTextStyles.caption.copyWith(
-                              color: AppColors.textSecondary,
+                              color: theme.colorScheme.onSurfaceVariant,
                             ),
                           ),
                           value: controller.isDefault.value,
                           onChanged: (value) => controller.isDefault.value = value,
-                          activeTrackColor: AppColors.primaryContainer,
-                          inactiveTrackColor: AppColors.grey200,
+                          activeTrackColor: theme.colorScheme.primaryContainer,
+                          inactiveTrackColor: isDark
+                              ? theme.colorScheme.surfaceContainerHigh
+                              : theme.colorScheme.surfaceContainerHigh,
                           thumbColor: WidgetStateProperty.resolveWith((states) {
                             if (states.contains(WidgetState.selected)) {
-                              return AppColors.primary;
+                              return theme.colorScheme.primary;
                             }
-                            return AppColors.grey400;
+                            return theme.colorScheme.onSurfaceVariant;
                           }),
                           contentPadding: const EdgeInsets.symmetric(
                             horizontal: 16,

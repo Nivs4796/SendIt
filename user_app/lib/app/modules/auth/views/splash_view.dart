@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/constants/app_assets.dart';
 import '../controllers/auth_controller.dart';
@@ -60,8 +59,10 @@ class _SplashContentState extends State<_SplashContent>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Center(
         child: AnimatedBuilder(
           animation: _animationController,
@@ -80,11 +81,11 @@ class _SplashContentState extends State<_SplashContent>
                         width: 180,
                         height: 180,
                         decoration: BoxDecoration(
-                          color: AppColors.white,
+                          color: theme.cardColor,
                           borderRadius: BorderRadius.circular(40),
                           boxShadow: [
                             BoxShadow(
-                              color: AppColors.primary.withValues(alpha: 0.15),
+                              color: theme.colorScheme.primary.withValues(alpha: 0.15),
                               blurRadius: 30,
                               offset: const Offset(0, 10),
                             ),
@@ -102,7 +103,7 @@ class _SplashContentState extends State<_SplashContent>
                     Text(
                       'SendIt',
                       style: AppTextStyles.h1.copyWith(
-                        color: AppColors.primary,
+                        color: theme.colorScheme.primary,
                         fontSize: 32,
                       ),
                     ),
@@ -110,13 +111,13 @@ class _SplashContentState extends State<_SplashContent>
                     Text(
                       'Deliver with Ease',
                       style: AppTextStyles.bodyLarge.copyWith(
-                        color: AppColors.textSecondary,
+                        color: theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
                     const SizedBox(height: 48),
                     // Loading indicator
                     SpinKitThreeBounce(
-                      color: AppColors.primary,
+                      color: theme.colorScheme.primary,
                       size: 28,
                     ),
                   ],

@@ -13,18 +13,18 @@ class ProfileView extends GetView<ProfileController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('Profile'),
         centerTitle: true,
-        backgroundColor: AppColors.white,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         elevation: 0,
       ),
       body: Obx(() {
         if (controller.isLoading.value) {
-          return const Center(
+          return Center(
             child: CircularProgressIndicator(
-              color: AppColors.primary,
+              color: Theme.of(context).colorScheme.primary,
             ),
           );
         }
@@ -115,10 +115,12 @@ class ProfileView extends GetView<ProfileController> {
               const SizedBox(height: 24),
 
               // App Version
-              Text(
-                'Version 1.0.0',
-                style: AppTextStyles.caption.copyWith(
-                  color: AppColors.textSecondary,
+              Builder(
+                builder: (context) => Text(
+                  'Version 1.0.0',
+                  style: AppTextStyles.caption.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ),
 
@@ -131,113 +133,127 @@ class ProfileView extends GetView<ProfileController> {
   }
 
   Widget _buildProfileHeader() {
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
+    return Builder(
+      builder: (context) {
+        final theme = Theme.of(context);
+        final isDark = theme.brightness == Brightness.dark;
+
+        return Container(
+          width: double.infinity,
+          margin: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: theme.cardColor,
+            borderRadius: BorderRadius.circular(16),
+            border: isDark
+                ? Border.all(
+                    color: theme.colorScheme.primary.withValues(alpha: 0.15),
+                  )
+                : null,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
+                blurRadius: isDark ? 16 : 10,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Obx(() {
-        final user = controller.user.value;
-        final avatarUrl = _getAvatarUrl(user?.avatar);
+          child: Obx(() {
+            final user = controller.user.value;
+            final avatarUrl = _getAvatarUrl(user?.avatar);
 
-        return Row(
-          children: [
-            // Avatar
-            Container(
-              width: 72,
-              height: 72,
-              decoration: BoxDecoration(
-                color: AppColors.primaryContainer,
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: AppColors.primary.withValues(alpha: 0.3),
-                  width: 2,
-                ),
-                image: avatarUrl != null
-                    ? DecorationImage(
-                        image: NetworkImage(avatarUrl),
-                        fit: BoxFit.cover,
-                        onError: (_, __) {},
-                      )
-                    : null,
-              ),
-              child: avatarUrl == null
-                  ? const Icon(
-                      Icons.person_rounded,
-                      size: 36,
-                      color: AppColors.primary,
-                    )
-                  : null,
-            ),
-
-            const SizedBox(width: 16),
-
-            // User Info
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    controller.userName.isNotEmpty
-                        ? controller.userName
-                        : 'User',
-                    style: AppTextStyles.h4,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    controller.userPhone.isNotEmpty
-                        ? controller.userPhone
-                        : 'No phone number',
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.textSecondary,
+            return Row(
+              children: [
+                // Avatar
+                Container(
+                  width: 72,
+                  height: 72,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primaryContainer,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: theme.colorScheme.primary.withValues(alpha: 0.3),
+                      width: 2,
                     ),
+                    image: avatarUrl != null
+                        ? DecorationImage(
+                            image: NetworkImage(avatarUrl),
+                            fit: BoxFit.cover,
+                            onError: (_, __) {},
+                          )
+                        : null,
                   ),
-                  if (controller.userEmail.isNotEmpty) ...[
-                    const SizedBox(height: 2),
-                    Text(
-                      controller.userEmail,
-                      style: AppTextStyles.caption.copyWith(
-                        color: AppColors.textHint,
+                  child: avatarUrl == null
+                      ? Icon(
+                          Icons.person_rounded,
+                          size: 36,
+                          color: theme.colorScheme.primary,
+                        )
+                      : null,
+                ),
+
+                const SizedBox(width: 16),
+
+                // User Info
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        controller.userName.isNotEmpty
+                            ? controller.userName
+                            : 'User',
+                        style: AppTextStyles.h4.copyWith(
+                          color: theme.colorScheme.onSurface,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ],
-              ),
-            ),
+                      const SizedBox(height: 4),
+                      Text(
+                        controller.userPhone.isNotEmpty
+                            ? controller.userPhone
+                            : 'No phone number',
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      if (controller.userEmail.isNotEmpty) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          controller.userEmail,
+                          style: AppTextStyles.caption.copyWith(
+                            color: theme.hintColor,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
 
-            // Edit Button
-            IconButton(
-              onPressed: () => Get.toNamed(Routes.personalInfo),
-              icon: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
-                  shape: BoxShape.circle,
+                // Edit Button
+                IconButton(
+                  onPressed: () => Get.toNamed(Routes.personalInfo),
+                  icon: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.edit_rounded,
+                      size: 20,
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
                 ),
-                child: const Icon(
-                  Icons.edit_rounded,
-                  size: 20,
-                  color: AppColors.primary,
-                ),
-              ),
-            ),
-          ],
+              ],
+            );
+          }),
         );
-      }),
+      },
     );
   }
 
@@ -245,66 +261,80 @@ class ProfileView extends GetView<ProfileController> {
     required String title,
     required List<_MenuItem> items,
   }) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-            child: Text(
-              title,
-              style: AppTextStyles.labelLarge.copyWith(
-                color: AppColors.textSecondary,
+    return Builder(
+      builder: (context) {
+        final theme = Theme.of(context);
+        final isDark = theme.brightness == Brightness.dark;
+
+        return Container(
+          margin: const EdgeInsets.symmetric(horizontal: 16),
+          decoration: BoxDecoration(
+            color: theme.cardColor,
+            borderRadius: BorderRadius.circular(16),
+            border: isDark
+                ? Border.all(
+                    color: theme.colorScheme.primary.withValues(alpha: 0.15),
+                  )
+                : null,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
+                blurRadius: isDark ? 16 : 10,
+                offset: const Offset(0, 2),
               ),
-            ),
+            ],
           ),
-          ...items.map((item) => _buildMenuItem(item)),
-        ],
-      ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+                child: Text(
+                  title,
+                  style: AppTextStyles.labelLarge.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+              ...items.map((item) => _buildMenuItem(item, context)),
+            ],
+          ),
+        );
+      },
     );
   }
 
-  Widget _buildMenuItem(_MenuItem item) {
+  Widget _buildMenuItem(_MenuItem item, BuildContext context) {
+    final theme = Theme.of(context);
+
     return Column(
       children: [
         ListTile(
           leading: Icon(
             item.icon,
-            color: item.iconColor ?? AppColors.textPrimary,
+            color: item.iconColor ?? theme.colorScheme.onSurface,
             size: 24,
           ),
           title: Text(
             item.title,
             style: AppTextStyles.bodyMedium.copyWith(
-              color: item.titleColor ?? AppColors.textPrimary,
+              color: item.titleColor ?? theme.colorScheme.onSurface,
             ),
           ),
           trailing: Icon(
             Icons.chevron_right_rounded,
-            color: item.iconColor ?? AppColors.textSecondary,
+            color: item.iconColor ?? theme.colorScheme.onSurfaceVariant,
             size: 24,
           ),
           onTap: item.onTap,
           contentPadding: const EdgeInsets.symmetric(horizontal: 20),
         ),
         if (item.showDivider)
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Divider(
               height: 1,
-              color: AppColors.border,
+              color: theme.dividerColor,
             ),
           ),
       ],
@@ -324,15 +354,23 @@ class ProfileView extends GetView<ProfileController> {
   }
 
   Widget _buildSettingsSection(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(16),
+        border: isDark
+            ? Border.all(
+                color: theme.colorScheme.primary.withValues(alpha: 0.15),
+              )
+            : null,
         boxShadow: [
           BoxShadow(
-            color: AppColors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
+            color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
+            blurRadius: isDark ? 16 : 10,
             offset: const Offset(0, 2),
           ),
         ],
@@ -345,31 +383,31 @@ class ProfileView extends GetView<ProfileController> {
             child: Text(
               'Settings',
               style: AppTextStyles.labelLarge.copyWith(
-                color: AppColors.textSecondary,
+                color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
           ),
           Obx(() => ListTile(
                 leading: Icon(
                   ThemeController.to.themeIcon,
-                  color: Theme.of(context).colorScheme.primary,
+                  color: theme.colorScheme.primary,
                   size: 24,
                 ),
                 title: Text(
                   'Theme',
                   style: AppTextStyles.bodyMedium.copyWith(
-                    color: Theme.of(context).textTheme.bodyLarge?.color,
+                    color: theme.colorScheme.onSurface,
                   ),
                 ),
                 subtitle: Text(
                   ThemeController.to.themeModeName,
                   style: AppTextStyles.caption.copyWith(
-                    color: AppColors.textSecondary,
+                    color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
-                trailing: const Icon(
+                trailing: Icon(
                   Icons.chevron_right_rounded,
-                  color: AppColors.textSecondary,
+                  color: theme.colorScheme.onSurfaceVariant,
                   size: 24,
                 ),
                 onTap: () => _showThemeSelector(context),
@@ -470,12 +508,13 @@ class ProfileView extends GetView<ProfileController> {
   }
 
   void _showComingSoon(String feature) {
+    final theme = Theme.of(Get.context!);
     Get.snackbar(
       'Coming Soon',
       '$feature will be available soon!',
       snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: AppColors.primary,
-      colorText: AppColors.white,
+      backgroundColor: theme.colorScheme.primary,
+      colorText: theme.colorScheme.onPrimary,
       margin: const EdgeInsets.all(16),
       borderRadius: 12,
       duration: const Duration(seconds: 2),

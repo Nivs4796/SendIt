@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../core/theme/app_colors.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/widgets/widgets.dart';
 import '../controllers/auth_controller.dart';
@@ -66,14 +65,15 @@ class _OtpContentState extends State<_OtpContent>
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<AuthController>();
+    final theme = Theme.of(context);
 
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-        backgroundColor: AppColors.white,
+        backgroundColor: theme.scaffoldBackgroundColor,
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
-          backgroundColor: AppColors.white,
+          backgroundColor: theme.appBarTheme.backgroundColor,
           elevation: 0,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back_ios_rounded),
@@ -144,10 +144,10 @@ class _OtpContentState extends State<_OtpContent>
                                       key: const ValueKey('timer'),
                                       mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
-                                        const Icon(
+                                        Icon(
                                           Icons.timer_outlined,
                                           size: 18,
-                                          color: AppColors.textSecondary,
+                                          color: theme.colorScheme.onSurfaceVariant,
                                         ),
                                         const SizedBox(width: 8),
                                         AppText.secondary(

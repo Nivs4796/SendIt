@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../core/theme/app_colors.dart';
 import '../../../core/constants/app_assets.dart';
 import '../../../core/widgets/widgets.dart';
 import '../controllers/auth_controller.dart';
@@ -61,12 +60,13 @@ class _LoginContentState extends State<_LoginContent>
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<AuthController>();
+    final theme = Theme.of(context);
     final screenHeight = MediaQuery.of(context).size.height;
 
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-        backgroundColor: AppColors.background,
+        backgroundColor: theme.scaffoldBackgroundColor,
         resizeToAvoidBottomInset: true,
         body: SafeArea(
           child: FadeTransition(
@@ -87,11 +87,11 @@ class _LoginContentState extends State<_LoginContent>
                           width: 120,
                           height: 120,
                           decoration: BoxDecoration(
-                            color: AppColors.white,
+                            color: theme.cardColor,
                             borderRadius: BorderRadius.circular(32),
                             boxShadow: [
                               BoxShadow(
-                                color: AppColors.primary.withValues(alpha: 0.15),
+                                color: theme.colorScheme.primary.withValues(alpha: 0.15),
                                 blurRadius: 24,
                                 offset: const Offset(0, 8),
                               ),
@@ -148,16 +148,16 @@ class _LoginContentState extends State<_LoginContent>
                         child: Text.rich(
                           TextSpan(
                             text: 'By continuing, you agree to our ',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 12,
-                              color: AppColors.textSecondary,
+                              color: theme.colorScheme.onSurfaceVariant,
                             ),
                             children: [
                               TextSpan(
                                 text: 'Terms of Service',
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: AppColors.primary,
+                                  color: theme.colorScheme.primary,
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
@@ -166,7 +166,7 @@ class _LoginContentState extends State<_LoginContent>
                                 text: 'Privacy Policy',
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: AppColors.primary,
+                                  color: theme.colorScheme.primary,
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),

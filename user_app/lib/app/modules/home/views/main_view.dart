@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../routes/app_routes.dart';
 
@@ -9,8 +8,10 @@ class MainView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: AppColors.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('SendIt'),
         actions: [
@@ -21,8 +22,8 @@ class MainView extends StatelessWidget {
                 'Coming Soon',
                 'Notifications will be available in a future update',
                 snackPosition: SnackPosition.BOTTOM,
-                backgroundColor: AppColors.info,
-                colorText: AppColors.white,
+                backgroundColor: theme.colorScheme.primary,
+                colorText: theme.colorScheme.onPrimary,
                 margin: const EdgeInsets.all(16),
                 borderRadius: 8,
               );
@@ -42,40 +43,44 @@ class MainView extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Welcome Card
-            _buildWelcomeCard(),
+            _buildWelcomeCard(context),
             const SizedBox(height: 24),
 
             // Quick Actions Section
             Text(
               'Quick Actions',
-              style: AppTextStyles.h4,
+              style: AppTextStyles.h4.copyWith(
+                color: theme.colorScheme.onSurface,
+              ),
             ),
             const SizedBox(height: 16),
-            _buildQuickActionsGrid(),
+            _buildQuickActionsGrid(context),
             const SizedBox(height: 24),
 
             // Development Status Card
-            _buildDevelopmentStatusCard(),
+            _buildDevelopmentStatusCard(context),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildWelcomeCard() {
+  Widget _buildWelcomeCard(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppColors.primary, Color(0xFF059669)],
+        gradient: LinearGradient(
+          colors: [theme.colorScheme.primary, const Color(0xFF059669)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.3),
+            color: theme.colorScheme.primary.withValues(alpha: 0.3),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -87,7 +92,7 @@ class MainView extends StatelessWidget {
           Text(
             'Welcome to SendIt!',
             style: AppTextStyles.h2.copyWith(
-              color: AppColors.white,
+              color: Colors.white,
               fontSize: 22,
             ),
           ),
@@ -95,7 +100,7 @@ class MainView extends StatelessWidget {
           Text(
             'Your reliable delivery partner',
             style: AppTextStyles.bodyMedium.copyWith(
-              color: AppColors.white,
+              color: Colors.white,
               fontSize: 14,
             ),
           ),
@@ -104,7 +109,9 @@ class MainView extends StatelessWidget {
     );
   }
 
-  Widget _buildQuickActionsGrid() {
+  Widget _buildQuickActionsGrid(BuildContext context) {
+    final theme = Theme.of(context);
+
     return GridView.count(
       crossAxisCount: 2,
       mainAxisSpacing: 12,
@@ -122,8 +129,8 @@ class MainView extends StatelessWidget {
               'Coming Soon',
               'Booking flow in Sprint 1',
               snackPosition: SnackPosition.BOTTOM,
-              backgroundColor: AppColors.info,
-              colorText: AppColors.white,
+              backgroundColor: theme.colorScheme.primary,
+              colorText: theme.colorScheme.onPrimary,
               margin: const EdgeInsets.all(16),
               borderRadius: 8,
             );
@@ -138,8 +145,8 @@ class MainView extends StatelessWidget {
               'Coming Soon',
               'Orders in Sprint 2',
               snackPosition: SnackPosition.BOTTOM,
-              backgroundColor: AppColors.info,
-              colorText: AppColors.white,
+              backgroundColor: theme.colorScheme.primary,
+              colorText: theme.colorScheme.onPrimary,
               margin: const EdgeInsets.all(16),
               borderRadius: 8,
             );
@@ -165,15 +172,20 @@ class MainView extends StatelessWidget {
     );
   }
 
-  Widget _buildDevelopmentStatusCard() {
+  Widget _buildDevelopmentStatusCard(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.infoLight,
+        color: isDark
+            ? theme.colorScheme.primary.withValues(alpha: 0.1)
+            : const Color(0xFFDBEAFE),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: AppColors.info.withValues(alpha: 0.3),
+          color: theme.colorScheme.primary.withValues(alpha: 0.3),
         ),
       ),
       child: Column(
@@ -181,54 +193,60 @@ class MainView extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(
+              Icon(
                 Icons.info_outline,
-                color: AppColors.info,
+                color: theme.colorScheme.primary,
                 size: 20,
               ),
               const SizedBox(width: 8),
               Text(
                 'Development Status',
                 style: AppTextStyles.labelLarge.copyWith(
-                  color: AppColors.info,
+                  color: theme.colorScheme.primary,
                   fontWeight: FontWeight.w600,
                 ),
               ),
             ],
           ),
           const SizedBox(height: 12),
-          _buildStatusItem('Auth Flow', true),
+          _buildStatusItem(context, 'Auth Flow', true),
           const SizedBox(height: 8),
-          _buildStatusItem('Profile & Wallet', true),
+          _buildStatusItem(context, 'Profile & Wallet', true),
           const SizedBox(height: 8),
-          _buildStatusItem('Booking Flow', false, subtitle: 'Sprint 1'),
+          _buildStatusItem(context, 'Booking Flow', false, subtitle: 'Sprint 1'),
           const SizedBox(height: 8),
-          _buildStatusItem('Orders & Tracking', false, subtitle: 'Sprint 2'),
+          _buildStatusItem(context, 'Orders & Tracking', false, subtitle: 'Sprint 2'),
         ],
       ),
     );
   }
 
-  Widget _buildStatusItem(String title, bool isComplete, {String? subtitle}) {
+  Widget _buildStatusItem(BuildContext context, String title, bool isComplete, {String? subtitle}) {
+    final theme = Theme.of(context);
+
     return Row(
       children: [
         Icon(
           isComplete ? Icons.check_circle : Icons.radio_button_unchecked,
-          color: isComplete ? AppColors.success : AppColors.grey400,
+          color: isComplete
+              ? theme.colorScheme.primary
+              : theme.colorScheme.onSurfaceVariant,
           size: 18,
         ),
         const SizedBox(width: 8),
         Text(
           title,
           style: AppTextStyles.bodyMedium.copyWith(
-            color: isComplete ? AppColors.textPrimary : AppColors.textSecondary,
+            color: isComplete
+                ? theme.colorScheme.onSurface
+                : theme.colorScheme.onSurfaceVariant,
           ),
         ),
         if (isComplete)
           Text(
             ' \u2713',
             style: AppTextStyles.bodyMedium.copyWith(
-              color: AppColors.success,
+              color: theme.colorScheme.primary,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -237,13 +255,13 @@ class MainView extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
             decoration: BoxDecoration(
-              color: AppColors.grey200,
+              color: theme.colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
               subtitle,
               style: AppTextStyles.labelSmall.copyWith(
-                color: AppColors.textSecondary,
+                color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
           ),
@@ -268,8 +286,11 @@ class _QuickActionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Material(
-      color: AppColors.white,
+      color: theme.cardColor,
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: onTap,
@@ -278,11 +299,15 @@ class _QuickActionCard extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.border),
+            border: Border.all(
+              color: isDark
+                  ? theme.colorScheme.primary.withValues(alpha: 0.15)
+                  : theme.dividerColor,
+            ),
             boxShadow: [
               BoxShadow(
-                color: AppColors.grey200.withValues(alpha: 0.5),
-                blurRadius: 4,
+                color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
+                blurRadius: isDark ? 8 : 4,
                 offset: const Offset(0, 2),
               ),
             ],
@@ -294,25 +319,27 @@ class _QuickActionCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: AppColors.primaryContainer,
+                  color: theme.colorScheme.primaryContainer,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
                   icon,
-                  color: AppColors.primary,
+                  color: theme.colorScheme.primary,
                   size: 24,
                 ),
               ),
               const SizedBox(height: 12),
               Text(
                 title,
-                style: AppTextStyles.labelLarge,
+                style: AppTextStyles.labelLarge.copyWith(
+                  color: theme.colorScheme.onSurface,
+                ),
               ),
               const SizedBox(height: 4),
               Text(
                 subtitle,
                 style: AppTextStyles.caption.copyWith(
-                  color: AppColors.textSecondary,
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
             ],

@@ -11,12 +11,14 @@ class EditProfileView extends GetView<ProfileController> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('Personal Information'),
         centerTitle: true,
-        backgroundColor: AppColors.white,
+        backgroundColor: theme.appBarTheme.backgroundColor,
         elevation: 0,
       ),
       body: SingleChildScrollView(
@@ -24,15 +26,15 @@ class EditProfileView extends GetView<ProfileController> {
         child: Column(
           children: [
             // Error Message
-            _buildErrorMessage(),
+            _buildErrorMessage(context),
 
             // Avatar Section
-            _buildAvatarSection(),
+            _buildAvatarSection(context),
 
             const SizedBox(height: 32),
 
             // Form Fields
-            _buildFormFields(),
+            _buildFormFields(context),
 
             const SizedBox(height: 32),
 
@@ -44,7 +46,7 @@ class EditProfileView extends GetView<ProfileController> {
     );
   }
 
-  Widget _buildErrorMessage() {
+  Widget _buildErrorMessage(BuildContext context) {
     return Obx(() {
       if (controller.errorMessage.value.isEmpty) {
         return const SizedBox.shrink();
@@ -54,15 +56,15 @@ class EditProfileView extends GetView<ProfileController> {
         margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: const Color(0xFFFEE2E2),
+          color: AppColors.errorLight,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
+          border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
         ),
         child: Row(
           children: [
             const Icon(
               Icons.error_outline_rounded,
-              color: Colors.red,
+              color: AppColors.error,
               size: 20,
             ),
             const SizedBox(width: 8),
@@ -70,7 +72,7 @@ class EditProfileView extends GetView<ProfileController> {
               child: Text(
                 controller.errorMessage.value,
                 style: AppTextStyles.bodySmall.copyWith(
-                  color: Colors.red,
+                  color: AppColors.error,
                 ),
               ),
             ),
@@ -78,7 +80,7 @@ class EditProfileView extends GetView<ProfileController> {
               onTap: controller.clearError,
               child: const Icon(
                 Icons.close_rounded,
-                color: Colors.red,
+                color: AppColors.error,
                 size: 18,
               ),
             ),
@@ -88,7 +90,9 @@ class EditProfileView extends GetView<ProfileController> {
     });
   }
 
-  Widget _buildAvatarSection() {
+  Widget _buildAvatarSection(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Center(
       child: Column(
         children: [
@@ -105,10 +109,10 @@ class EditProfileView extends GetView<ProfileController> {
                     width: 100,
                     height: 100,
                     decoration: BoxDecoration(
-                      color: AppColors.primaryContainer,
+                      color: theme.colorScheme.primaryContainer,
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: AppColors.primary.withValues(alpha: 0.3),
+                        color: theme.colorScheme.primary.withValues(alpha: 0.3),
                         width: 3,
                       ),
                       image: selectedFile != null
@@ -125,10 +129,10 @@ class EditProfileView extends GetView<ProfileController> {
                               : null,
                     ),
                     child: selectedFile == null && avatarUrl == null
-                        ? const Icon(
+                        ? Icon(
                             Icons.person_rounded,
                             size: 48,
-                            color: AppColors.primary,
+                            color: theme.colorScheme.primary,
                           )
                         : null,
                   );
@@ -142,17 +146,17 @@ class EditProfileView extends GetView<ProfileController> {
                     width: 36,
                     height: 36,
                     decoration: BoxDecoration(
-                      color: AppColors.primary,
+                      color: theme.colorScheme.primary,
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: AppColors.white,
+                        color: theme.scaffoldBackgroundColor,
                         width: 2,
                       ),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.camera_alt_rounded,
                       size: 18,
-                      color: AppColors.white,
+                      color: theme.colorScheme.onPrimary,
                     ),
                   ),
                 ),
@@ -163,7 +167,7 @@ class EditProfileView extends GetView<ProfileController> {
           Text(
             'Tap to change photo',
             style: AppTextStyles.bodySmall.copyWith(
-              color: AppColors.textSecondary,
+              color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
         ],
@@ -171,7 +175,9 @@ class EditProfileView extends GetView<ProfileController> {
     );
   }
 
-  Widget _buildFormFields() {
+  Widget _buildFormFields(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Column(
       children: [
         // Phone Number (Read-only)
@@ -180,9 +186,9 @@ class EditProfileView extends GetView<ProfileController> {
               hint: 'Phone number',
               controller: TextEditingController(text: controller.userPhone),
               enabled: false,
-              prefixIcon: const Icon(
+              prefixIcon: Icon(
                 Icons.phone_rounded,
-                color: AppColors.textSecondary,
+                color: theme.colorScheme.onSurfaceVariant,
               ),
             )),
 
@@ -191,9 +197,9 @@ class EditProfileView extends GetView<ProfileController> {
         // Full Name
         AppTextField.name(
           controller: controller.nameController,
-          prefixIcon: const Icon(
+          prefixIcon: Icon(
             Icons.person_outline_rounded,
-            color: AppColors.textSecondary,
+            color: theme.colorScheme.onSurfaceVariant,
           ),
         ),
 
@@ -204,9 +210,9 @@ class EditProfileView extends GetView<ProfileController> {
           label: 'Email (Optional)',
           hint: 'Enter your email',
           controller: controller.emailController,
-          prefixIcon: const Icon(
+          prefixIcon: Icon(
             Icons.email_outlined,
-            color: AppColors.textSecondary,
+            color: theme.colorScheme.onSurfaceVariant,
           ),
         ),
       ],
