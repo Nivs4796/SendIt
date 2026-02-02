@@ -215,7 +215,7 @@ class OrderDetailsView extends GetView<OrdersController> {
             icon: Icons.circle,
             iconColor: AppColors.success,
             label: 'Pickup',
-            address: order.pickupAddress?.formattedAddress ??
+            address: order.pickupAddress?.fullAddress ??
                 order.pickupAddress?.address ??
                 'Pickup location',
             time: order.pickedUpAt,
@@ -246,7 +246,7 @@ class OrderDetailsView extends GetView<OrdersController> {
             icon: Icons.location_on,
             iconColor: theme.colorScheme.primary,
             label: 'Drop',
-            address: order.dropAddress?.formattedAddress ??
+            address: order.dropAddress?.fullAddress ??
                 order.dropAddress?.address ??
                 'Drop location',
             time: order.deliveredAt,
