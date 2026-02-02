@@ -99,6 +99,25 @@ router.get(
 
 /**
  * @swagger
+ * /coupons/stats:
+ *   get:
+ *     summary: Get coupon statistics
+ *     tags: [Coupons]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Coupon statistics
+ */
+router.get(
+  '/stats',
+  authenticate,
+  authorize('admin'),
+  couponController.getCouponStats
+)
+
+/**
+ * @swagger
  * /coupons/{id}:
  *   get:
  *     summary: Get coupon by ID
@@ -177,25 +196,6 @@ router.delete(
   authenticate,
   authorize('admin'),
   couponController.deleteCoupon
-)
-
-/**
- * @swagger
- * /coupons/stats:
- *   get:
- *     summary: Get coupon statistics
- *     tags: [Coupons]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Coupon statistics
- */
-router.get(
-  '/stats',
-  authenticate,
-  authorize('admin'),
-  couponController.getCouponStats
 )
 
 // ============================================
