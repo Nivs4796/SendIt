@@ -274,7 +274,9 @@ class ProfileController extends GetxController {
       if (response.success && response.data != null) {
         user.value = response.data;
         selectedAvatarFile.value = null;
+        _storage.user = response.data!.toJson();
 
+        Get.back();
         Get.snackbar(
           'Success',
           'Profile updated successfully',
@@ -282,8 +284,6 @@ class ProfileController extends GetxController {
           backgroundColor: Colors.green,
           colorText: Colors.white,
         );
-
-        Get.back();
       } else {
         final message = response.message ?? 'Failed to update profile';
         errorMessage.value = message;
