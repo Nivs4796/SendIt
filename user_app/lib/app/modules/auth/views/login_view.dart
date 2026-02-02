@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_text_styles.dart';
-import '../../../core/theme/app_theme.dart';
-import '../../../core/constants/app_constants.dart';
 import '../../../core/constants/app_assets.dart';
+import '../../../core/widgets/widgets.dart';
 import '../controllers/auth_controller.dart';
 
 class LoginView extends GetView<AuthController> {
@@ -69,7 +66,7 @@ class _LoginContentState extends State<_LoginContent>
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-        backgroundColor: AppColors.background, // Mint background
+        backgroundColor: AppColors.background,
         resizeToAvoidBottomInset: true,
         body: SafeArea(
           child: FadeTransition(
@@ -83,7 +80,7 @@ class _LoginContentState extends State<_LoginContent>
                     children: [
                       SizedBox(height: screenHeight * 0.08),
 
-                      // SendIt Logo - Larger, cleaner design
+                      // SendIt Logo
                       Hero(
                         tag: 'sendit_logo',
                         child: Container(
@@ -110,204 +107,56 @@ class _LoginContentState extends State<_LoginContent>
 
                       const SizedBox(height: 32),
 
-                      // Title - Centered
-                      Text(
+                      // Title - Using AppText
+                      const AppText.h2(
                         'Welcome to SendIt',
-                        style: AppTextStyles.h2,
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 8),
-                      Text(
+                      const AppText.secondary(
                         'Enter your phone number to continue',
-                        style: AppTextStyles.bodyLarge.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
                         textAlign: TextAlign.center,
                       ),
 
                       const SizedBox(height: 40),
 
-                      // Phone Input - High contrast border
-                      Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 2),
-                        decoration: BoxDecoration(
-                          color: AppColors.white,
-                          borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-                          border: Border.all(
-                            color: AppColors.grey300, // Grey border for clear visibility
-                            width: 2.0,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.black.withValues(alpha: 0.06),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          children: [
-                            // Country Code
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 20,
-                                vertical: 18,
-                              ),
-                              decoration: const BoxDecoration(
-                                border: Border(
-                                  right: BorderSide(
-                                    color: AppColors.grey300, // Visible divider
-                                    width: 1.5,
-                                  ),
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Text(
-                                    '🇮🇳',
-                                    style: TextStyle(fontSize: 18),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    '+91',
-                                    style: AppTextStyles.bodyLarge.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                      color: AppColors.textPrimary,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            // Phone Number
-                            Expanded(
-                              child: TextField(
-                                controller: _phoneController,
-                                focusNode: _phoneFocusNode,
-                                keyboardType: TextInputType.phone,
-                                maxLength: AppConstants.maxPhoneLength,
-                                inputFormatters: [
-                                  FilteringTextInputFormatter.digitsOnly,
-                                ],
-                                style: AppTextStyles.bodyLarge.copyWith(
-                                  fontWeight: FontWeight.w500,
-                                  letterSpacing: 1.2,
-                                ),
-                                decoration: InputDecoration(
-                                  hintText: 'Phone Number',
-                                  hintStyle: AppTextStyles.bodyLarge.copyWith(
-                                    color: AppColors.textHint,
-                                  ),
-                                  counterText: '',
-                                  border: InputBorder.none,
-                                  enabledBorder: InputBorder.none,
-                                  focusedBorder: InputBorder.none,
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 20,
-                                    vertical: 18,
-                                  ),
-                                ),
-                                onChanged: (value) => controller.phone.value = value,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      // Error Message with animation
-                      Obx(() => AnimatedSize(
-                        duration: const Duration(milliseconds: 200),
-                        child: controller.errorMessage.isNotEmpty
-                            ? Container(
-                                width: double.infinity,
-                                margin: const EdgeInsets.only(bottom: 8),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 12,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppColors.errorLight,
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(
-                                    color: AppColors.error.withValues(alpha: 0.3),
-                                  ),
-                                ),
-                                child: Row(
-                                  children: [
-                                    const Icon(
-                                      Icons.error_outline_rounded,
-                                      size: 18,
-                                      color: AppColors.error,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      child: Text(
-                                        controller.errorMessage.value,
-                                        style: AppTextStyles.bodySmall.copyWith(
-                                          color: AppColors.error,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              )
-                            : const SizedBox.shrink(),
+                      // Phone Input - Using AppTextField.phone
+                      Obx(() => AppTextField.phone(
+                        controller: _phoneController,
+                        focusNode: _phoneFocusNode,
+                        hint: 'Phone Number',
+                        errorText: controller.errorMessage.value.isNotEmpty
+                            ? controller.errorMessage.value
+                            : null,
+                        onChanged: (value) => controller.phone.value = value,
                       )),
 
                       const SizedBox(height: 24),
 
-                      // Submit Button
-                      Obx(() => SizedBox(
-                        width: double.infinity,
-                        height: 56,
-                        child: ElevatedButton(
-                          onPressed: controller.isLoading.value
-                              ? null
-                              : controller.sendOtp,
-                          style: ElevatedButton.styleFrom(
-                            elevation: 0,
-                            shadowColor: AppColors.primary.withValues(alpha: 0.3),
-                          ),
-                          child: AnimatedSwitcher(
-                            duration: const Duration(milliseconds: 200),
-                            child: controller.isLoading.value
-                                ? const SizedBox(
-                                    key: ValueKey('loading'),
-                                    height: 22,
-                                    width: 22,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2.5,
-                                      color: AppColors.white,
-                                    ),
-                                  )
-                                : Text(
-                                    'Send OTP',
-                                    key: const ValueKey('text'),
-                                    style: AppTextStyles.button.copyWith(
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                          ),
-                        ),
+                      // Submit Button - Using AppButton
+                      Obx(() => AppButton.primary(
+                        text: 'Send OTP',
+                        isLoading: controller.isLoading.value,
+                        onPressed: controller.sendOtp,
                       )),
 
                       const SizedBox(height: 24),
 
-                      // Terms - Better styled
+                      // Terms
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: Text.rich(
                           TextSpan(
                             text: 'By continuing, you agree to our ',
-                            style: AppTextStyles.caption.copyWith(
+                            style: const TextStyle(
+                              fontSize: 12,
                               color: AppColors.textSecondary,
                             ),
                             children: [
                               TextSpan(
                                 text: 'Terms of Service',
-                                style: AppTextStyles.caption.copyWith(
+                                style: TextStyle(
+                                  fontSize: 12,
                                   color: AppColors.primary,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -315,7 +164,8 @@ class _LoginContentState extends State<_LoginContent>
                               const TextSpan(text: ' and '),
                               TextSpan(
                                 text: 'Privacy Policy',
-                                style: AppTextStyles.caption.copyWith(
+                                style: TextStyle(
+                                  fontSize: 12,
                                   color: AppColors.primary,
                                   fontWeight: FontWeight.w500,
                                 ),

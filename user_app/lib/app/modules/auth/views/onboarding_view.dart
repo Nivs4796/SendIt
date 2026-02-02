@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_text_styles.dart';
 import '../../../core/constants/app_assets.dart';
+import '../../../core/widgets/widgets.dart';
 import '../controllers/auth_controller.dart';
 
 class OnboardingView extends GetView<AuthController> {
@@ -90,22 +90,19 @@ class _OnboardingContentState extends State<_OnboardingContent>
           opacity: _fadeAnimation,
           child: Column(
             children: [
-              // Skip button
+              // Skip button - Using AppButton.text
               Align(
                 alignment: Alignment.topRight,
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: TextButton(
+                  child: AppButton.text(
+                    text: 'Skip',
+                    textColor: AppColors.textSecondary,
                     onPressed: () => Get.find<AuthController>().completeOnboarding(),
-                    child: Text(
-                      'Skip',
-                      style: AppTextStyles.labelLarge.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
                   ),
                 ),
               ),
+
               // Pages
               Expanded(
                 child: PageView.builder(
@@ -124,6 +121,7 @@ class _OnboardingContentState extends State<_OnboardingContent>
                   },
                 ),
               ),
+
               // Indicators with animation
               Obx(() => Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -144,24 +142,17 @@ class _OnboardingContentState extends State<_OnboardingContent>
                   ),
                 ),
               )),
+
               const SizedBox(height: 32),
-              // Button with animated text
+
+              // Button - Using AppButton with animated text
               Padding(
                 padding: const EdgeInsets.all(24),
-                child: Obx(() => SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: _onNextPressed,
-                    child: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 200),
-                      child: Text(
-                        _currentPage.value < _pages.length - 1
-                            ? 'Next'
-                            : 'Get Started',
-                        key: ValueKey(_currentPage.value < _pages.length - 1),
-                      ),
-                    ),
-                  ),
+                child: Obx(() => AppButton.primary(
+                  text: _currentPage.value < _pages.length - 1
+                      ? 'Next'
+                      : 'Get Started',
+                  onPressed: _onNextPressed,
                 )),
               ),
             ],
@@ -243,18 +234,20 @@ class _OnboardingPage extends StatelessWidget {
                     ),
             ),
           ),
+
           const SizedBox(height: 48),
-          Text(
+
+          // Title - Using AppText
+          AppText.h2(
             title,
-            style: AppTextStyles.h2,
             textAlign: TextAlign.center,
           ),
+
           const SizedBox(height: 16),
-          Text(
+
+          // Description - Using AppText
+          AppText.secondary(
             description,
-            style: AppTextStyles.bodyLarge.copyWith(
-              color: AppColors.textSecondary,
-            ),
             textAlign: TextAlign.center,
           ),
         ],

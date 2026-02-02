@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_text_styles.dart';
-import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/widgets.dart';
 import '../controllers/auth_controller.dart';
 
 class ProfileSetupView extends GetView<AuthController> {
@@ -100,18 +99,15 @@ class _ProfileSetupContentState extends State<_ProfileSetupContent>
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'Tell us about yourself',
-                            style: AppTextStyles.h3,
-                          ),
+                          // Title - Using AppText
+                          const AppText.h3('Tell us about yourself'),
                           const SizedBox(height: 8),
-                          Text(
+                          const AppText.secondary(
                             'This helps us personalize your experience',
-                            style: AppTextStyles.bodyMedium.copyWith(
-                              color: AppColors.textSecondary,
-                            ),
                           ),
+
                           const SizedBox(height: 32),
+
                           // Profile Picture with animation
                           Center(
                             child: TweenAnimationBuilder<double>(
@@ -175,135 +171,54 @@ class _ProfileSetupContentState extends State<_ProfileSetupContent>
                               ),
                             ),
                           ),
+
                           const SizedBox(height: 32),
-                          // Name Input - Glassmorphism style
-                          Container(
-                            decoration: BoxDecoration(
-                              color: AppColors.glassInputBackground,
-                              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-                              border: Border.all(color: AppColors.glassInputBorder),
+
+                          // Name Input - Using AppTextField.name
+                          Obx(() => AppTextField.name(
+                            controller: _nameController,
+                            focusNode: _nameFocusNode,
+                            label: 'Full Name',
+                            hint: 'Enter your name',
+                            prefixIcon: const Icon(
+                              Icons.person_outline_rounded,
+                              color: AppColors.textSecondary,
                             ),
-                            child: TextField(
-                              controller: _nameController,
-                              focusNode: _nameFocusNode,
-                              textCapitalization: TextCapitalization.words,
-                              style: AppTextStyles.bodyLarge,
-                              decoration: InputDecoration(
-                                labelText: 'Full Name',
-                                hintText: 'Enter your name',
-                                prefixIcon: Icon(
-                                  Icons.person_outline_rounded,
-                                  color: AppColors.textSecondary,
-                                ),
-                                border: InputBorder.none,
-                                enabledBorder: InputBorder.none,
-                                focusedBorder: InputBorder.none,
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 20,
-                                  vertical: 18,
-                                ),
-                              ),
-                              onChanged: (value) => controller.name.value = value,
-                              onSubmitted: (_) => _emailFocusNode.requestFocus(),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          // Email Input - Glassmorphism style
-                          Container(
-                            decoration: BoxDecoration(
-                              color: AppColors.glassInputBackground,
-                              borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-                              border: Border.all(color: AppColors.glassInputBorder),
-                            ),
-                            child: TextField(
-                              controller: _emailController,
-                              focusNode: _emailFocusNode,
-                              keyboardType: TextInputType.emailAddress,
-                              style: AppTextStyles.bodyLarge,
-                              decoration: InputDecoration(
-                                labelText: 'Email (Optional)',
-                                hintText: 'Enter your email',
-                                prefixIcon: Icon(
-                                  Icons.email_outlined,
-                                  color: AppColors.textSecondary,
-                                ),
-                                border: InputBorder.none,
-                                enabledBorder: InputBorder.none,
-                                focusedBorder: InputBorder.none,
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 20,
-                                  vertical: 18,
-                                ),
-                              ),
-                              onChanged: (value) => controller.email.value = value,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          // Error Message with animation
-                          Obx(() => AnimatedSize(
-                            duration: const Duration(milliseconds: 200),
-                            child: controller.errorMessage.isNotEmpty
-                                ? Container(
-                                    margin: const EdgeInsets.only(bottom: 16),
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 16,
-                                      vertical: 8,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: AppColors.errorLight,
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Icon(
-                                          Icons.error_outline_rounded,
-                                          size: 18,
-                                          color: AppColors.error,
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Expanded(
-                                          child: Text(
-                                            controller.errorMessage.value,
-                                            style: AppTextStyles.bodySmall.copyWith(
-                                              color: AppColors.error,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  )
-                                : const SizedBox.shrink(),
+                            errorText: controller.errorMessage.value.isNotEmpty &&
+                                    controller.errorMessage.value.contains('Name')
+                                ? controller.errorMessage.value
+                                : null,
+                            onChanged: (value) => controller.name.value = value,
+                            onSubmitted: (_) => _emailFocusNode.requestFocus(),
                           )),
+
+                          const SizedBox(height: 16),
+
+                          // Email Input - Using AppTextField.email
+                          AppTextField.email(
+                            controller: _emailController,
+                            focusNode: _emailFocusNode,
+                            label: 'Email (Optional)',
+                            hint: 'Enter your email',
+                            prefixIcon: const Icon(
+                              Icons.email_outlined,
+                              color: AppColors.textSecondary,
+                            ),
+                            onChanged: (value) => controller.email.value = value,
+                          ),
+
                           // Spacer
                           SizedBox(
                             height: MediaQuery.of(context).size.height * 0.15,
                           ),
-                          // Submit Button
-                          Obx(() => SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                              onPressed: controller.isLoading.value
-                                  ? null
-                                  : controller.updateProfile,
-                              child: AnimatedSwitcher(
-                                duration: const Duration(milliseconds: 200),
-                                child: controller.isLoading.value
-                                    ? const SizedBox(
-                                        key: ValueKey('loading'),
-                                        height: 20,
-                                        width: 20,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                          color: AppColors.white,
-                                        ),
-                                      )
-                                    : const Text(
-                                        'Continue',
-                                        key: ValueKey('text'),
-                                      ),
-                              ),
-                            ),
+
+                          // Submit Button - Using AppButton
+                          Obx(() => AppButton.primary(
+                            text: 'Continue',
+                            isLoading: controller.isLoading.value,
+                            onPressed: controller.updateProfile,
                           )),
+
                           const SizedBox(height: 16),
                         ],
                       ),
