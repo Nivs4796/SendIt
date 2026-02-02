@@ -404,3 +404,32 @@ export const getAvailableCoupons = async (
 
   return availableCoupons
 }
+
+/**
+ * Get coupon statistics for admin dashboard
+ */
+export const getCouponStats = async () => {
+  const [totalCoupons, activeCoupons, usageStats] = await Promise.all([
+    prisma.coupon.count(),
+    prisma.coupon.count({
+      where: {
+        isActive: true,
+        OR: [
+          { expiresAt: null },
+          { expiresAt: { gte: new Date() } },
+        ],
+      },
+    }),
+    prisma.couponUsage.aggregate({
+      _count: { id: true },
+      _sum: { discount: true },
+    }),
+  ])
+
+  return {
+    totalCoupons,
+    activeCoupons,
+    totalRedemptions: usageStats._count.id,
+    totalDiscountGiven: usageStats._sum.discount || 0,
+  }
+}

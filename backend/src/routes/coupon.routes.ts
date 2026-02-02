@@ -179,6 +179,25 @@ router.delete(
   couponController.deleteCoupon
 )
 
+/**
+ * @swagger
+ * /coupons/stats:
+ *   get:
+ *     summary: Get coupon statistics
+ *     tags: [Coupons]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Coupon statistics
+ */
+router.get(
+  '/stats',
+  authenticate,
+  authorize('admin'),
+  couponController.getCouponStats
+)
+
 // ============================================
 // USER ROUTES
 // ============================================

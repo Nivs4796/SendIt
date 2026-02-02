@@ -178,3 +178,19 @@ export const getCouponHistory = async (
     next(error)
   }
 }
+
+/**
+ * Get coupon statistics (Admin)
+ */
+export const getCouponStats = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const stats = await couponService.getCouponStats()
+    res.json(formatResponse(true, 'Coupon stats retrieved', stats))
+  } catch (error) {
+    next(error)
+  }
+}
