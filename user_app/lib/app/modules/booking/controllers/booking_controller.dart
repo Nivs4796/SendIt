@@ -5,10 +5,12 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../data/models/address_model.dart';
 import '../../../data/models/booking_model.dart';
+import '../../../data/models/coupon_model.dart';
 import '../../../data/models/price_calculation_model.dart';
 import '../../../data/models/vehicle_type_model.dart';
 import '../../../data/providers/api_exceptions.dart';
 import '../../../data/repositories/booking_repository.dart';
+import '../../../data/repositories/coupon_repository.dart';
 import '../../../routes/app_routes.dart';
 import '../../../services/location_service.dart';
 import '../../../services/payment_service.dart';
@@ -28,6 +30,7 @@ enum BookingState {
 class BookingController extends GetxController {
   // Dependencies
   final BookingRepository _bookingRepository = BookingRepository();
+  final CouponRepository _couponRepository = CouponRepository();
   late final LocationService _locationService;
   late final PaymentService _paymentService;
 
@@ -97,8 +100,14 @@ class BookingController extends GetxController {
   /// Applied coupon code
   final RxString couponCode = ''.obs;
 
+  /// Applied coupon model (for displaying coupon details)
+  final Rx<CouponModel?> appliedCoupon = Rx<CouponModel?>(null);
+
   /// Discount amount from coupon
   final RxDouble couponDiscount = 0.0.obs;
+
+  /// Whether coupon validation is in progress
+  final RxBool isValidatingCoupon = false.obs;
 
   // Booking State
   /// The current booking being created/tracked
@@ -417,38 +426,93 @@ class BookingController extends GetxController {
     }
   }
 
-  /// Applies a coupon code.
-  /// Currently a placeholder - implement actual coupon validation API.
+  /// Applies a coupon code by validating it with the backend API.
+  /// Validates the coupon against order amount and vehicle type.
   Future<void> applyCoupon(String code) async {
+    // Handle empty code - clear coupon
     if (code.isEmpty) {
-      couponCode.value = '';
-      couponDiscount.value = 0.0;
+      _clearCoupon();
+      return;
+    }
+
+    // Validate prerequisites
+    if (priceCalculation.value == null) {
+      _showError('Please select a vehicle first to apply coupon');
+      return;
+    }
+
+    if (selectedVehicle.value == null) {
+      _showError('Please select a vehicle type');
       return;
     }
 
     try {
-      // TODO: Implement actual coupon validation API
-      // For now, we'll just store the code
-      couponCode.value = code;
+      isValidatingCoupon.value = true;
+      errorMessage.value = '';
 
-      // Placeholder discount logic - replace with API response
-      // Example: 10% discount for 'FIRST10'
-      if (code.toUpperCase() == 'FIRST10' && priceCalculation.value != null) {
-        couponDiscount.value = priceCalculation.value!.totalAmount * 0.10;
-        _showSuccess('Coupon applied successfully!');
+      final response = await _couponRepository.validateCoupon(
+        code: code.trim().toUpperCase(),
+        orderAmount: priceCalculation.value!.totalAmount,
+        vehicleTypeId: selectedVehicle.value!.id,
+      );
+
+      if (response.success && response.data != null) {
+        final data = response.data!;
+        final coupon = data['coupon'] as CouponModel?;
+        final discount = data['discount'] as double;
+
+        if (coupon != null && discount > 0) {
+          // Apply coupon successfully
+          couponCode.value = code.trim().toUpperCase();
+          appliedCoupon.value = coupon;
+          couponDiscount.value = discount;
+
+          _showSuccess(
+            'Coupon applied! You save ₹${discount.toStringAsFixed(2)}',
+          );
+
+          // Update balance check after discount
+          if (selectedPaymentMethod.value == PaymentMethod.wallet) {
+            hasSufficientBalance.value = walletBalance.value >= finalAmount;
+          }
+        } else {
+          _clearCoupon();
+          _showError('Coupon is not applicable for this order');
+        }
       } else {
-        couponDiscount.value = 0.0;
-        _showError('Invalid coupon code');
+        _clearCoupon();
+        _showError(response.message ?? 'Invalid coupon code');
       }
-
-      // Update balance check after discount
-      if (selectedPaymentMethod.value == PaymentMethod.wallet) {
-        hasSufficientBalance.value = walletBalance.value >= finalAmount;
-      }
+    } on ApiException catch (e) {
+      _clearCoupon();
+      _showError(e.message);
+    } on NetworkException {
+      _clearCoupon();
+      _showError('No internet connection');
     } catch (e) {
-      couponCode.value = '';
-      couponDiscount.value = 0.0;
-      _showError('Failed to apply coupon');
+      _clearCoupon();
+      _showError('Failed to validate coupon');
+    } finally {
+      isValidatingCoupon.value = false;
+    }
+  }
+
+  /// Removes the currently applied coupon.
+  void removeCoupon() {
+    _clearCoupon();
+    _showSuccess('Coupon removed');
+  }
+
+  /// Clears coupon state without showing any message.
+  void _clearCoupon() {
+    couponCode.value = '';
+    appliedCoupon.value = null;
+    couponDiscount.value = 0.0;
+
+    // Update balance check after removing discount
+    if (selectedPaymentMethod.value == PaymentMethod.wallet &&
+        priceCalculation.value != null) {
+      hasSufficientBalance.value = walletBalance.value >= finalAmount;
     }
   }
 
@@ -585,7 +649,9 @@ class BookingController extends GetxController {
     // Reset payment
     selectedPaymentMethod.value = PaymentMethod.wallet;
     couponCode.value = '';
+    appliedCoupon.value = null;
     couponDiscount.value = 0.0;
+    isValidatingCoupon.value = false;
 
     // Reset booking
     currentBooking.value = null;
@@ -601,9 +667,10 @@ class BookingController extends GetxController {
   // ============================================
 
   /// Resets the price calculation when locations change.
+  /// Also clears any applied coupon since it may not be valid for new price.
   void _resetPriceCalculation() {
     priceCalculation.value = null;
-    couponDiscount.value = 0.0;
+    _clearCoupon();
     hasSufficientBalance.value = false;
   }
 

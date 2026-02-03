@@ -485,9 +485,10 @@ class PaymentView extends GetView<BookingController> {
 
     return Obx(() {
       final hasCoupon = controller.couponCode.value.isNotEmpty;
+      final isValidating = controller.isValidatingCoupon.value;
 
       return GestureDetector(
-        onTap: () => _showCouponDialog(context),
+        onTap: isValidating ? null : () => _showCouponDialog(context),
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
@@ -514,13 +515,23 @@ class PaymentView extends GetView<BookingController> {
                       : theme.colorScheme.primaryContainer,
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(
-                  Icons.local_offer_outlined,
-                  size: 20,
-                  color: hasCoupon
-                      ? AppColors.success
-                      : theme.colorScheme.primary,
-                ),
+                child: isValidating
+                    ? Padding(
+                        padding: const EdgeInsets.all(10),
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            theme.colorScheme.primary,
+                          ),
+                        ),
+                      )
+                    : Icon(
+                        Icons.local_offer_outlined,
+                        size: 20,
+                        color: hasCoupon
+                            ? AppColors.success
+                            : theme.colorScheme.primary,
+                      ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -528,7 +539,11 @@ class PaymentView extends GetView<BookingController> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      hasCoupon ? controller.couponCode.value : 'Apply Coupon',
+                      isValidating
+                          ? 'Validating...'
+                          : hasCoupon
+                              ? controller.couponCode.value
+                              : 'Apply Coupon',
                       style: AppTextStyles.labelLarge.copyWith(
                         color: hasCoupon
                             ? AppColors.successDark
@@ -542,12 +557,19 @@ class PaymentView extends GetView<BookingController> {
                           color: AppColors.success,
                         ),
                       ),
+                    if (hasCoupon && controller.appliedCoupon.value != null)
+                      Text(
+                        controller.appliedCoupon.value!.bannerSubtitle,
+                        style: AppTextStyles.caption.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
                   ],
                 ),
               ),
-              if (hasCoupon)
+              if (hasCoupon && !isValidating)
                 GestureDetector(
-                  onTap: () => controller.applyCoupon(''),
+                  onTap: () => controller.removeCoupon(),
                   child: Container(
                     padding: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
@@ -561,7 +583,7 @@ class PaymentView extends GetView<BookingController> {
                     ),
                   ),
                 )
-              else
+              else if (!isValidating)
                 Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -786,7 +808,7 @@ class PaymentView extends GetView<BookingController> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Try "FIRST10" for 10% discount',
+              'Enter a valid coupon code to get discount',
               style: AppTextStyles.caption.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
                 fontStyle: FontStyle.italic,
@@ -807,10 +829,10 @@ class PaymentView extends GetView<BookingController> {
           ElevatedButton(
             onPressed: () {
               final code = couponController.text.trim();
+              Get.back();
               if (code.isNotEmpty) {
                 controller.applyCoupon(code);
               }
-              Get.back();
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: theme.colorScheme.primary,
