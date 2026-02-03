@@ -41,14 +41,19 @@ class PilotModel {
   });
 
   factory PilotModel.fromJson(Map<String, dynamic> json) {
+    // Handle both camelCase (from API) and snake_case field names
+    final createdAtStr = json['createdAt'] ?? json['created_at'];
+    final updatedAtStr = json['updatedAt'] ?? json['updated_at'];
+    final dateOfBirthStr = json['dateOfBirth'] ?? json['date_of_birth'];
+    
     return PilotModel(
       id: json['id'] as String,
       name: json['name'] as String,
       phone: json['phone'] as String,
       email: json['email'] as String?,
       avatar: json['avatar'] as String?,
-      dateOfBirth: json['date_of_birth'] != null
-          ? DateTime.parse(json['date_of_birth'] as String)
+      dateOfBirth: dateOfBirthStr != null
+          ? DateTime.parse(dateOfBirthStr as String)
           : null,
       age: json['age'] as int?,
       address: json['address'] as String?,
@@ -57,13 +62,15 @@ class PilotModel {
       pincode: json['pincode'] as String?,
       status: PilotStatus.fromString(json['status'] as String? ?? 'pending'),
       verificationStatus: VerificationStatus.fromString(
-          json['verification_status'] as String? ?? 'pending'),
-      isOnline: json['is_online'] as bool? ?? false,
+          json['verificationStatus'] ?? json['verification_status'] as String? ?? 'pending'),
+      isOnline: json['isOnline'] ?? json['is_online'] as bool? ?? false,
       rating: (json['rating'] as num?)?.toDouble(),
-      totalRides: json['total_rides'] as int? ?? 0,
-      createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: json['updated_at'] != null
-          ? DateTime.parse(json['updated_at'] as String)
+      totalRides: json['totalRides'] ?? json['total_rides'] as int? ?? 0,
+      createdAt: createdAtStr != null 
+          ? DateTime.parse(createdAtStr as String)
+          : DateTime.now(),
+      updatedAt: updatedAtStr != null
+          ? DateTime.parse(updatedAtStr as String)
           : null,
     );
   }
