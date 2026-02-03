@@ -84,24 +84,26 @@ class AppText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     TextStyle baseStyle = _getBaseStyle();
+    final theme = Theme.of(context);
 
     // Determine the effective color
     Color? effectiveColor = color;
     if (_isErrorText) {
-      effectiveColor = Theme.of(context).colorScheme.error;
+      effectiveColor = theme.colorScheme.error;
     } else if (_isSecondaryText) {
-      effectiveColor = Theme.of(context).colorScheme.onSurfaceVariant;
+      effectiveColor = theme.colorScheme.onSurfaceVariant;
+    } else if (color == null) {
+      // Apply theme-aware text color for all other variants
+      effectiveColor = theme.colorScheme.onSurface;
     }
 
     // Apply overrides
-    if (effectiveColor != null || letterSpacing != null || fontWeight != null || decoration != null) {
-      baseStyle = baseStyle.copyWith(
-        color: effectiveColor,
-        letterSpacing: letterSpacing,
-        fontWeight: fontWeight,
-        decoration: decoration,
-      );
-    }
+    baseStyle = baseStyle.copyWith(
+      color: effectiveColor,
+      letterSpacing: letterSpacing,
+      fontWeight: fontWeight,
+      decoration: decoration,
+    );
 
     return Text(
       text,

@@ -1,11 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:pinput/pinput.dart';
-
-import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_text_styles.dart';
-import '../../../core/theme/app_theme.dart';
-import '../../../core/widgets/app_button.dart';
+import '../../../core/widgets/widgets.dart';
 import '../controllers/auth_controller.dart';
 
 class OtpView extends GetView<AuthController> {
@@ -13,165 +8,178 @@ class OtpView extends GetView<AuthController> {
 
   @override
   Widget build(BuildContext context) {
+    return const _OtpContent();
+  }
+}
+
+class _OtpContent extends StatefulWidget {
+  const _OtpContent();
+
+  @override
+  State<_OtpContent> createState() => _OtpContentState();
+}
+
+class _OtpContentState extends State<_OtpContent>
+    with SingleTickerProviderStateMixin {
+  late TextEditingController _pinController;
+  late FocusNode _pinFocusNode;
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _pinController = TextEditingController();
+    _pinFocusNode = FocusNode();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
+    );
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.1),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOutCubic),
+    );
+    _animationController.forward();
+
+    // Auto-focus the OTP input
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _pinFocusNode.requestFocus();
+    });
+  }
+
+  @override
+  void dispose() {
+    _pinController.dispose();
+    _pinFocusNode.dispose();
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = Get.find<AuthController>();
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
-    final defaultPinTheme = PinTheme(
-      width: 50,
-      height: 56,
-      textStyle: AppTextStyles.h3.copyWith(
-        fontWeight: FontWeight.bold,
-        color: theme.colorScheme.onSurface,
-      ),
-      decoration: BoxDecoration(
-        color: isDark
-            ? theme.colorScheme.surfaceContainerHighest
-            : theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
-        border: Border.all(
-          color: theme.colorScheme.outline.withValues(alpha: 0.2),
-        ),
-      ),
-    );
-
-    final focusedPinTheme = defaultPinTheme.copyWith(
-      decoration: defaultPinTheme.decoration?.copyWith(
-        border: Border.all(
-          color: AppColors.primary,
-          width: 2,
-        ),
-      ),
-    );
-
-    final submittedPinTheme = defaultPinTheme.copyWith(
-      decoration: defaultPinTheme.decoration?.copyWith(
-        color: AppColors.primary.withValues(alpha: 0.1),
-        border: Border.all(
-          color: AppColors.primary,
-        ),
-      ),
-    );
-
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back_ios_rounded,
-            color: theme.colorScheme.onSurface,
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        backgroundColor: theme.scaffoldBackgroundColor,
+        resizeToAvoidBottomInset: true,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: IconButton(
+            icon: Icon(
+              Icons.arrow_back_ios_rounded,
+              color: theme.colorScheme.onSurface,
+            ),
+            onPressed: () => Get.back(),
           ),
-          onPressed: () => Get.back(),
         ),
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 20),
-
-              // Title
-              Text(
-                'Verify Phone',
-                style: AppTextStyles.h3.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Obx(() => Text(
-                'Enter the 6-digit code sent to ${controller.countryCode.value} ${controller.phone.value}',
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                ),
-              )),
-
-              const SizedBox(height: 40),
-
-              // OTP Input
-              Center(
-                child: Pinput(
-                  length: 6,
-                  defaultPinTheme: defaultPinTheme,
-                  focusedPinTheme: focusedPinTheme,
-                  submittedPinTheme: submittedPinTheme,
-                  onCompleted: controller.updateOtp,
-                  onChanged: (value) => controller.otp.value = value,
-                ),
-              ),
-
-              const SizedBox(height: 24),
-
-              // Error Message
-              Obx(() {
-                if (controller.errorMessage.value.isEmpty) {
-                  return const SizedBox.shrink();
-                }
-                return Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.error.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.error_outline,
-                        color: theme.colorScheme.error,
-                        size: 20,
+        body: SafeArea(
+          child: FadeTransition(
+            opacity: _fadeAnimation,
+            child: SlideTransition(
+              position: _slideAnimation,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return SingleChildScrollView(
+                    padding: const EdgeInsets.all(24),
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minHeight: constraints.maxHeight - 48,
                       ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          controller.errorMessage.value,
-                          style: AppTextStyles.bodySmall.copyWith(
-                            color: theme.colorScheme.error,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Title
+                          const AppText.h2('Verification Code'),
+                          const SizedBox(height: 8),
+                          Obx(() => AppText.secondary(
+                            'We have sent the code to ${controller.countryCode.value} ${controller.phone.value}',
+                          )),
+
+                          const SizedBox(height: 40),
+
+                          // OTP Input
+                          Center(
+                            child: Obx(() => AppOtpField(
+                              length: 6,
+                              controller: _pinController,
+                              focusNode: _pinFocusNode,
+                              errorText: controller.errorMessage.value.isNotEmpty
+                                  ? controller.errorMessage.value
+                                  : null,
+                              onCompleted: (pin) {
+                                controller.otp.value = pin;
+                                controller.verifyOtp();
+                              },
+                              onChanged: (value) {
+                                controller.otp.value = value;
+                                if (controller.errorMessage.isNotEmpty) {
+                                  controller.clearError();
+                                }
+                              },
+                            )),
                           ),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }),
 
-              const SizedBox(height: 24),
+                          const SizedBox(height: 24),
 
-              // Resend OTP
-              Center(
-                child: Obx(() {
-                  if (controller.canResendOtp.value) {
-                    return TextButton(
-                      onPressed: controller.resendOtp,
-                      child: Text(
-                        'Resend OTP',
-                        style: AppTextStyles.bodyMedium.copyWith(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.w600,
-                        ),
+                          // Resend OTP
+                          Center(
+                            child: Obx(() => AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 300),
+                              child: controller.canResendOtp.value
+                                  ? AppButton.text(
+                                      key: const ValueKey('resend'),
+                                      text: 'Resend OTP',
+                                      icon: Icons.refresh_rounded,
+                                      onPressed: controller.resendOtp,
+                                    )
+                                  : Row(
+                                      key: const ValueKey('timer'),
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.timer_outlined,
+                                          size: 18,
+                                          color: theme.colorScheme.onSurfaceVariant,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        AppText.secondary(
+                                          'Resend OTP in ${controller.resendSeconds.value}s',
+                                        ),
+                                      ],
+                                    ),
+                            )),
+                          ),
+
+                          // Spacer
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.15,
+                          ),
+
+                          // Verify Button
+                          Obx(() => AppButton.primary(
+                            text: 'Verify',
+                            isLoading: controller.isLoading.value,
+                            onPressed: controller.verifyOtp,
+                          )),
+
+                          const SizedBox(height: 16),
+                        ],
                       ),
-                    );
-                  }
-                  return Text(
-                    'Resend OTP in ${controller.resendSeconds.value}s',
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                     ),
                   );
-                }),
+                },
               ),
-
-              const SizedBox(height: 32),
-
-              // Verify Button
-              Obx(() => AppButton(
-                text: 'Verify',
-                onPressed: controller.verifyOtp,
-                isLoading: controller.isLoading.value,
-                isDisabled: controller.otp.value.length != 6,
-              )),
-            ],
+            ),
           ),
         ),
       ),
