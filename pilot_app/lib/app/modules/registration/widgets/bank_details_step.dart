@@ -3,6 +3,9 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
+import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/inputs/app_text_field.dart';
 import '../controllers/registration_controller.dart';
 
 class BankDetailsStep extends GetView<RegistrationController> {
@@ -13,7 +16,10 @@ class BankDetailsStep extends GetView<RegistrationController> {
     final theme = Theme.of(context);
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: EdgeInsets.symmetric(
+        horizontal: AppTheme.spacingLg,
+        vertical: AppTheme.spacingSm,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -21,187 +27,131 @@ class BankDetailsStep extends GetView<RegistrationController> {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(8),
+                padding: EdgeInsets.all(AppTheme.spacingSm),
                 decoration: BoxDecoration(
                   color: AppColors.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
                 ),
                 child: Icon(Icons.account_balance_rounded, color: AppColors.primary, size: 18),
               ),
-              const SizedBox(width: 10),
+              SizedBox(width: AppTheme.spacingSm),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Bank Details', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-                    Text('For your earnings payout', style: TextStyle(fontSize: 11, color: theme.colorScheme.onSurface.withValues(alpha: 0.6))),
+                    Text('Bank Details', style: AppTextStyles.h4),
+                    Text('For your earnings payout', style: AppTextStyles.caption),
                   ],
                 ),
               ),
             ],
           ),
 
-          const SizedBox(height: 10),
+          SizedBox(height: AppTheme.spacingMd),
 
-          // Earnings Info Card
-          _buildEarningsInfoCard(theme),
+          // Earnings Info
+          _buildEarningsInfo(theme),
 
-          const SizedBox(height: 12),
+          SizedBox(height: AppTheme.spacingMd),
 
-          // Account Details Form
-          _buildFormCard(
-            theme,
-            children: [
-              _buildCompactField(
-                controller: controller.accountHolderController,
-                label: 'Account Holder Name',
-                hint: 'Name as per bank',
-                icon: Icons.person_outline_rounded,
-              ),
-
-              const SizedBox(height: 10),
-
-              _buildCompactField(
-                controller: controller.bankNameController,
-                label: 'Bank Name',
-                hint: 'e.g., State Bank of India',
-                icon: Icons.account_balance_outlined,
-              ),
-
-              const SizedBox(height: 10),
-
-              _buildCompactField(
-                controller: controller.accountNumberController,
-                label: 'Account Number',
-                hint: 'Enter account number',
-                icon: Icons.numbers_rounded,
-                keyboardType: TextInputType.number,
-                obscureText: true,
-              ),
-
-              const SizedBox(height: 10),
-
-              _buildCompactField(
-                controller: controller.confirmAccountNumberController,
-                label: 'Confirm Account Number',
-                hint: 'Re-enter to confirm',
-                icon: Icons.check_circle_outline_rounded,
-                keyboardType: TextInputType.number,
-              ),
-
-              const SizedBox(height: 10),
-
-              _buildCompactField(
-                controller: controller.ifscController,
-                label: 'IFSC Code',
-                hint: 'e.g., SBIN0001234',
-                icon: Icons.qr_code_rounded,
-                textCapitalization: TextCapitalization.characters,
-                maxLength: 11,
-              ),
-            ],
+          // Form
+          AppTextField(
+            controller: controller.accountHolderController,
+            label: 'Account Holder Name',
+            hint: 'Name as per bank',
+            prefixIcon: const Icon(Icons.person_outline),
+            textCapitalization: TextCapitalization.words,
           ),
 
-          const SizedBox(height: 10),
+          SizedBox(height: AppTheme.spacingSm),
 
-          // Supporting Document
-          Text('Optional Document', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
-          const SizedBox(height: 6),
+          AppTextField(
+            controller: controller.bankNameController,
+            label: 'Bank Name',
+            hint: 'e.g., State Bank of India',
+            prefixIcon: const Icon(Icons.account_balance_outlined),
+          ),
 
-          _buildDocumentUpload(context, theme),
+          SizedBox(height: AppTheme.spacingSm),
 
-          const SizedBox(height: 10),
+          AppTextField(
+            controller: controller.accountNumberController,
+            label: 'Account Number',
+            hint: 'Enter account number',
+            prefixIcon: const Icon(Icons.numbers),
+            type: AppTextFieldType.number,
+            obscureText: true,
+          ),
+
+          SizedBox(height: AppTheme.spacingSm),
+
+          AppTextField(
+            controller: controller.confirmAccountNumberController,
+            label: 'Confirm Account Number',
+            hint: 'Re-enter to confirm',
+            prefixIcon: const Icon(Icons.check_circle_outline),
+            type: AppTextFieldType.number,
+          ),
+
+          SizedBox(height: AppTheme.spacingSm),
+
+          AppTextField(
+            controller: controller.ifscController,
+            label: 'IFSC Code',
+            hint: 'e.g., SBIN0001234',
+            prefixIcon: const Icon(Icons.qr_code),
+            textCapitalization: TextCapitalization.characters,
+            maxLength: 11,
+          ),
+
+          SizedBox(height: AppTheme.spacingMd),
+
+          // Optional Document
+          Text('Optional Document', style: AppTextStyles.labelLarge),
+          SizedBox(height: AppTheme.spacingSm),
+
+          _buildDocUpload(context, theme),
+
+          SizedBox(height: AppTheme.spacingMd),
 
           // Security Note
           _buildSecurityNote(theme),
 
-          const SizedBox(height: 10),
+          SizedBox(height: AppTheme.spacingSm),
 
-          // Final Step Note
-          _buildFinalStepNote(theme),
+          // Final Note
+          _buildFinalNote(theme),
 
-          const SizedBox(height: 12),
+          SizedBox(height: AppTheme.spacingMd),
         ],
       ),
     );
   }
 
-  Widget _buildCompactField({
-    required TextEditingController controller,
-    required String label,
-    required String hint,
-    required IconData icon,
-    TextInputType? keyboardType,
-    bool obscureText = false,
-    TextCapitalization textCapitalization = TextCapitalization.none,
-    int? maxLength,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500)),
-        const SizedBox(height: 4),
-        Container(
-          height: 42,
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.05),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
-          ),
-          child: TextField(
-            controller: controller,
-            keyboardType: keyboardType,
-            obscureText: obscureText,
-            textCapitalization: textCapitalization,
-            maxLength: maxLength,
-            style: const TextStyle(fontSize: 13),
-            decoration: InputDecoration(
-              hintText: hint,
-              hintStyle: TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.3)),
-              prefixIcon: Icon(icon, size: 16, color: AppColors.primary),
-              border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(vertical: 12),
-              counterText: '',
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildFormCard(ThemeData theme, {required List<Widget> children}) {
+  Widget _buildEarningsInfo(ThemeData theme) {
     return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.1)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: children,
-      ),
-    );
-  }
-
-  Widget _buildEarningsInfoCard(ThemeData theme) {
-    return Container(
-      padding: const EdgeInsets.all(10),
+      padding: EdgeInsets.all(AppTheme.spacingSm),
       decoration: BoxDecoration(
         color: AppColors.success.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
         border: Border.all(color: AppColors.success.withValues(alpha: 0.2)),
       ),
       child: Row(
         children: [
           Icon(Icons.monetization_on_rounded, color: AppColors.success, size: 20),
-          const SizedBox(width: 10),
+          SizedBox(width: AppTheme.spacingSm),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Weekly Payouts', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.success)),
-                Text('Earnings transferred every week', style: TextStyle(fontSize: 10, color: theme.colorScheme.onSurface.withValues(alpha: 0.7))),
+                Text(
+                  'Weekly Payouts',
+                  style: AppTextStyles.labelLarge.copyWith(color: AppColors.success),
+                ),
+                Text(
+                  'Earnings transferred every week',
+                  style: AppTextStyles.caption,
+                ),
               ],
             ),
           ),
@@ -210,19 +160,19 @@ class BankDetailsStep extends GetView<RegistrationController> {
     );
   }
 
-  Widget _buildDocumentUpload(BuildContext context, ThemeData theme) {
+  Widget _buildDocUpload(BuildContext context, ThemeData theme) {
     return Obx(() {
       final isUploaded = controller.cancelledChequeFile.value != null;
-      
+
       return GestureDetector(
-        onTap: () => _showImagePicker(context),
+        onTap: () => _showPicker(context),
         child: Container(
-          padding: const EdgeInsets.all(10),
+          padding: EdgeInsets.all(AppTheme.spacingSm),
           decoration: BoxDecoration(
             color: isUploaded
                 ? AppColors.success.withValues(alpha: 0.05)
                 : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
             border: Border.all(
               color: isUploaded
                   ? AppColors.success.withValues(alpha: 0.5)
@@ -238,7 +188,7 @@ class BankDetailsStep extends GetView<RegistrationController> {
                   color: isUploaded
                       ? AppColors.success.withValues(alpha: 0.15)
                       : AppColors.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
                 ),
                 child: Icon(
                   isUploaded ? Icons.check_circle_rounded : Icons.receipt_long_rounded,
@@ -246,17 +196,16 @@ class BankDetailsStep extends GetView<RegistrationController> {
                   size: 18,
                 ),
               ),
-              const SizedBox(width: 10),
+              SizedBox(width: AppTheme.spacingSm),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Cancelled Cheque / Passbook', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                    Text('Cancelled Cheque / Passbook', style: AppTextStyles.labelLarge),
                     Text(
                       isUploaded ? '✓ Uploaded' : 'Helps verify faster',
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: isUploaded ? AppColors.success : theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                      style: AppTextStyles.caption.copyWith(
+                        color: isUploaded ? AppColors.success : null,
                       ),
                     ),
                   ],
@@ -276,20 +225,20 @@ class BankDetailsStep extends GetView<RegistrationController> {
 
   Widget _buildSecurityNote(ThemeData theme) {
     return Container(
-      padding: const EdgeInsets.all(10),
+      padding: EdgeInsets.all(AppTheme.spacingSm),
       decoration: BoxDecoration(
         color: Colors.blue.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
         border: Border.all(color: Colors.blue.withValues(alpha: 0.2)),
       ),
       child: Row(
         children: [
           Icon(Icons.lock_rounded, color: Colors.blue.shade600, size: 16),
-          const SizedBox(width: 8),
+          SizedBox(width: AppTheme.spacingSm),
           Expanded(
             child: Text(
               '256-bit encrypted & stored securely',
-              style: TextStyle(fontSize: 10, color: Colors.blue.shade600),
+              style: AppTextStyles.caption.copyWith(color: Colors.blue.shade600),
             ),
           ),
         ],
@@ -297,24 +246,27 @@ class BankDetailsStep extends GetView<RegistrationController> {
     );
   }
 
-  Widget _buildFinalStepNote(ThemeData theme) {
+  Widget _buildFinalNote(ThemeData theme) {
     return Container(
-      padding: const EdgeInsets.all(10),
+      padding: EdgeInsets.all(AppTheme.spacingSm),
       decoration: BoxDecoration(
         color: AppColors.primary.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
         border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
       ),
       child: Row(
         children: [
           Icon(Icons.celebration_rounded, color: AppColors.primary, size: 18),
-          const SizedBox(width: 10),
+          SizedBox(width: AppTheme.spacingSm),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Almost Done!', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.primary)),
-                Text('Review & submit your application', style: TextStyle(fontSize: 10, color: theme.colorScheme.onSurface.withValues(alpha: 0.7))),
+                Text(
+                  'Almost Done!',
+                  style: AppTextStyles.labelLarge.copyWith(color: AppColors.primary),
+                ),
+                Text('Review & submit your application', style: AppTextStyles.caption),
               ],
             ),
           ),
@@ -323,9 +275,9 @@ class BankDetailsStep extends GetView<RegistrationController> {
     );
   }
 
-  void _showImagePicker(BuildContext context) {
+  void _showPicker(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -334,57 +286,50 @@ class BankDetailsStep extends GetView<RegistrationController> {
           color: theme.colorScheme.surface,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
         ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
+        padding: EdgeInsets.all(AppTheme.spacingLg),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 32,
+              height: 3,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.outline.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            SizedBox(height: AppTheme.spacingMd),
+            Text('Upload Document', style: AppTextStyles.h4),
+            SizedBox(height: AppTheme.spacingMd),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                Container(
-                  width: 32,
-                  height: 3,
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
+                _buildPickerOption(
+                  icon: Icons.camera_alt_rounded,
+                  label: 'Camera',
+                  onTap: () {
+                    Get.back();
+                    controller.pickImage(type: 'cancelled_cheque', source: ImageSource.camera);
+                  },
                 ),
-                const SizedBox(height: 12),
-                Text('Upload Document', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 12),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _buildPickerOption(
-                      theme,
-                      icon: Icons.camera_alt_rounded,
-                      label: 'Camera',
-                      onTap: () {
-                        Get.back();
-                        controller.pickImage(type: 'cancelled_cheque', source: ImageSource.camera);
-                      },
-                    ),
-                    _buildPickerOption(
-                      theme,
-                      icon: Icons.photo_library_rounded,
-                      label: 'Gallery',
-                      onTap: () {
-                        Get.back();
-                        controller.pickImage(type: 'cancelled_cheque', source: ImageSource.gallery);
-                      },
-                    ),
-                  ],
+                _buildPickerOption(
+                  icon: Icons.photo_library_rounded,
+                  label: 'Gallery',
+                  onTap: () {
+                    Get.back();
+                    controller.pickImage(type: 'cancelled_cheque', source: ImageSource.gallery);
+                  },
                 ),
-                const SizedBox(height: 8),
               ],
             ),
-          ),
+            SizedBox(height: AppTheme.spacingSm),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildPickerOption(
-    ThemeData theme, {
+  Widget _buildPickerOption({
     required IconData icon,
     required String label,
     required VoidCallback onTap,
@@ -394,16 +339,16 @@ class BankDetailsStep extends GetView<RegistrationController> {
       child: Column(
         children: [
           Container(
-            width: 50,
-            height: 50,
+            width: 48,
+            height: 48,
             decoration: BoxDecoration(
               color: AppColors.primary.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, size: 22, color: AppColors.primary),
+            child: Icon(icon, size: 20, color: AppColors.primary),
           ),
-          const SizedBox(height: 6),
-          Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
+          SizedBox(height: AppTheme.spacingXs),
+          Text(label, style: AppTextStyles.labelMedium),
         ],
       ),
     );

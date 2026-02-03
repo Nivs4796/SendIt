@@ -3,10 +3,8 @@ import 'package:flutter/services.dart';
 import '../../theme/app_text_styles.dart';
 import '../../theme/app_theme.dart';
 
-/// Configurable text field for basic inputs: text, phone, email, password
-/// Themed with glassmorphism style and full customization support
+/// Compact text field with single border - uses theme's InputDecorationTheme
 class AppTextField extends StatefulWidget {
-  // Core properties
   final String? label;
   final String? hint;
   final String? helperText;
@@ -14,8 +12,6 @@ class AppTextField extends StatefulWidget {
   final TextEditingController? controller;
   final FocusNode? focusNode;
   final AppTextFieldType type;
-
-  // Behavior
   final bool enabled;
   final bool readOnly;
   final bool autofocus;
@@ -24,26 +20,15 @@ class AppTextField extends StatefulWidget {
   final int maxLines;
   final TextInputAction? textInputAction;
   final TextCapitalization textCapitalization;
-
-  // Callbacks
   final ValueChanged<String>? onChanged;
   final VoidCallback? onTap;
   final VoidCallback? onEditingComplete;
   final ValueChanged<String>? onSubmitted;
   final FormFieldValidator<String>? validator;
-
-  // Appearance
   final Widget? prefixIcon;
   final Widget? suffixIcon;
   final String? prefixText;
   final String? suffixText;
-  final Color? fillColor;
-  final Color? borderColor;
-  final Color? focusedBorderColor;
-  final double? borderRadius;
-  final EdgeInsets? contentPadding;
-
-  // Phone specific
   final String? countryCode;
   final String? countryFlag;
 
@@ -73,88 +58,14 @@ class AppTextField extends StatefulWidget {
     this.suffixIcon,
     this.prefixText,
     this.suffixText,
-    this.fillColor,
-    this.borderColor,
-    this.focusedBorderColor,
-    this.borderRadius,
-    this.contentPadding,
     this.countryCode,
     this.countryFlag,
   });
 
-  // Named constructors for specific types
-  const AppTextField.email({
-    super.key,
-    this.label = 'Email',
-    this.hint = 'Enter your email',
-    this.helperText,
-    this.errorText,
-    this.controller,
-    this.focusNode,
-    this.enabled = true,
-    this.readOnly = false,
-    this.autofocus = false,
-    this.textInputAction,
-    this.onChanged,
-    this.onTap,
-    this.onEditingComplete,
-    this.onSubmitted,
-    this.validator,
-    this.prefixIcon,
-    this.suffixIcon,
-    this.prefixText,
-    this.suffixText,
-    this.fillColor,
-    this.borderColor,
-    this.focusedBorderColor,
-    this.borderRadius,
-    this.contentPadding,
-  })  : type = AppTextFieldType.email,
-        obscureText = false,
-        maxLength = null,
-        maxLines = 1,
-        textCapitalization = TextCapitalization.none,
-        countryCode = null,
-        countryFlag = null;
-
-  const AppTextField.password({
-    super.key,
-    this.label = 'Password',
-    this.hint = 'Enter your password',
-    this.helperText,
-    this.errorText,
-    this.controller,
-    this.focusNode,
-    this.enabled = true,
-    this.readOnly = false,
-    this.autofocus = false,
-    this.textInputAction,
-    this.onChanged,
-    this.onTap,
-    this.onEditingComplete,
-    this.onSubmitted,
-    this.validator,
-    this.prefixIcon,
-    this.fillColor,
-    this.borderColor,
-    this.focusedBorderColor,
-    this.borderRadius,
-    this.contentPadding,
-  })  : type = AppTextFieldType.password,
-        obscureText = true,
-        maxLength = null,
-        maxLines = 1,
-        textCapitalization = TextCapitalization.none,
-        suffixIcon = null,
-        prefixText = null,
-        suffixText = null,
-        countryCode = null,
-        countryFlag = null;
-
   const AppTextField.phone({
     super.key,
     this.label = 'Phone Number',
-    this.hint = 'Enter phone number',
+    this.hint = 'Phone Number',
     this.helperText,
     this.errorText,
     this.controller,
@@ -170,11 +81,6 @@ class AppTextField extends StatefulWidget {
     this.onSubmitted,
     this.validator,
     this.suffixIcon,
-    this.fillColor,
-    this.borderColor,
-    this.focusedBorderColor,
-    this.borderRadius,
-    this.contentPadding,
     this.countryCode = '+91',
     this.countryFlag = '🇮🇳',
   })  : type = AppTextFieldType.phone,
@@ -185,40 +91,6 @@ class AppTextField extends StatefulWidget {
         prefixText = null,
         suffixText = null;
 
-  const AppTextField.name({
-    super.key,
-    this.label = 'Full Name',
-    this.hint = 'Enter your name',
-    this.helperText,
-    this.errorText,
-    this.controller,
-    this.focusNode,
-    this.enabled = true,
-    this.readOnly = false,
-    this.autofocus = false,
-    this.textInputAction,
-    this.onChanged,
-    this.onTap,
-    this.onEditingComplete,
-    this.onSubmitted,
-    this.validator,
-    this.prefixIcon,
-    this.suffixIcon,
-    this.prefixText,
-    this.suffixText,
-    this.fillColor,
-    this.borderColor,
-    this.focusedBorderColor,
-    this.borderRadius,
-    this.contentPadding,
-  })  : type = AppTextFieldType.name,
-        obscureText = false,
-        maxLength = null,
-        maxLines = 1,
-        textCapitalization = TextCapitalization.words,
-        countryCode = null,
-        countryFlag = null;
-
   @override
   State<AppTextField> createState() => _AppTextFieldState();
 }
@@ -226,14 +98,12 @@ class AppTextField extends StatefulWidget {
 class _AppTextFieldState extends State<AppTextField> {
   late bool _obscureText;
   late FocusNode _focusNode;
-  bool _isFocused = false;
 
   @override
   void initState() {
     super.initState();
     _obscureText = widget.obscureText;
     _focusNode = widget.focusNode ?? FocusNode();
-    _focusNode.addListener(_onFocusChange);
   }
 
   @override
@@ -242,12 +112,6 @@ class _AppTextFieldState extends State<AppTextField> {
       _focusNode.dispose();
     }
     super.dispose();
-  }
-
-  void _onFocusChange() {
-    setState(() {
-      _isFocused = _focusNode.hasFocus;
-    });
   }
 
   @override
@@ -271,90 +135,51 @@ class _AppTextFieldState extends State<AppTextField> {
                   : Theme.of(context).colorScheme.onSurface,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 4),
         ],
-        Container(
-          margin: const EdgeInsets.symmetric(horizontal: 2),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(widget.borderRadius ?? AppTheme.radiusMedium),
-            border: Border.all(
-              color: hasError
-                  ? Theme.of(context).colorScheme.error
-                  : _isFocused
-                      ? (widget.focusedBorderColor ?? Theme.of(context).colorScheme.primary)
-                      : (widget.borderColor ?? Theme.of(context).dividerColor),
-              width: _isFocused || hasError ? 2.0 : 1.5,
-            ),
-            boxShadow: _isFocused
-                ? [
-                    BoxShadow(
-                      color: (hasError ? Theme.of(context).colorScheme.error : Theme.of(context).colorScheme.primary).withValues(alpha: 0.1),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
+        TextField(
+          controller: widget.controller,
+          focusNode: _focusNode,
+          enabled: widget.enabled,
+          readOnly: widget.readOnly,
+          autofocus: widget.autofocus,
+          obscureText: _obscureText,
+          maxLength: widget.maxLength,
+          maxLines: widget.maxLines,
+          keyboardType: _getKeyboardType(),
+          textInputAction: widget.textInputAction,
+          textCapitalization: widget.textCapitalization,
+          inputFormatters: _getInputFormatters(),
+          style: AppTextStyles.bodyLarge.copyWith(
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
+          onChanged: widget.onChanged,
+          onTap: widget.onTap,
+          onEditingComplete: widget.onEditingComplete,
+          onSubmitted: widget.onSubmitted,
+          decoration: InputDecoration(
+            hintText: widget.hint,
+            counterText: '',
+            prefixIcon: widget.prefixIcon != null
+                ? IconTheme(
+                    data: IconThemeData(
+                      size: 18,
+                      color: Theme.of(context).colorScheme.primary,
                     ),
-                  ]
+                    child: widget.prefixIcon!,
+                  )
                 : null,
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular((widget.borderRadius ?? AppTheme.radiusMedium) - 2),
-            child: Container(
-              color: widget.fillColor ?? Theme.of(context).cardColor,
-              child: TextField(
-            controller: widget.controller,
-            focusNode: _focusNode,
-            enabled: widget.enabled,
-            readOnly: widget.readOnly,
-            autofocus: widget.autofocus,
-            obscureText: _obscureText,
-            maxLength: widget.maxLength,
-            maxLines: widget.maxLines,
-            keyboardType: _getKeyboardType(),
-            textInputAction: widget.textInputAction,
-            textCapitalization: widget.textCapitalization,
-            inputFormatters: _getInputFormatters(),
-            style: AppTextStyles.bodyLarge.copyWith(color: Theme.of(context).colorScheme.onSurface),
-            onChanged: widget.onChanged,
-            onTap: widget.onTap,
-            onEditingComplete: widget.onEditingComplete,
-            onSubmitted: widget.onSubmitted,
-            decoration: InputDecoration(
-              hintText: widget.hint,
-              hintStyle: AppTextStyles.bodyLarge.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
-              counterText: '',
-              border: InputBorder.none,
-              enabledBorder: InputBorder.none,
-              focusedBorder: InputBorder.none,
-              errorBorder: InputBorder.none,
-              focusedErrorBorder: InputBorder.none,
-              contentPadding: widget.contentPadding ?? const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-              prefixIcon: widget.prefixIcon,
-              prefixText: widget.prefixText,
-              suffixText: widget.suffixText,
-              suffixIcon: _buildSuffixIcon(),
-            ),
-          ),
-            ),
+            prefixText: widget.prefixText,
+            suffixText: widget.suffixText,
+            suffixIcon: _buildSuffixIcon(),
+            errorText: hasError ? widget.errorText : null,
           ),
         ),
-        if (hasError) ...[
-          const SizedBox(height: 6),
-          Row(
-            children: [
-              Icon(Icons.error_outline_rounded, size: 14, color: Theme.of(context).colorScheme.error),
-              const SizedBox(width: 4),
-              Expanded(
-                child: Text(
-                  widget.errorText!,
-                  style: AppTextStyles.caption.copyWith(color: Theme.of(context).colorScheme.error),
-                ),
-              ),
-            ],
-          ),
-        ] else if (widget.helperText != null) ...[
-          const SizedBox(height: 6),
+        if (widget.helperText != null && !hasError) ...[
+          const SizedBox(height: 4),
           Text(
             widget.helperText!,
-            style: AppTextStyles.caption.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+            style: AppTextStyles.caption,
           ),
         ],
       ],
@@ -375,118 +200,88 @@ class _AppTextFieldState extends State<AppTextField> {
                   : Theme.of(context).colorScheme.onSurface,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 4),
         ],
         Container(
-          margin: const EdgeInsets.symmetric(horizontal: 2),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(widget.borderRadius ?? AppTheme.radiusMedium),
+            borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
             border: Border.all(
               color: hasError
                   ? Theme.of(context).colorScheme.error
-                  : _isFocused
-                      ? (widget.focusedBorderColor ?? Theme.of(context).colorScheme.primary)
-                      : (widget.borderColor ?? Theme.of(context).dividerColor),
-              width: _isFocused || hasError ? 2.0 : 2.0,
+                  : Theme.of(context).colorScheme.outline,
             ),
-            boxShadow: [
-              BoxShadow(
-                color: Theme.of(context).shadowColor.withValues(alpha: 0.06),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
           ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular((widget.borderRadius ?? AppTheme.radiusMedium) - 2),
-            child: Container(
-              color: widget.fillColor ?? Theme.of(context).cardColor,
-              child: Row(
-                children: [
-                  // Country Code
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-                    decoration: BoxDecoration(
-                      border: Border(
-                        right: BorderSide(
-                          color: Theme.of(context).dividerColor,
-                          width: 1.5,
-                        ),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (widget.countryFlag != null)
-                          Text(widget.countryFlag!, style: const TextStyle(fontSize: 18)),
-                        const SizedBox(width: 8),
-                        Text(
-                          widget.countryCode ?? '+91',
-                          style: AppTextStyles.bodyLarge.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: Theme.of(context).colorScheme.onSurface,
-                          ),
-                        ),
-                      ],
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                decoration: BoxDecoration(
+                  border: Border(
+                    right: BorderSide(
+                      color: Theme.of(context).colorScheme.outline,
                     ),
                   ),
-                  // Phone Number
-                  Expanded(
-                    child: TextField(
-                      controller: widget.controller,
-                      focusNode: _focusNode,
-                      enabled: widget.enabled,
-                      readOnly: widget.readOnly,
-                      autofocus: widget.autofocus,
-                      keyboardType: TextInputType.phone,
-                      maxLength: widget.maxLength,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      style: AppTextStyles.bodyLarge.copyWith(
-                        fontWeight: FontWeight.w500,
-                        letterSpacing: 1.2,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (widget.countryFlag != null)
+                      Text(widget.countryFlag!, style: const TextStyle(fontSize: 14)),
+                    const SizedBox(width: 4),
+                    Text(
+                      widget.countryCode ?? '+91',
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        fontWeight: FontWeight.w600,
                         color: Theme.of(context).colorScheme.onSurface,
                       ),
-                      onChanged: widget.onChanged,
-                      onTap: widget.onTap,
-                      onEditingComplete: widget.onEditingComplete,
-                      onSubmitted: widget.onSubmitted,
-                      decoration: InputDecoration(
-                        hintText: widget.hint,
-                        hintStyle: AppTextStyles.bodyLarge.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
-                        counterText: '',
-                        border: InputBorder.none,
-                        enabledBorder: InputBorder.none,
-                        focusedBorder: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-                        suffixIcon: widget.suffixIcon,
-                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ),
-        ),
-        if (hasError) ...[
-          const SizedBox(height: 6),
-          Row(
-            children: [
-              Icon(Icons.error_outline_rounded, size: 14, color: Theme.of(context).colorScheme.error),
-              const SizedBox(width: 4),
               Expanded(
-                child: Text(
-                  widget.errorText!,
-                  style: AppTextStyles.caption.copyWith(color: Theme.of(context).colorScheme.error),
+                child: TextField(
+                  controller: widget.controller,
+                  focusNode: _focusNode,
+                  enabled: widget.enabled,
+                  readOnly: widget.readOnly,
+                  autofocus: widget.autofocus,
+                  keyboardType: TextInputType.phone,
+                  maxLength: widget.maxLength,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  style: AppTextStyles.bodyLarge.copyWith(
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: 1,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                  onChanged: widget.onChanged,
+                  onTap: widget.onTap,
+                  onEditingComplete: widget.onEditingComplete,
+                  onSubmitted: widget.onSubmitted,
+                  decoration: InputDecoration(
+                    hintText: widget.hint,
+                    counterText: '',
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                    suffixIcon: widget.suffixIcon,
+                  ),
                 ),
               ),
             ],
           ),
-        ] else if (widget.helperText != null) ...[
-          const SizedBox(height: 6),
+        ),
+        if (hasError) ...[
+          const SizedBox(height: 4),
           Text(
-            widget.helperText!,
-            style: AppTextStyles.caption.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+            widget.errorText!,
+            style: AppTextStyles.caption.copyWith(
+              color: Theme.of(context).colorScheme.error,
+            ),
           ),
+        ] else if (widget.helperText != null) ...[
+          const SizedBox(height: 4),
+          Text(widget.helperText!, style: AppTextStyles.caption),
         ],
       ],
     );
@@ -497,6 +292,7 @@ class _AppTextFieldState extends State<AppTextField> {
       return IconButton(
         icon: Icon(
           _obscureText ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+          size: 18,
           color: Theme.of(context).colorScheme.onSurfaceVariant,
         ),
         onPressed: () {

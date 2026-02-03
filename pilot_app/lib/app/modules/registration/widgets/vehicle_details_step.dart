@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/inputs/app_text_field.dart';
 import '../../../data/models/vehicle_model.dart';
 import '../controllers/registration_controller.dart';
@@ -14,25 +16,28 @@ class VehicleDetailsStep extends GetView<RegistrationController> {
     final theme = Theme.of(context);
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: EdgeInsets.symmetric(
+        horizontal: AppTheme.spacingLg,
+        vertical: AppTheme.spacingSm,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Header
-          Text('Vehicle Details', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-          Text('Tell us about your ride', style: TextStyle(fontSize: 11, color: theme.colorScheme.onSurface.withValues(alpha: 0.6))),
+          Text('Vehicle Details', style: AppTextStyles.h4),
+          Text('Tell us about your ride', style: AppTextStyles.caption),
 
-          const SizedBox(height: 10),
+          SizedBox(height: AppTheme.spacingMd),
 
-          // Vehicle Type Selection
-          Text('Vehicle Type', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
-          const SizedBox(height: 8),
-          
+          // Vehicle Type
+          Text('Vehicle Type', style: AppTextStyles.labelLarge),
+          SizedBox(height: AppTheme.spacingSm),
+
           Obx(() => _buildVehicleTypeGrid(theme)),
 
-          const SizedBox(height: 10),
+          SizedBox(height: AppTheme.spacingMd),
 
-          // Fuel Type (Category)
+          // Fuel Type
           Obx(() {
             if (controller.selectedVehicleType.value == null) {
               return const SizedBox.shrink();
@@ -40,48 +45,43 @@ class VehicleDetailsStep extends GetView<RegistrationController> {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Fuel Type', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
-                const SizedBox(height: 8),
+                Text('Fuel Type', style: AppTextStyles.labelLarge),
+                SizedBox(height: AppTheme.spacingSm),
                 Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
+                  spacing: AppTheme.spacingSm,
+                  runSpacing: AppTheme.spacingSm,
                   children: controller.availableCategories.map((category) {
                     final isSelected = controller.selectedVehicleCategory.value == category;
-                    return _buildFuelTypeChip(theme, category, isSelected);
+                    return _buildFuelChip(theme, category, isSelected);
                   }).toList(),
                 ),
-                const SizedBox(height: 10),
+                SizedBox(height: AppTheme.spacingMd),
               ],
             );
           }),
 
-          // Vehicle Info Card
-          _buildFormCard(
-            theme,
-            children: [
-              // Vehicle Number
-              _buildCompactTextField(
-                controller: controller.vehicleNumberController,
-                label: 'Vehicle Number',
-                hint: 'e.g., GJ-01-AB-1234',
-                icon: Icons.confirmation_number_outlined,
-              ),
-
-              const SizedBox(height: 10),
-
-              // Vehicle Model
-              _buildCompactTextField(
-                controller: controller.vehicleModelController,
-                label: 'Vehicle Model (Optional)',
-                hint: 'e.g., Honda Activa 6G',
-                icon: Icons.local_shipping_outlined,
-              ),
-            ],
+          // Vehicle Number
+          AppTextField(
+            controller: controller.vehicleNumberController,
+            label: 'Vehicle Number',
+            hint: 'e.g., GJ-01-AB-1234',
+            prefixIcon: const Icon(Icons.confirmation_number_outlined),
+            textCapitalization: TextCapitalization.characters,
           ),
 
-          const SizedBox(height: 10),
+          SizedBox(height: AppTheme.spacingSm),
 
-          // Age Warning for motorized vehicles
+          // Vehicle Model
+          AppTextField(
+            controller: controller.vehicleModelController,
+            label: 'Vehicle Model (Optional)',
+            hint: 'e.g., Honda Activa 6G',
+            prefixIcon: const Icon(Icons.local_shipping_outlined),
+          ),
+
+          SizedBox(height: AppTheme.spacingMd),
+
+          // Age Warning
           Obx(() {
             if (controller.requiresLicense && controller.isMinor) {
               return _buildWarningCard(theme);
@@ -92,60 +92,8 @@ class VehicleDetailsStep extends GetView<RegistrationController> {
           // Info tip
           _buildInfoTip(theme),
 
-          const SizedBox(height: 16),
+          SizedBox(height: AppTheme.spacingMd),
         ],
-      ),
-    );
-  }
-
-  Widget _buildCompactTextField({
-    required TextEditingController controller,
-    required String label,
-    required String hint,
-    required IconData icon,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500)),
-        const SizedBox(height: 4),
-        Container(
-          height: 42,
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.05),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
-          ),
-          child: TextField(
-            controller: controller,
-            style: const TextStyle(fontSize: 13),
-            textCapitalization: TextCapitalization.characters,
-            decoration: InputDecoration(
-              hintText: hint,
-              hintStyle: TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.3)),
-              prefixIcon: Icon(icon, size: 16, color: AppColors.primary),
-              border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(vertical: 12),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildFormCard(ThemeData theme, {required List<Widget> children}) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-          color: theme.colorScheme.outline.withValues(alpha: 0.1),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: children,
       ),
     );
   }
@@ -158,35 +106,32 @@ class VehicleDetailsStep extends GetView<RegistrationController> {
         crossAxisCount: 3,
         mainAxisSpacing: 8,
         crossAxisSpacing: 8,
-        childAspectRatio: 1.1,
+        childAspectRatio: 1.15,
       ),
       itemCount: VehicleType.values.length,
       itemBuilder: (context, index) {
         final type = VehicleType.values[index];
         final isSelected = controller.selectedVehicleType.value == type;
-        return _buildVehicleTypeCard(theme, type, isSelected);
+        return _buildVehicleCard(theme, type, isSelected);
       },
     );
   }
 
-  Widget _buildVehicleTypeCard(ThemeData theme, VehicleType type, bool isSelected) {
+  Widget _buildVehicleCard(ThemeData theme, VehicleType type, bool isSelected) {
     return GestureDetector(
       onTap: () {
         controller.selectedVehicleType.value = type;
         controller.selectedVehicleCategory.value = null;
       },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
+      child: Container(
         decoration: BoxDecoration(
           color: isSelected
               ? AppColors.primary.withValues(alpha: 0.1)
               : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
           border: Border.all(
-            color: isSelected
-                ? AppColors.primary
-                : theme.colorScheme.outline.withValues(alpha: 0.1),
-            width: isSelected ? 2 : 1,
+            color: isSelected ? AppColors.primary : theme.colorScheme.outline.withValues(alpha: 0.2),
+            width: isSelected ? 1.5 : 1,
           ),
         ),
         child: Column(
@@ -194,20 +139,15 @@ class VehicleDetailsStep extends GetView<RegistrationController> {
           children: [
             Icon(
               _getVehicleIcon(type),
-              size: 24,
-              color: isSelected
-                  ? AppColors.primary
-                  : theme.colorScheme.onSurface.withValues(alpha: 0.6),
+              size: 22,
+              color: isSelected ? AppColors.primary : theme.colorScheme.onSurface.withValues(alpha: 0.6),
             ),
-            const SizedBox(height: 4),
+            SizedBox(height: AppTheme.spacingXs),
             Text(
               type.displayText,
-              style: TextStyle(
-                fontSize: 10,
+              style: AppTextStyles.labelSmall.copyWith(
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                color: isSelected
-                    ? AppColors.primary
-                    : theme.colorScheme.onSurface.withValues(alpha: 0.8),
+                color: isSelected ? AppColors.primary : theme.colorScheme.onSurface.withValues(alpha: 0.8),
               ),
               textAlign: TextAlign.center,
             ),
@@ -217,23 +157,19 @@ class VehicleDetailsStep extends GetView<RegistrationController> {
     );
   }
 
-  Widget _buildFuelTypeChip(ThemeData theme, VehicleCategory category, bool isSelected) {
+  Widget _buildFuelChip(ThemeData theme, VehicleCategory category, bool isSelected) {
     return GestureDetector(
-      onTap: () {
-        controller.selectedVehicleCategory.value = category;
-      },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      onTap: () => controller.selectedVehicleCategory.value = category,
+      child: Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: AppTheme.spacingMd,
+          vertical: AppTheme.spacingSm,
+        ),
         decoration: BoxDecoration(
-          color: isSelected
-              ? AppColors.primary
-              : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-          borderRadius: BorderRadius.circular(16),
+          color: isSelected ? AppColors.primary : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+          borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
           border: Border.all(
-            color: isSelected
-                ? AppColors.primary
-                : theme.colorScheme.outline.withValues(alpha: 0.2),
+            color: isSelected ? AppColors.primary : theme.colorScheme.outline.withValues(alpha: 0.2),
           ),
         ),
         child: Row(
@@ -244,11 +180,10 @@ class VehicleDetailsStep extends GetView<RegistrationController> {
               size: 14,
               color: isSelected ? Colors.white : theme.colorScheme.onSurface,
             ),
-            const SizedBox(width: 4),
+            SizedBox(width: AppTheme.spacingXs),
             Text(
               category.displayText,
-              style: TextStyle(
-                fontSize: 11,
+              style: AppTextStyles.labelSmall.copyWith(
                 color: isSelected ? Colors.white : theme.colorScheme.onSurface,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
               ),
@@ -261,21 +196,21 @@ class VehicleDetailsStep extends GetView<RegistrationController> {
 
   Widget _buildWarningCard(ThemeData theme) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(10),
+      margin: EdgeInsets.only(bottom: AppTheme.spacingMd),
+      padding: EdgeInsets.all(AppTheme.spacingSm),
       decoration: BoxDecoration(
         color: Colors.orange.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
         border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
           Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 18),
-          const SizedBox(width: 8),
+          SizedBox(width: AppTheme.spacingSm),
           Expanded(
             child: Text(
-              'You must be 18+ for motorized vehicles. Select Cycle or EV Cycle.',
-              style: TextStyle(fontSize: 11, color: Colors.orange.shade700),
+              'You must be 18+ for motorized vehicles.',
+              style: AppTextStyles.bodySmall.copyWith(color: Colors.orange.shade700),
             ),
           ),
         ],
@@ -285,20 +220,20 @@ class VehicleDetailsStep extends GetView<RegistrationController> {
 
   Widget _buildInfoTip(ThemeData theme) {
     return Container(
-      padding: const EdgeInsets.all(10),
+      padding: EdgeInsets.all(AppTheme.spacingSm),
       decoration: BoxDecoration(
         color: AppColors.primary.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
         border: Border.all(color: AppColors.primary.withValues(alpha: 0.1)),
       ),
       child: Row(
         children: [
-          Icon(Icons.lightbulb_outline_rounded, color: AppColors.primary, size: 16),
-          const SizedBox(width: 8),
+          Icon(Icons.lightbulb_outline, color: AppColors.primary, size: 16),
+          SizedBox(width: AppTheme.spacingSm),
           Expanded(
             child: Text(
-              'Choose the vehicle you\'ll use most for deliveries',
-              style: TextStyle(fontSize: 11, color: AppColors.primary),
+              'Choose your primary delivery vehicle',
+              style: AppTextStyles.bodySmall.copyWith(color: AppColors.primary),
             ),
           ),
         ],
