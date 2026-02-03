@@ -21,6 +21,7 @@ class OtpView extends GetView<AuthController> {
       height: 56,
       textStyle: AppTextStyles.h3.copyWith(
         fontWeight: FontWeight.bold,
+        color: theme.colorScheme.onSurface,
       ),
       decoration: BoxDecoration(
         color: isDark

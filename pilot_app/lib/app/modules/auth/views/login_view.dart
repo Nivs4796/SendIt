@@ -117,7 +117,9 @@ class LoginView extends GetView<AuthController> {
                         inputFormatters: [
                           FilteringTextInputFormatter.digitsOnly,
                         ],
-                        style: AppTextStyles.bodyLarge,
+                        style: AppTextStyles.bodyLarge.copyWith(
+                          color: theme.colorScheme.onSurface,
+                        ),
                         decoration: InputDecoration(
                           hintText: 'Phone Number',
                           hintStyle: AppTextStyles.bodyLarge.copyWith(
