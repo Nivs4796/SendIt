@@ -5,7 +5,6 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../data/models/booking_model.dart';
 import '../../../data/models/coupon_model.dart';
 import '../controllers/home_controller.dart';
-import '../widgets/offer_details_sheet.dart';
 
 class MainView extends GetView<HomeController> {
   const MainView({super.key});
@@ -210,10 +209,11 @@ class MainView extends GetView<HomeController> {
       width: 220,
       margin: const EdgeInsets.symmetric(horizontal: 4),
       child: Material(
+        color: Colors.transparent,
         borderRadius: BorderRadius.circular(16),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
-          onTap: () => OfferDetailsSheet.show(context, coupon, gradientColors),
+          onTap: () {},
           child: Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
