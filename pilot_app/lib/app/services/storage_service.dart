@@ -7,6 +7,7 @@ class StorageKeys {
   static const String token = 'auth_token';
   static const String refreshToken = 'refresh_token';
   static const String pilot = 'pilot_data';
+  static const String phone = 'pilot_phone';
   static const String isLoggedIn = 'is_logged_in';
   static const String themeMode = 'theme_mode';
   static const String onboarding = 'onboarding_completed';
@@ -46,6 +47,19 @@ class StorageService extends GetxService {
   }
 
   bool get isLoggedIn => token != null && token!.isNotEmpty;
+
+  // ============================================
+  // PHONE (for registration)
+  // ============================================
+  String? get phone => _box.read(StorageKeys.phone);
+
+  set phone(String? value) {
+    if (value != null) {
+      _box.write(StorageKeys.phone, value);
+    } else {
+      _box.remove(StorageKeys.phone);
+    }
+  }
 
   // ============================================
   // PILOT DATA

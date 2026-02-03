@@ -7,9 +7,11 @@ import '../../../data/models/pilot_model.dart';
 import '../../../data/models/vehicle_model.dart';
 import '../../../data/repositories/auth_repository.dart';
 import '../../../routes/app_routes.dart';
+import '../../../services/storage_service.dart';
 
 class RegistrationController extends GetxController {
   final AuthRepository _authRepository = AuthRepository();
+  final StorageService _storage = Get.find<StorageService>();
   final ImagePicker _imagePicker = ImagePicker();
 
   // Current step (0-3)
@@ -277,6 +279,7 @@ class RegistrationController extends GetxController {
 
       final response = await _authRepository.registerPilot(
         personalDetails: {
+          'phone': _storage.phone,  // Include phone from storage
           'name': nameController.text.trim(),
           'email': emailController.text.trim(),
           'date_of_birth': dateOfBirth.value?.toIso8601String(),

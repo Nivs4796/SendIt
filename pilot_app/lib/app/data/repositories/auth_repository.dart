@@ -96,6 +96,9 @@ class AuthRepository {
         if (data['refreshToken'] != null) {
           _storage.refreshToken = data['refreshToken'];
         }
+        
+        // Save phone number for registration
+        _storage.phone = '$countryCode$phone';
 
         // Check if new user or existing pilot
         final isNewUser = data['isNewUser'] ?? true;
