@@ -149,15 +149,12 @@ export const sendPilotOTP = async (
   const otp = generateOTP(6)
   const expiresAt = getOTPExpiry()
 
-  let pilot = await prisma.pilot.findUnique({
+  // Check if pilot exists (for logging purposes)
+  const pilot = await prisma.pilot.findUnique({
     where: { phone },
   })
 
-  if (!pilot && purpose === 'LOGIN') {
-    throw new AppError('Pilot not registered. Please sign up first.', 404)
-  }
-
-  // Save OTP
+  // Save OTP - allow for both new and existing pilots
   await prisma.oTP.create({
     data: {
       phone,
@@ -203,15 +200,27 @@ export const verifyPilotOTP = async (
     where: { phone },
   })
 
+  // New pilot - return isNewUser: true, app will redirect to registration
   if (!pilot) {
-    throw new AppError('Pilot not found', 404)
+    // Generate temporary token for registration
+    const tempToken = generateToken({ phone, type: 'pilot_registration' })
+    
+    return {
+      success: true,
+      message: 'OTP verified. Please complete registration.',
+      accessToken: tempToken,
+      isNewUser: true,
+    }
   }
 
-  // Update pilot as verified
-  await prisma.pilot.update({
-    where: { id: pilot.id },
-    data: { isVerified: true },
-  })
+  // Existing pilot - login flow
+  // Update pilot as verified if not already
+  if (!pilot.isVerified) {
+    await prisma.pilot.update({
+      where: { id: pilot.id },
+      data: { isVerified: true },
+    })
+  }
 
   const accessToken = generateToken({ id: pilot.id, type: 'pilot' })
   const refreshToken = generateRefreshToken({ id: pilot.id, type: 'pilot' })
@@ -228,6 +237,7 @@ export const verifyPilotOTP = async (
       email: pilot.email,
       isVerified: pilot.isVerified,
     },
+    isNewUser: false,
   }
 }
 

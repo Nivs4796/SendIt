@@ -89,9 +89,10 @@ export const verifyPilotOTP = async (
     const result = await authService.verifyPilotOTP(phone, otp)
     res.status(200).json(
       formatResponse(true, result.message, {
-        accessToken: result.accessToken,
+        token: result.accessToken,
         refreshToken: result.refreshToken,
         pilot: result.user,
+        isNewUser: result.isNewUser,
       })
     )
   } catch (error) {
