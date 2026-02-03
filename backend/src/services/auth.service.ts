@@ -81,26 +81,31 @@ export const verifyUserOTP = async (
   phone: string,
   otp: string
 ): Promise<VerifyOTPResult> => {
-  // Find the latest OTP for this phone
-  const otpRecord = await prisma.oTP.findFirst({
-    where: {
-      phone,
-      otp,
-      isUsed: false,
-      expiresAt: { gt: new Date() },
-    },
-    orderBy: { createdAt: 'desc' },
-  })
+  // DEV MODE: Accept static OTP 111111 for testing (no SMS setup)
+  const isDevOTP = config.nodeEnv === 'development' && otp === '111111'
+  
+  if (!isDevOTP) {
+    // Find the latest OTP for this phone
+    const otpRecord = await prisma.oTP.findFirst({
+      where: {
+        phone,
+        otp,
+        isUsed: false,
+        expiresAt: { gt: new Date() },
+      },
+      orderBy: { createdAt: 'desc' },
+    })
 
-  if (!otpRecord) {
-    throw new AppError('Invalid or expired OTP', 400)
+    if (!otpRecord) {
+      throw new AppError('Invalid or expired OTP', 400)
+    }
+
+    // Mark OTP as used
+    await prisma.oTP.update({
+      where: { id: otpRecord.id },
+      data: { isUsed: true },
+    })
   }
-
-  // Mark OTP as used
-  await prisma.oTP.update({
-    where: { id: otpRecord.id },
-    data: { isUsed: true },
-  })
 
   // Get or create user
   let user = await prisma.user.findUnique({
@@ -177,24 +182,29 @@ export const verifyPilotOTP = async (
   phone: string,
   otp: string
 ): Promise<VerifyOTPResult> => {
-  const otpRecord = await prisma.oTP.findFirst({
-    where: {
-      phone,
-      otp,
-      isUsed: false,
-      expiresAt: { gt: new Date() },
-    },
-    orderBy: { createdAt: 'desc' },
-  })
+  // DEV MODE: Accept static OTP 111111 for testing (no SMS setup)
+  const isDevOTP = config.nodeEnv === 'development' && otp === '111111'
+  
+  if (!isDevOTP) {
+    const otpRecord = await prisma.oTP.findFirst({
+      where: {
+        phone,
+        otp,
+        isUsed: false,
+        expiresAt: { gt: new Date() },
+      },
+      orderBy: { createdAt: 'desc' },
+    })
 
-  if (!otpRecord) {
-    throw new AppError('Invalid or expired OTP', 400)
+    if (!otpRecord) {
+      throw new AppError('Invalid or expired OTP', 400)
+    }
+
+    await prisma.oTP.update({
+      where: { id: otpRecord.id },
+      data: { isUsed: true },
+    })
   }
-
-  await prisma.oTP.update({
-    where: { id: otpRecord.id },
-    data: { isUsed: true },
-  })
 
   const pilot = await prisma.pilot.findUnique({
     where: { phone },

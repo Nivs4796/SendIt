@@ -118,29 +118,11 @@ class AuthController extends GetxController {
   }
 
   /// Verify OTP
-  /// Dev mode: Use OTP 999999 to go to registration, 123456 for home
+  /// Backend accepts static OTP 111111 in development mode
   Future<void> verifyOtp() async {
     if (otp.value.length != 6) {
       errorMessage.value = 'Please enter a valid 6-digit OTP';
       return;
-    }
-
-    // DEV MODE: Allow test OTPs for UI testing
-    const devMode = true; // TODO: Set to false in production
-    if (devMode) {
-      if (otp.value == '999999') {
-        // Test new user flow → Registration
-        Get.offAllNamed(Routes.registration);
-        return;
-      } else if (otp.value == '888888') {
-        // Test verification pending flow
-        Get.offAllNamed(Routes.verificationPending);
-        return;
-      } else if (otp.value == '123456') {
-        // Test existing user flow → Home
-        Get.offAllNamed(Routes.home);
-        return;
-      }
     }
 
     try {
