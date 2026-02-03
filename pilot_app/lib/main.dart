@@ -8,7 +8,11 @@ import 'app/routes/app_pages.dart';
 import 'app/routes/app_routes.dart';
 import 'app/core/controllers/theme_controller.dart';
 import 'app/services/storage_service.dart';
+import 'app/services/socket_service.dart';
+import 'app/services/location_service.dart';
 import 'app/data/providers/api_client.dart';
+import 'app/data/repositories/job_repository.dart';
+import 'app/modules/jobs/controllers/jobs_controller.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,7 +34,7 @@ void main() async {
 
 /// Initialize all services
 Future<void> initServices() async {
-  // Storage Service
+  // Storage Service (must be first)
   await Get.putAsync(() => StorageService().init());
   
   // API Client
@@ -38,6 +42,18 @@ Future<void> initServices() async {
   
   // Theme Controller
   Get.put(ThemeController());
+  
+  // Socket Service (for real-time communication)
+  await Get.putAsync(() => SocketService().init());
+  
+  // Location Service (for GPS tracking)
+  await Get.putAsync(() => LocationService().init());
+  
+  // Job Repository
+  Get.lazyPut<JobRepository>(() => JobRepository());
+  
+  // Jobs Controller (global job state - permanent)
+  Get.put(JobsController(), permanent: true);
 }
 
 class SendItPilotApp extends StatelessWidget {

@@ -1,16 +1,24 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../data/models/pilot_model.dart';
 import '../../../data/models/vehicle_model.dart';
 import '../../../data/models/earnings_model.dart';
+import '../../../data/models/job_model.dart';
 import '../../../data/repositories/pilot_repository.dart';
 import '../../../data/repositories/auth_repository.dart';
 import '../../../services/storage_service.dart';
+import '../../../services/socket_service.dart';
+import '../../../services/location_service.dart';
+import '../../jobs/controllers/jobs_controller.dart';
 
 class HomeController extends GetxController {
   late PilotRepository _pilotRepository;
   late AuthRepository _authRepository;
   late StorageService _storage;
+  late SocketService _socketService;
+  late LocationService _locationService;
+  late JobsController _jobsController;
 
   // Pilot state
   final Rx<PilotModel?> pilot = Rx<PilotModel?>(null);
@@ -38,6 +46,9 @@ class HomeController extends GetxController {
     _pilotRepository = PilotRepository();
     _authRepository = AuthRepository();
     _storage = Get.find<StorageService>();
+    _socketService = Get.find<SocketService>();
+    _locationService = Get.find<LocationService>();
+    _jobsController = Get.find<JobsController>();
     
     _loadPilotData();
     _loadEarnings();
@@ -166,20 +177,33 @@ class HomeController extends GetxController {
   }
 
   void _startLocationTracking() {
-    // TODO: Implement background location tracking
+    _locationService.startTracking();
   }
 
   void _stopLocationTracking() {
-    // TODO: Stop location tracking
+    _locationService.stopTracking();
   }
 
   void _connectWebSocket() {
-    // TODO: Connect to WebSocket for job dispatch
+    _socketService.connect();
+    
+    // Emit online status with active vehicle
+    final vehicleId = activeVehicle.value?.id ?? pilot.value?.id;
+    if (vehicleId != null) {
+      _socketService.emitOnline(vehicleId);
+    }
   }
 
   void _disconnectWebSocket() {
-    // TODO: Disconnect WebSocket
+    _socketService.emitOffline();
+    _socketService.disconnect();
   }
+  
+  /// Check if there's an active job
+  bool get hasActiveJob => _jobsController.activeJob.value != null;
+  
+  /// Get active job
+  JobModel? get activeJob => _jobsController.activeJob.value;
 
   /// Get current earnings based on selected tab
   EarningsModel? get currentEarnings {

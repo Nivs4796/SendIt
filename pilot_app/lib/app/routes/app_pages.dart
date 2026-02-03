@@ -13,6 +13,8 @@ import '../modules/registration/views/registration_view.dart';
 import '../modules/registration/views/verification_pending_view.dart';
 import '../modules/home/bindings/home_binding.dart';
 import '../modules/home/views/home_view.dart';
+import '../modules/jobs/bindings/jobs_binding.dart';
+import '../modules/jobs/views/active_job_view.dart';
 
 /// App route pages configuration
 class AppPages {
@@ -57,12 +59,12 @@ class AppPages {
       binding: HomeBinding(),
     ),
 
-    // Jobs (to be implemented)
-    // GetPage(
-    //   name: Routes.activeJob,
-    //   page: () => const ActiveJobView(),
-    //   binding: JobBinding(),
-    // ),
+    // Jobs
+    GetPage(
+      name: Routes.activeJob,
+      page: () => const ActiveJobView(),
+      binding: JobsBinding(),
+    ),
 
     // Earnings (to be implemented)
     // GetPage(
