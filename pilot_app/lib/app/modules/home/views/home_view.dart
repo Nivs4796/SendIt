@@ -325,13 +325,16 @@ class HomeView extends GetView<HomeController> {
               children: [
                 Row(
                   children: [
-                    Text(
-                      '2 Wheeler - EV',
-                      style: AppTextStyles.bodyMedium.copyWith(
-                        fontWeight: FontWeight.w600,
+                    Flexible(
+                      child: Text(
+                        '2 Wheeler - EV',
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 6),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
@@ -348,6 +351,7 @@ class HomeView extends GetView<HomeController> {
                     ),
                   ],
                 ),
+                const SizedBox(height: 2),
                 Text(
                   'GJ-01-AB-1234',
                   style: AppTextStyles.bodySmall.copyWith(
@@ -357,13 +361,11 @@ class HomeView extends GetView<HomeController> {
               ],
             ),
           ),
-          TextButton(
-            onPressed: () => Get.toNamed(Routes.vehicles),
-            child: Text(
-              'Change',
-              style: AppTextStyles.labelMedium.copyWith(
-                color: AppColors.primary,
-              ),
+          const SizedBox(width: 8),
+          Text(
+            'Change',
+            style: AppTextStyles.labelMedium.copyWith(
+              color: AppColors.primary,
             ),
           ),
         ],

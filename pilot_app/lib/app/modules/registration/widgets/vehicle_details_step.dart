@@ -102,7 +102,7 @@ class VehicleDetailsStep extends GetView<RegistrationController> {
             controller: controller.vehicleNumberController,
             label: 'Vehicle Number',
             hint: 'e.g., GJ-01-AB-1234',
-            prefixIcon: Icon(Icons.pin_outlined),
+            prefixIcon: const Icon(Icons.pin_outlined),
             textCapitalization: TextCapitalization.characters,
           ),
 
@@ -113,7 +113,7 @@ class VehicleDetailsStep extends GetView<RegistrationController> {
             controller: controller.vehicleModelController,
             label: 'Vehicle Model (Optional)',
             hint: 'e.g., Honda Activa 6G',
-            prefixIcon: Icon(Icons.directions_bike_outlined),
+            prefixIcon: const Icon(Icons.directions_bike_outlined),
           ),
 
           const SizedBox(height: 24),

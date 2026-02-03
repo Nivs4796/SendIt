@@ -40,7 +40,7 @@ class BankDetailsStep extends GetView<RegistrationController> {
             controller: controller.accountHolderController,
             label: 'Account Holder Name',
             hint: 'Name as per bank account',
-            prefixIcon: Icon(Icons.person_outline),
+            prefixIcon: const Icon(Icons.person_outline),
             textCapitalization: TextCapitalization.words,
           ),
 
@@ -51,7 +51,7 @@ class BankDetailsStep extends GetView<RegistrationController> {
             controller: controller.bankNameController,
             label: 'Bank Name',
             hint: 'e.g., State Bank of India',
-            prefixIcon: Icon(Icons.account_balance_outlined),
+            prefixIcon: const Icon(Icons.account_balance_outlined),
           ),
 
           const SizedBox(height: 16),
@@ -61,7 +61,7 @@ class BankDetailsStep extends GetView<RegistrationController> {
             controller: controller.accountNumberController,
             label: 'Account Number',
             hint: 'Enter account number',
-            prefixIcon: Icon(Icons.credit_card_outlined),
+            prefixIcon: const Icon(Icons.credit_card_outlined),
             type: AppTextFieldType.number,
             obscureText: true,
           ),
@@ -73,7 +73,7 @@ class BankDetailsStep extends GetView<RegistrationController> {
             controller: controller.confirmAccountNumberController,
             label: 'Confirm Account Number',
             hint: 'Re-enter account number',
-            prefixIcon: Icon(Icons.credit_card_outlined),
+            prefixIcon: const Icon(Icons.credit_card_outlined),
             type: AppTextFieldType.number,
           ),
 
@@ -84,7 +84,7 @@ class BankDetailsStep extends GetView<RegistrationController> {
             controller: controller.ifscController,
             label: 'IFSC Code',
             hint: 'e.g., SBIN0001234',
-            prefixIcon: Icon(Icons.code_outlined),
+            prefixIcon: const Icon(Icons.code_outlined),
             textCapitalization: TextCapitalization.characters,
           ),
 
