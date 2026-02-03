@@ -16,73 +16,22 @@ class PersonalDetailsStep extends GetView<RegistrationController> {
     final theme = Theme.of(context);
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Header + Profile Photo Row
           Row(
             children: [
-              // Header
-              Expanded(
-                child: _buildCompactHeader(
-                  theme,
-                  title: 'Personal Details',
-                  subtitle: 'Let\'s get to know you',
-                ),
-              ),
-              const SizedBox(width: 16),
-              // Profile Photo
               Obx(() => _buildCompactProfilePhoto(theme)),
-            ],
-          ),
-
-          const SizedBox(height: 20),
-
-          // Form Card
-          _buildFormCard(
-            theme,
-            children: [
-              // Full Name
-              AppTextField(
-                controller: controller.nameController,
-                label: 'Full Name',
-                hint: 'Enter your full name',
-                prefixIcon: const Icon(Icons.badge_outlined),
-                textCapitalization: TextCapitalization.words,
-              ),
-
-              const SizedBox(height: 16),
-
-              // Email
-              AppTextField(
-                controller: controller.emailController,
-                label: 'Email Address',
-                hint: 'your.email@example.com',
-                prefixIcon: const Icon(Icons.alternate_email_rounded),
-                type: AppTextFieldType.email,
-              ),
-
-              const SizedBox(height: 16),
-
-              // Date of Birth
-              GestureDetector(
-                onTap: () => _selectDateOfBirth(context),
-                child: AbsorbPointer(
-                  child: Obx(() => AppTextField(
-                    label: 'Date of Birth',
-                    hint: 'Select date of birth',
-                    prefixIcon: const Icon(Icons.cake_outlined),
-                    controller: TextEditingController(
-                      text: controller.dateOfBirth.value != null
-                          ? DateFormat('dd MMM yyyy').format(controller.dateOfBirth.value!)
-                          : '',
-                    ),
-                    suffixIcon: Icon(
-                      Icons.calendar_month_rounded,
-                      color: AppColors.primary,
-                    ),
-                  )),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Personal Details', style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.bold)),
+                    Text('Let\'s get to know you', style: AppTextStyles.caption.copyWith(color: theme.colorScheme.onSurface.withValues(alpha: 0.6))),
+                  ],
                 ),
               ),
             ],
@@ -90,62 +39,138 @@ class PersonalDetailsStep extends GetView<RegistrationController> {
 
           const SizedBox(height: 16),
 
-          // Address Section
-          _buildSectionLabel(theme, 'Address'),
+          // Full Name
+          _buildCompactField(
+            controller: controller.nameController,
+            label: 'Full Name',
+            hint: 'Enter your full name',
+            icon: Icons.person_outline,
+          ),
+
           const SizedBox(height: 12),
 
-          _buildFormCard(
-            theme,
+          // Email
+          _buildCompactField(
+            controller: controller.emailController,
+            label: 'Email',
+            hint: 'your.email@example.com',
+            icon: Icons.email_outlined,
+            keyboardType: TextInputType.emailAddress,
+          ),
+
+          const SizedBox(height: 12),
+
+          // Date of Birth
+          GestureDetector(
+            onTap: () => _selectDateOfBirth(context),
+            child: AbsorbPointer(
+              child: Obx(() => _buildCompactField(
+                controller: TextEditingController(
+                  text: controller.dateOfBirth.value != null
+                      ? DateFormat('dd MMM yyyy').format(controller.dateOfBirth.value!)
+                      : '',
+                ),
+                label: 'Date of Birth',
+                hint: 'Select date',
+                icon: Icons.calendar_today_outlined,
+                suffixIcon: Icons.arrow_drop_down,
+              )),
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // Address Section Header
+          Text('Address', style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600)),
+          const SizedBox(height: 10),
+
+          // Street Address
+          _buildCompactField(
+            controller: controller.addressController,
+            label: 'Street Address',
+            hint: 'Enter address',
+            icon: Icons.home_outlined,
+          ),
+
+          const SizedBox(height: 12),
+
+          // City & State Row
+          Row(
             children: [
-              // Address
-              AppTextField(
-                controller: controller.addressController,
-                label: 'Street Address',
-                hint: 'Enter your full address',
-                prefixIcon: const Icon(Icons.home_outlined),
-                maxLines: 2,
+              Expanded(
+                child: _buildCompactField(
+                  controller: controller.cityController,
+                  label: 'City',
+                  hint: 'City',
+                ),
               ),
-
-              const SizedBox(height: 16),
-
-              // City & State Row
-              Row(
-                children: [
-                  Expanded(
-                    child: AppTextField(
-                      controller: controller.cityController,
-                      label: 'City',
-                      hint: 'City',
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: AppTextField(
-                      controller: controller.stateController,
-                      label: 'State',
-                      hint: 'State',
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 16),
-
-              // Pincode
-              AppTextField(
-                controller: controller.pincodeController,
-                label: 'PIN Code',
-                hint: '6-digit PIN',
-                prefixIcon: const Icon(Icons.pin_drop_outlined),
-                type: AppTextFieldType.number,
-                maxLength: 6,
+              const SizedBox(width: 10),
+              Expanded(
+                child: _buildCompactField(
+                  controller: controller.stateController,
+                  label: 'State',
+                  hint: 'State',
+                ),
               ),
             ],
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
+
+          // Pincode
+          _buildCompactField(
+            controller: controller.pincodeController,
+            label: 'PIN Code',
+            hint: '6-digit PIN',
+            icon: Icons.pin_drop_outlined,
+            keyboardType: TextInputType.number,
+            maxLength: 6,
+          ),
+
+          const SizedBox(height: 12),
         ],
       ),
+    );
+  }
+
+  Widget _buildCompactField({
+    required TextEditingController controller,
+    required String label,
+    required String hint,
+    IconData? icon,
+    IconData? suffixIcon,
+    TextInputType? keyboardType,
+    int? maxLength,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: AppTextStyles.caption.copyWith(fontWeight: FontWeight.w500)),
+        const SizedBox(height: 6),
+        Container(
+          height: 48,
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.05),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+          ),
+          child: TextField(
+            controller: controller,
+            keyboardType: keyboardType,
+            maxLength: maxLength,
+            style: AppTextStyles.bodySmall,
+            decoration: InputDecoration(
+              hintText: hint,
+              hintStyle: AppTextStyles.bodySmall.copyWith(color: Colors.white.withValues(alpha: 0.3)),
+              prefixIcon: icon != null ? Icon(icon, size: 18, color: AppColors.primary) : null,
+              suffixIcon: suffixIcon != null ? Icon(suffixIcon, size: 20, color: Colors.white54) : null,
+              border: InputBorder.none,
+              contentPadding: EdgeInsets.symmetric(horizontal: icon != null ? 0 : 12, vertical: 14),
+              counterText: '',
+            ),
+          ),
+        ),
+      ],
     );
   }
 
