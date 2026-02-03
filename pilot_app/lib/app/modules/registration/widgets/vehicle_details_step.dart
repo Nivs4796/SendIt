@@ -20,45 +20,27 @@ class VehicleDetailsStep extends GetView<RegistrationController> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Vehicle Details',
-            style: AppTextStyles.bodyLarge.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+          // Header
+          _buildSectionHeader(
+            theme,
+            icon: Icons.directions_bike_rounded,
+            title: 'Vehicle Details',
+            subtitle: 'Tell us about your ride',
           ),
-          const SizedBox(height: 8),
-          Text(
-            'Add your vehicle information',
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-            ),
-          ),
-          const SizedBox(height: 24),
 
-          // Vehicle Type
+          const SizedBox(height: 32),
+
+          // Vehicle Type Selection
           Text(
-            'Vehicle Type',
-            style: AppTextStyles.labelLarge.copyWith(
+            'Select Vehicle Type',
+            style: AppTextStyles.bodyMedium.copyWith(
               fontWeight: FontWeight.w600,
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
             ),
           ),
-          const SizedBox(height: 12),
-          Obx(() => Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            children: VehicleType.values.map((type) {
-              final isSelected = controller.selectedVehicleType.value == type;
-              return _buildTypeChip(
-                context,
-                type: type,
-                isSelected: isSelected,
-                onTap: () {
-                  controller.selectedVehicleType.value = type;
-                  controller.selectedVehicleCategory.value = null;
-                },
-              );
-            }).toList(),
-          )),
+          const SizedBox(height: 16),
+          
+          Obx(() => _buildVehicleTypeGrid(theme)),
 
           const SizedBox(height: 24),
 
@@ -71,25 +53,19 @@ class VehicleDetailsStep extends GetView<RegistrationController> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Fuel Type',
-                  style: AppTextStyles.labelLarge.copyWith(
+                  'Select Fuel Type',
+                  style: AppTextStyles.bodyMedium.copyWith(
                     fontWeight: FontWeight.w600,
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
                 Wrap(
                   spacing: 12,
                   runSpacing: 12,
                   children: controller.availableCategories.map((category) {
                     final isSelected = controller.selectedVehicleCategory.value == category;
-                    return _buildCategoryChip(
-                      context,
-                      category: category,
-                      isSelected: isSelected,
-                      onTap: () {
-                        controller.selectedVehicleCategory.value = category;
-                      },
-                    );
+                    return _buildFuelTypeChip(theme, category, isSelected);
                   }).toList(),
                 ),
                 const SizedBox(height: 24),
@@ -97,23 +73,29 @@ class VehicleDetailsStep extends GetView<RegistrationController> {
             );
           }),
 
-          // Vehicle Number
-          AppTextField(
-            controller: controller.vehicleNumberController,
-            label: 'Vehicle Number',
-            hint: 'e.g., GJ-01-AB-1234',
-            prefixIcon: const Icon(Icons.pin_outlined),
-            textCapitalization: TextCapitalization.characters,
-          ),
+          // Vehicle Info Card
+          _buildFormCard(
+            theme,
+            children: [
+              // Vehicle Number
+              AppTextField(
+                controller: controller.vehicleNumberController,
+                label: 'Vehicle Number',
+                hint: 'e.g., GJ-01-AB-1234',
+                prefixIcon: const Icon(Icons.confirmation_number_outlined),
+                textCapitalization: TextCapitalization.characters,
+              ),
 
-          const SizedBox(height: 16),
+              const SizedBox(height: 20),
 
-          // Vehicle Model
-          AppTextField(
-            controller: controller.vehicleModelController,
-            label: 'Vehicle Model (Optional)',
-            hint: 'e.g., Honda Activa 6G',
-            prefixIcon: const Icon(Icons.directions_bike_outlined),
+              // Vehicle Model
+              AppTextField(
+                controller: controller.vehicleModelController,
+                label: 'Vehicle Model (Optional)',
+                hint: 'e.g., Honda Activa 6G',
+                prefixIcon: const Icon(Icons.local_shipping_outlined),
+              ),
+            ],
           ),
 
           const SizedBox(height: 24),
@@ -121,79 +103,198 @@ class VehicleDetailsStep extends GetView<RegistrationController> {
           // Age Warning for motorized vehicles
           Obx(() {
             if (controller.requiresLicense && controller.isMinor) {
-              return Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.orange.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
-                  border: Border.all(
-                    color: Colors.orange.withValues(alpha: 0.3),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.warning_amber_rounded,
-                      color: Colors.orange,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        'You must be 18+ to use motorized vehicles. Please select Cycle or EV Cycle.',
-                        style: AppTextStyles.bodySmall.copyWith(
-                          color: Colors.orange.shade800,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              );
+              return _buildWarningCard(theme);
             }
             return const SizedBox.shrink();
           }),
+
+          // Info tip
+          _buildInfoTip(theme),
+
+          const SizedBox(height: 32),
         ],
       ),
     );
   }
 
-  Widget _buildTypeChip(
-    BuildContext context, {
-    required VehicleType type,
-    required bool isSelected,
-    required VoidCallback onTap,
+  Widget _buildSectionHeader(
+    ThemeData theme, {
+    required IconData icon,
+    required String title,
+    required String subtitle,
   }) {
-    final theme = Theme.of(context);
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: AppColors.primary.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(
+            icon,
+            color: AppColors.primary,
+            size: 24,
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: AppTextStyles.h4.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                subtitle,
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
 
+  Widget _buildFormCard(ThemeData theme, {required List<Widget> children}) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: theme.colorScheme.outline.withValues(alpha: 0.1),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: children,
+      ),
+    );
+  }
+
+  Widget _buildVehicleTypeGrid(ThemeData theme) {
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        mainAxisSpacing: 12,
+        crossAxisSpacing: 12,
+        childAspectRatio: 1,
+      ),
+      itemCount: VehicleType.values.length,
+      itemBuilder: (context, index) {
+        final type = VehicleType.values[index];
+        final isSelected = controller.selectedVehicleType.value == type;
+        return _buildVehicleTypeCard(theme, type, isSelected);
+      },
+    );
+  }
+
+  Widget _buildVehicleTypeCard(ThemeData theme, VehicleType type, bool isSelected) {
     return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      onTap: () {
+        controller.selectedVehicleType.value = type;
+        controller.selectedVehicleCategory.value = null;
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
         decoration: BoxDecoration(
           color: isSelected
               ? AppColors.primary.withValues(alpha: 0.1)
-              : theme.colorScheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+              : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isSelected
+                ? AppColors.primary
+                : theme.colorScheme.outline.withValues(alpha: 0.1),
+            width: isSelected ? 2 : 1,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.2),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ]
+              : null,
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              _getVehicleIcon(type),
+              size: 32,
+              color: isSelected
+                  ? AppColors.primary
+                  : theme.colorScheme.onSurface.withValues(alpha: 0.6),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              type.displayText,
+              style: AppTextStyles.labelSmall.copyWith(
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                color: isSelected
+                    ? AppColors.primary
+                    : theme.colorScheme.onSurface.withValues(alpha: 0.8),
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFuelTypeChip(ThemeData theme, VehicleCategory category, bool isSelected) {
+    return GestureDetector(
+      onTap: () {
+        controller.selectedVehicleCategory.value = category;
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppColors.primary
+              : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+          borderRadius: BorderRadius.circular(25),
           border: Border.all(
             color: isSelected
                 ? AppColors.primary
                 : theme.colorScheme.outline.withValues(alpha: 0.2),
-            width: isSelected ? 2 : 1,
           ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              _getVehicleIcon(type),
-              size: 20,
-              color: isSelected ? AppColors.primary : theme.colorScheme.onSurface,
+              _getFuelIcon(category),
+              size: 18,
+              color: isSelected ? Colors.white : theme.colorScheme.onSurface,
             ),
             const SizedBox(width: 8),
             Text(
-              type.displayText,
+              category.displayText,
               style: AppTextStyles.bodyMedium.copyWith(
-                color: isSelected ? AppColors.primary : theme.colorScheme.onSurface,
+                color: isSelected ? Colors.white : theme.colorScheme.onSurface,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
               ),
             ),
@@ -203,37 +304,85 @@ class VehicleDetailsStep extends GetView<RegistrationController> {
     );
   }
 
-  Widget _buildCategoryChip(
-    BuildContext context, {
-    required VehicleCategory category,
-    required bool isSelected,
-    required VoidCallback onTap,
-  }) {
-    final theme = Theme.of(context);
+  Widget _buildWarningCard(ThemeData theme) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 24),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.orange.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Colors.orange.withValues(alpha: 0.3),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.orange.withValues(alpha: 0.2),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.warning_amber_rounded,
+              color: Colors.orange,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Age Restriction',
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: Colors.orange.shade800,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'You must be 18+ to use motorized vehicles. Please select Cycle or EV Cycle.',
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: Colors.orange.shade700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? AppColors.primary.withValues(alpha: 0.1)
-              : theme.colorScheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
-          border: Border.all(
-            color: isSelected
-                ? AppColors.primary
-                : theme.colorScheme.outline.withValues(alpha: 0.2),
-            width: isSelected ? 2 : 1,
-          ),
+  Widget _buildInfoTip(ThemeData theme) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: AppColors.primary.withValues(alpha: 0.1),
         ),
-        child: Text(
-          category.displayText,
-          style: AppTextStyles.bodyMedium.copyWith(
-            color: isSelected ? AppColors.primary : theme.colorScheme.onSurface,
-            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.lightbulb_outline_rounded,
+            color: AppColors.primary,
+            size: 20,
           ),
-        ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              'Choose the vehicle you\'ll use most for deliveries',
+              style: AppTextStyles.bodySmall.copyWith(
+                color: AppColors.primary,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -241,15 +390,30 @@ class VehicleDetailsStep extends GetView<RegistrationController> {
   IconData _getVehicleIcon(VehicleType type) {
     switch (type) {
       case VehicleType.cycle:
-        return Icons.pedal_bike_outlined;
+        return Icons.pedal_bike_rounded;
       case VehicleType.evCycle:
-        return Icons.electric_bike_outlined;
+        return Icons.electric_bike_rounded;
       case VehicleType.twoWheeler:
-        return Icons.two_wheeler_outlined;
+        return Icons.two_wheeler_rounded;
       case VehicleType.threeWheeler:
-        return Icons.electric_rickshaw_outlined;
+        return Icons.electric_rickshaw_rounded;
       case VehicleType.truck:
-        return Icons.local_shipping_outlined;
+        return Icons.local_shipping_rounded;
+    }
+  }
+
+  IconData _getFuelIcon(VehicleCategory category) {
+    switch (category) {
+      case VehicleCategory.petrol:
+        return Icons.local_gas_station_rounded;
+      case VehicleCategory.diesel:
+        return Icons.local_gas_station_rounded;
+      case VehicleCategory.cng:
+        return Icons.propane_tank_rounded;
+      case VehicleCategory.ev:
+        return Icons.electric_bolt_rounded;
+      case VehicleCategory.manual:
+        return Icons.directions_walk_rounded;
     }
   }
 }

@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
-import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/app_button.dart';
 import '../controllers/registration_controller.dart';
 
@@ -13,217 +12,475 @@ class VerificationPendingView extends GetView<RegistrationController> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final size = MediaQuery.of(context).size;
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Spacer(),
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              children: [
+                SizedBox(height: size.height * 0.05),
 
-              // Success Icon
-              Container(
-                width: 120,
-                height: 120,
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.hourglass_top_rounded,
-                  size: 60,
-                  color: AppColors.primary,
-                ),
-              ),
+                // Animated Success Illustration
+                _buildSuccessAnimation(theme),
 
-              const SizedBox(height: 32),
+                const SizedBox(height: 40),
 
-              // Title
-              Text(
-                'Application Submitted!',
-                style: AppTextStyles.h3.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.center,
-              ),
-
-              const SizedBox(height: 12),
-
-              // Subtitle
-              Text(
-                'Your application is under review. We\'ll notify you once it\'s approved.',
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                ),
-                textAlign: TextAlign.center,
-              ),
-
-              const SizedBox(height: 32),
-
-              // Timeline
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-                ),
-                child: Column(
-                  children: [
-                    _buildTimelineItem(
-                      context,
-                      icon: Icons.check_circle,
-                      title: 'Application Received',
-                      subtitle: 'We\'ve received your application',
-                      isCompleted: true,
+                // Title with gradient
+                ShaderMask(
+                  shaderCallback: (bounds) => LinearGradient(
+                    colors: [AppColors.primary, AppColors.primary.withValues(alpha: 0.7)],
+                  ).createShader(bounds),
+                  child: Text(
+                    'You\'re Almost There! 🎉',
+                    style: AppTextStyles.h2.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
                     ),
-                    _buildTimelineConnector(context, isCompleted: true),
-                    _buildTimelineItem(
-                      context,
-                      icon: Icons.search,
-                      title: 'Under Review',
-                      subtitle: 'Our team is verifying your documents',
-                      isCompleted: false,
-                      isActive: true,
-                    ),
-                    _buildTimelineConnector(context, isCompleted: false),
-                    _buildTimelineItem(
-                      context,
-                      icon: Icons.verified,
-                      title: 'Verification Complete',
-                      subtitle: 'Usually takes 24-48 hours',
-                      isCompleted: false,
-                    ),
-                  ],
+                    textAlign: TextAlign.center,
+                  ),
                 ),
-              ),
 
-              const SizedBox(height: 24),
+                const SizedBox(height: 12),
 
-              // Support Info
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.support_agent,
-                    size: 20,
+                Text(
+                  'Your application has been submitted successfully.\nOur team is reviewing your documents.',
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                    height: 1.5,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+
+                const SizedBox(height: 40),
+
+                // Progress Timeline
+                _buildProgressTimeline(theme),
+
+                const SizedBox(height: 32),
+
+                // Estimated Time Card
+                _buildEstimatedTimeCard(theme),
+
+                const SizedBox(height: 24),
+
+                // What's Next Section
+                _buildWhatsNextSection(theme),
+
+                const SizedBox(height: 32),
+
+                // Action Buttons
+                Obx(() => AppButton(
+                  text: 'Check Application Status',
+                  onPressed: controller.checkVerificationStatus,
+                  isLoading: controller.isLoading.value,
+                  icon: Icons.refresh_rounded,
+                )),
+
+                const SizedBox(height: 12),
+
+                TextButton.icon(
+                  onPressed: () {
+                    // TODO: Open support chat
+                  },
+                  icon: Icon(
+                    Icons.chat_bubble_outline_rounded,
+                    size: 18,
                     color: AppColors.primary,
                   ),
-                  const SizedBox(width: 8),
-                  Text(
-                    '24/7 Support Available',
+                  label: Text(
+                    'Need Help? Chat with Support',
                     style: AppTextStyles.bodyMedium.copyWith(
                       color: AppColors.primary,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
-                ],
-              ),
-
-              const Spacer(),
-
-              // Check Status Button
-              Obx(() => AppButton(
-                text: 'Check Status',
-                onPressed: controller.checkVerificationStatus,
-                isLoading: controller.isLoading.value,
-                variant: AppButtonVariant.outline,
-              )),
-
-              const SizedBox(height: 12),
-
-              // Contact Support
-              TextButton(
-                onPressed: () {
-                  // TODO: Open support
-                },
-                child: Text(
-                  'Contact Support',
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                  ),
                 ),
-              ),
-            ],
+
+                const SizedBox(height: 24),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildTimelineItem(
-    BuildContext context, {
+  Widget _buildSuccessAnimation(ThemeData theme) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0.0, end: 1.0),
+      duration: const Duration(milliseconds: 800),
+      curve: Curves.elasticOut,
+      builder: (context, value, child) {
+        return Transform.scale(
+          scale: value,
+          child: child,
+        );
+      },
+      child: Container(
+        width: 160,
+        height: 160,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              AppColors.primary.withValues(alpha: 0.15),
+              AppColors.primary.withValues(alpha: 0.05),
+            ],
+          ),
+          shape: BoxShape.circle,
+        ),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            // Outer ring
+            Container(
+              width: 140,
+              height: 140,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: AppColors.primary.withValues(alpha: 0.3),
+                  width: 3,
+                ),
+              ),
+            ),
+            // Inner circle with icon
+            Container(
+              width: 100,
+              height: 100,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    AppColors.primary,
+                    AppColors.primary.withValues(alpha: 0.8),
+                  ],
+                ),
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.4),
+                    blurRadius: 20,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: const Icon(
+                Icons.hourglass_top_rounded,
+                size: 48,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProgressTimeline(ThemeData theme) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: theme.colorScheme.outline.withValues(alpha: 0.1),
+        ),
+      ),
+      child: Column(
+        children: [
+          _buildTimelineStep(
+            theme,
+            icon: Icons.check_circle_rounded,
+            title: 'Application Received',
+            subtitle: 'Just now',
+            status: TimelineStatus.completed,
+            isFirst: true,
+          ),
+          _buildTimelineStep(
+            theme,
+            icon: Icons.document_scanner_rounded,
+            title: 'Document Verification',
+            subtitle: 'In progress...',
+            status: TimelineStatus.inProgress,
+          ),
+          _buildTimelineStep(
+            theme,
+            icon: Icons.verified_user_rounded,
+            title: 'Background Check',
+            subtitle: 'Pending',
+            status: TimelineStatus.pending,
+          ),
+          _buildTimelineStep(
+            theme,
+            icon: Icons.celebration_rounded,
+            title: 'Account Activated',
+            subtitle: 'Almost there!',
+            status: TimelineStatus.pending,
+            isLast: true,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTimelineStep(
+    ThemeData theme, {
     required IconData icon,
     required String title,
     required String subtitle,
-    required bool isCompleted,
-    bool isActive = false,
+    required TimelineStatus status,
+    bool isFirst = false,
+    bool isLast = false,
   }) {
-    final theme = Theme.of(context);
-    final color = isCompleted
-        ? AppColors.primary
-        : isActive
-            ? AppColors.primary
-            : theme.colorScheme.onSurface.withValues(alpha: 0.3);
+    final isCompleted = status == TimelineStatus.completed;
+    final isInProgress = status == TimelineStatus.inProgress;
+    
+    Color getColor() {
+      if (isCompleted) return AppColors.success;
+      if (isInProgress) return AppColors.primary;
+      return theme.colorScheme.onSurface.withValues(alpha: 0.3);
+    }
 
-    return Row(
-      children: [
-        Container(
-          width: 40,
-          height: 40,
-          decoration: BoxDecoration(
-            color: isCompleted || isActive
-                ? AppColors.primary.withValues(alpha: 0.1)
-                : Colors.transparent,
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: color,
-              width: 2,
+    return IntrinsicHeight(
+      child: Row(
+        children: [
+          // Timeline line and dot
+          SizedBox(
+            width: 40,
+            child: Column(
+              children: [
+                // Top line
+                if (!isFirst)
+                  Container(
+                    width: 2,
+                    height: 12,
+                    color: isCompleted || isInProgress
+                        ? getColor()
+                        : theme.colorScheme.outline.withValues(alpha: 0.2),
+                  ),
+                // Dot
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: isCompleted || isInProgress
+                        ? getColor().withValues(alpha: 0.15)
+                        : Colors.transparent,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: getColor(),
+                      width: 2,
+                    ),
+                  ),
+                  child: Icon(
+                    isCompleted ? Icons.check_rounded : icon,
+                    size: 16,
+                    color: getColor(),
+                  ),
+                ),
+                // Bottom line
+                if (!isLast)
+                  Expanded(
+                    child: Container(
+                      width: 2,
+                      color: isCompleted
+                          ? AppColors.success
+                          : theme.colorScheme.outline.withValues(alpha: 0.2),
+                    ),
+                  ),
+              ],
             ),
           ),
-          child: Icon(
-            icon,
-            size: 20,
-            color: color,
+          const SizedBox(width: 12),
+          // Content
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.only(
+                top: isFirst ? 0 : 4,
+                bottom: isLast ? 0 : 16,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: isCompleted || isInProgress
+                          ? theme.colorScheme.onSurface
+                          : theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Row(
+                    children: [
+                      if (isInProgress) ...[
+                        SizedBox(
+                          width: 12,
+                          height: 12,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation(AppColors.primary),
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                      ],
+                      Text(
+                        subtitle,
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: isInProgress
+                              ? AppColors.primary
+                              : theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                          fontWeight: isInProgress ? FontWeight.w500 : FontWeight.normal,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEstimatedTimeCard(ThemeData theme) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppColors.primary.withValues(alpha: 0.1),
+            AppColors.primary.withValues(alpha: 0.05),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: AppColors.primary.withValues(alpha: 0.2),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              Icons.schedule_rounded,
+              color: AppColors.primary,
+              size: 24,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Estimated Wait Time',
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '24-48 Hours',
+                  style: AppTextStyles.h4.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWhatsNextSection(ThemeData theme) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'What\'s Next?',
+          style: AppTextStyles.bodyLarge.copyWith(
+            fontWeight: FontWeight.bold,
           ),
         ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: AppTextStyles.bodyMedium.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: isCompleted || isActive
-                      ? theme.colorScheme.onSurface
-                      : theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                ),
-              ),
-              Text(
-                subtitle,
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                ),
-              ),
-            ],
-          ),
+        const SizedBox(height: 16),
+        _buildInfoTile(
+          theme,
+          icon: Icons.notifications_active_rounded,
+          title: 'Stay Notified',
+          subtitle: 'We\'ll send you updates via SMS & app notifications',
+        ),
+        const SizedBox(height: 12),
+        _buildInfoTile(
+          theme,
+          icon: Icons.workspace_premium_rounded,
+          title: 'Get Ready',
+          subtitle: 'Once approved, you can start accepting deliveries',
         ),
       ],
     );
   }
 
-  Widget _buildTimelineConnector(BuildContext context, {required bool isCompleted}) {
+  Widget _buildInfoTile(
+    ThemeData theme, {
+    required IconData icon,
+    required String title,
+    required String subtitle,
+  }) {
     return Container(
-      margin: const EdgeInsets.only(left: 19),
-      width: 2,
-      height: 24,
-      color: isCompleted
-          ? AppColors.primary
-          : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.2),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            icon,
+            color: AppColors.primary,
+            size: 24,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                Text(
+                  subtitle,
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
+
+enum TimelineStatus { completed, inProgress, pending }
