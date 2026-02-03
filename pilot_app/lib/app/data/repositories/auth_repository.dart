@@ -1,4 +1,6 @@
-import 'package:get/get.dart';
+import 'dart:io';
+import 'package:dio/dio.dart';
+import 'package:get/get.dart' hide FormData, MultipartFile;
 
 import '../models/pilot_model.dart';
 import '../providers/api_client.dart';
@@ -324,6 +326,185 @@ class AuthRepository {
         'success': pilot != null,
         'status': pilot?.verificationStatus.value ?? 'pending',
         'pilot': pilot,
+      };
+    }
+  }
+
+  /// Upload a single document file
+  Future<Map<String, dynamic>> uploadDocument(File file) async {
+    try {
+      final fileName = file.path.split('/').last;
+      final formData = FormData.fromMap({
+        'file': await MultipartFile.fromFile(
+          file.path,
+          filename: fileName,
+        ),
+      });
+
+      final response = await _api.post(
+        ApiConstants.uploadDocument,
+        data: formData,
+        options: Options(
+          contentType: 'multipart/form-data',
+        ),
+      );
+
+      if (response.statusCode == 200 && response.data['success'] == true) {
+        return {
+          'success': true,
+          'url': response.data['data']['url'],
+          'filename': response.data['data']['filename'],
+        };
+      }
+
+      return {
+        'success': false,
+        'message': response.data['message'] ?? 'Upload failed',
+      };
+    } on ApiException catch (e) {
+      return {
+        'success': false,
+        'message': e.message,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Failed to upload file',
+      };
+    }
+  }
+
+  /// Upload multiple pilot documents at once
+  Future<Map<String, dynamic>> uploadPilotDocuments({
+    File? idProof,
+    File? drivingLicense,
+    File? vehicleRC,
+    File? insurance,
+    File? parentalConsent,
+    File? bankProof,
+  }) async {
+    try {
+      final Map<String, MultipartFile> files = {};
+
+      if (idProof != null) {
+        files['idProof'] = await MultipartFile.fromFile(
+          idProof.path,
+          filename: idProof.path.split('/').last,
+        );
+      }
+      if (drivingLicense != null) {
+        files['drivingLicense'] = await MultipartFile.fromFile(
+          drivingLicense.path,
+          filename: drivingLicense.path.split('/').last,
+        );
+      }
+      if (vehicleRC != null) {
+        files['vehicleRC'] = await MultipartFile.fromFile(
+          vehicleRC.path,
+          filename: vehicleRC.path.split('/').last,
+        );
+      }
+      if (insurance != null) {
+        files['insurance'] = await MultipartFile.fromFile(
+          insurance.path,
+          filename: insurance.path.split('/').last,
+        );
+      }
+      if (parentalConsent != null) {
+        files['parentalConsent'] = await MultipartFile.fromFile(
+          parentalConsent.path,
+          filename: parentalConsent.path.split('/').last,
+        );
+      }
+      if (bankProof != null) {
+        files['bankProof'] = await MultipartFile.fromFile(
+          bankProof.path,
+          filename: bankProof.path.split('/').last,
+        );
+      }
+
+      if (files.isEmpty) {
+        return {
+          'success': true,
+          'uploaded': <String, String>{},
+          'message': 'No files to upload',
+        };
+      }
+
+      final formData = FormData.fromMap(files);
+
+      final response = await _api.post(
+        ApiConstants.uploadPilotDocuments,
+        data: formData,
+        options: Options(
+          contentType: 'multipart/form-data',
+        ),
+      );
+
+      if (response.statusCode == 200 && response.data['success'] == true) {
+        return {
+          'success': true,
+          'uploaded': Map<String, String>.from(response.data['data']['uploaded'] ?? {}),
+          'count': response.data['data']['count'] ?? 0,
+        };
+      }
+
+      return {
+        'success': false,
+        'message': response.data['message'] ?? 'Upload failed',
+      };
+    } on ApiException catch (e) {
+      return {
+        'success': false,
+        'message': e.message,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Failed to upload documents',
+      };
+    }
+  }
+
+  /// Upload pilot avatar
+  Future<Map<String, dynamic>> uploadAvatar(File file) async {
+    try {
+      final fileName = file.path.split('/').last;
+      final formData = FormData.fromMap({
+        'avatar': await MultipartFile.fromFile(
+          file.path,
+          filename: fileName,
+        ),
+      });
+
+      final response = await _api.post(
+        ApiConstants.uploadAvatar,
+        data: formData,
+        options: Options(
+          contentType: 'multipart/form-data',
+        ),
+      );
+
+      if (response.statusCode == 200 && response.data['success'] == true) {
+        return {
+          'success': true,
+          'avatar': response.data['data']['avatar'],
+        };
+      }
+
+      return {
+        'success': false,
+        'message': response.data['message'] ?? 'Upload failed',
+      };
+    } on ApiException catch (e) {
+      return {
+        'success': false,
+        'message': e.message,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Failed to upload avatar',
       };
     }
   }

@@ -269,6 +269,10 @@ class RegistrationController extends GetxController {
     }
   }
 
+  /// Upload progress tracking
+  final uploadProgress = 0.0.obs;
+  final uploadStatus = ''.obs;
+
   /// Submit registration
   Future<void> submitRegistration() async {
     if (!validateCurrentStep()) return;
@@ -276,10 +280,35 @@ class RegistrationController extends GetxController {
     try {
       isLoading.value = true;
       errorMessage.value = '';
+      uploadProgress.value = 0.0;
 
+      // Step 1: Upload documents first
+      uploadStatus.value = 'Uploading documents...';
+      final documentUrls = await _uploadDocuments();
+      
+      if (documentUrls == null) {
+        // Upload failed, error message already set
+        return;
+      }
+
+      uploadProgress.value = 0.5;
+      uploadStatus.value = 'Submitting registration...';
+
+      // Step 2: Upload profile photo if provided
+      String? avatarUrl;
+      if (profilePhoto.value != null) {
+        final avatarResult = await _authRepository.uploadAvatar(profilePhoto.value!);
+        if (avatarResult['success'] == true) {
+          avatarUrl = avatarResult['avatar'];
+        }
+      }
+
+      uploadProgress.value = 0.7;
+
+      // Step 3: Submit registration with uploaded URLs
       final response = await _authRepository.registerPilot(
         personalDetails: {
-          'phone': _storage.phone,  // Include phone from storage
+          'phone': _storage.phone,
           'name': nameController.text.trim(),
           'email': emailController.text.trim(),
           'date_of_birth': dateOfBirth.value?.toIso8601String(),
@@ -288,6 +317,7 @@ class RegistrationController extends GetxController {
           'city': cityController.text.trim(),
           'state': stateController.text.trim(),
           'pincode': pincodeController.text.trim(),
+          if (avatarUrl != null) 'avatar': avatarUrl,
         },
         vehicleDetails: {
           'type': selectedVehicleType.value?.value,
@@ -295,14 +325,7 @@ class RegistrationController extends GetxController {
           'number': vehicleNumberController.text.trim(),
           'model': vehicleModelController.text.trim(),
         },
-        documents: {
-          // TODO: Upload files and get URLs
-          'id_proof': idProofFile.value?.path,
-          'driving_license': drivingLicenseFile.value?.path,
-          'vehicle_rc': vehicleRcFile.value?.path,
-          'insurance': insuranceFile.value?.path,
-          'parental_consent': parentalConsentFile.value?.path,
-        },
+        documents: documentUrls,
         bankDetails: {
           'account_holder': accountHolderController.text.trim(),
           'bank_name': bankNameController.text.trim(),
@@ -310,6 +333,8 @@ class RegistrationController extends GetxController {
           'ifsc': ifscController.text.trim(),
         },
       );
+
+      uploadProgress.value = 1.0;
 
       if (response['success'] == true) {
         Get.offAllNamed(Routes.verificationPending);
@@ -320,6 +345,43 @@ class RegistrationController extends GetxController {
       errorMessage.value = 'Registration failed. Please try again.';
     } finally {
       isLoading.value = false;
+      uploadStatus.value = '';
+      uploadProgress.value = 0.0;
+    }
+  }
+
+  /// Upload all documents and return URLs map
+  Future<Map<String, dynamic>?> _uploadDocuments() async {
+    try {
+      // Use batch upload endpoint
+      final result = await _authRepository.uploadPilotDocuments(
+        idProof: idProofFile.value,
+        drivingLicense: drivingLicenseFile.value,
+        vehicleRC: vehicleRcFile.value,
+        insurance: insuranceFile.value,
+        parentalConsent: parentalConsentFile.value,
+        bankProof: cancelledChequeFile.value,
+      );
+
+      if (result['success'] == true) {
+        final uploaded = result['uploaded'] as Map<String, String>;
+        
+        // Map backend field names to API expected names
+        return {
+          'id_proof': uploaded['idProof'],
+          'driving_license': uploaded['drivingLicense'],
+          'vehicle_rc': uploaded['vehicleRC'],
+          'insurance': uploaded['insurance'],
+          'parental_consent': uploaded['parentalConsent'],
+          'bank_proof': uploaded['bankProof'],
+        };
+      } else {
+        errorMessage.value = result['message'] ?? 'Failed to upload documents';
+        return null;
+      }
+    } catch (e) {
+      errorMessage.value = 'Failed to upload documents. Please try again.';
+      return null;
     }
   }
 

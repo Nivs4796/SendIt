@@ -44,6 +44,7 @@ class ApiConstants {
   // ============================================
   static const String uploadImage = '/upload/image';
   static const String uploadDocument = '/upload/document';
+  static const String uploadPilotDocuments = '/upload/pilot/documents';
   static const String uploadAvatar = '/upload/pilot/avatar';
 
   // ============================================
