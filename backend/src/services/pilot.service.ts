@@ -1,14 +1,40 @@
 import prisma from '../config/database'
 import { AppError } from '../middleware/errorHandler'
 import { getPaginationParams } from '../utils/helpers'
-import { Gender, PilotStatus } from '@prisma/client'
+import { Gender, PilotStatus, DocumentType } from '@prisma/client'
 
 interface RegisterPilotInput {
   phone: string
   name: string
   email?: string
+  date_of_birth?: string
   dateOfBirth?: Date
   gender?: Gender
+  // Extra fields from app (stored in pilot record where possible)
+  address?: string
+  city?: string
+  state?: string
+  pincode?: string
+  // Related data
+  vehicle?: {
+    type: string
+    category: string
+    number: string
+    model?: string
+  }
+  documents?: {
+    id_proof?: string
+    driving_license?: string
+    vehicle_rc?: string
+    insurance?: string
+    parental_consent?: string
+  }
+  bankDetails?: {
+    account_holder: string
+    bank_name: string
+    account_number: string
+    ifsc: string
+  }
 }
 
 interface UpdatePilotInput {
@@ -28,19 +54,102 @@ export const registerPilot = async (input: RegisterPilotInput) => {
     throw new AppError('Pilot with this phone already exists', 400)
   }
 
-  const pilot = await prisma.pilot.create({
-    data: input,
-    select: {
-      id: true,
-      phone: true,
-      name: true,
-      email: true,
-      status: true,
-      createdAt: true,
-    },
+  // Parse date_of_birth string to Date
+  let dob: Date | undefined
+  if (input.date_of_birth) {
+    dob = new Date(input.date_of_birth)
+  } else if (input.dateOfBirth) {
+    dob = input.dateOfBirth
+  }
+
+  // Create pilot with transaction to handle related records
+  const pilot = await prisma.$transaction(async (tx) => {
+    // 1. Create pilot
+    const newPilot = await tx.pilot.create({
+      data: {
+        phone: input.phone,
+        name: input.name,
+        email: input.email,
+        dateOfBirth: dob,
+      },
+    })
+
+    // 2. Create vehicle if provided
+    if (input.vehicle) {
+      // Map vehicle type string to vehicleTypeId
+      const vehicleTypeMap: Record<string, string> = {
+        'cycle': 'Cycle',
+        'ev_cycle': 'EV Cycle', 
+        '2_wheeler': '2 Wheeler',
+        '3_wheeler': '3 Wheeler',
+        'truck': 'Truck',
+      }
+      const typeName = vehicleTypeMap[input.vehicle.type] || input.vehicle.type
+
+      const vehicleType = await tx.vehicleType.findFirst({
+        where: { name: { contains: typeName, mode: 'insensitive' } },
+      })
+
+      if (vehicleType) {
+        await tx.vehicle.create({
+          data: {
+            pilotId: newPilot.id,
+            vehicleTypeId: vehicleType.id,
+            registrationNo: input.vehicle.number,
+            model: input.vehicle.model,
+          },
+        })
+      }
+    }
+
+    // 3. Create documents if provided
+    if (input.documents) {
+      const docTypeMap: Record<string, DocumentType> = {
+        'id_proof': 'ID_PROOF',
+        'driving_license': 'DRIVING_LICENSE',
+        'vehicle_rc': 'VEHICLE_RC',
+        'insurance': 'INSURANCE',
+        'parental_consent': 'OTHER',
+      }
+
+      const docsToCreate = Object.entries(input.documents)
+        .filter(([_, url]) => url)
+        .map(([type, url]) => ({
+          pilotId: newPilot.id,
+          type: docTypeMap[type] || 'OTHER',
+          url: url as string,
+          filename: (url as string).split('/').pop() || 'document',
+        }))
+
+      if (docsToCreate.length > 0) {
+        await tx.document.createMany({ data: docsToCreate })
+      }
+    }
+
+    // 4. Create bank account if provided
+    if (input.bankDetails) {
+      await tx.bankAccount.create({
+        data: {
+          pilotId: newPilot.id,
+          accountName: input.bankDetails.account_holder,
+          accountNumber: input.bankDetails.account_number,
+          ifscCode: input.bankDetails.ifsc,
+          bankName: input.bankDetails.bank_name,
+        },
+      })
+    }
+
+    return newPilot
   })
 
-  return pilot
+  return {
+    id: pilot.id,
+    phone: pilot.phone,
+    name: pilot.name,
+    email: pilot.email,
+    status: pilot.status,
+    createdAt: pilot.createdAt,
+  }
 }
 
 export const getPilotById = async (id: string) => {
