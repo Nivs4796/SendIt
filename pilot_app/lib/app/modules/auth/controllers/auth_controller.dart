@@ -4,11 +4,10 @@ import 'package:get/get.dart';
 
 import '../../../data/models/pilot_model.dart';
 import '../../../data/repositories/auth_repository.dart';
-import '../../../core/constants/app_constants.dart';
 import '../../../routes/app_routes.dart';
 
 class AuthController extends GetxController {
-  final AuthRepository _authRepository = AuthRepository();
+  late AuthRepository _authRepository;
 
   // Observable state
   final isLoading = false.obs;
@@ -31,6 +30,7 @@ class AuthController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    _authRepository = AuthRepository();
     phoneController = TextEditingController();
     phoneController.addListener(() {
       phone.value = phoneController.text;
@@ -48,11 +48,12 @@ class AuthController extends GetxController {
   Future<void> checkAuthState() async {
     await Future.delayed(const Duration(milliseconds: 1500));
 
-    final isLoggedIn = await _authRepository.isLoggedIn();
-    
-    if (isLoggedIn) {
-      final pilot = await _authRepository.getCurrentPilot();
-      if (pilot != null) {
+    if (_authRepository.isLoggedIn) {
+      // Try to get fresh profile from API
+      final response = await _authRepository.getProfile();
+      
+      if (response['success'] == true && response['pilot'] != null) {
+        final pilot = response['pilot'] as PilotModel;
         currentPilot.value = pilot;
         
         // Check verification status
@@ -65,8 +66,22 @@ class AuthController extends GetxController {
           // Rejected or needs re-registration
           Get.offAllNamed(Routes.registration);
         }
-      } else {
+      } else if (response['unauthorized'] == true) {
+        // Token expired, go to login
         Get.offAllNamed(Routes.login);
+      } else {
+        // Try local pilot data
+        final localPilot = _authRepository.currentPilot;
+        if (localPilot != null) {
+          currentPilot.value = localPilot;
+          if (localPilot.verificationStatus == VerificationStatus.approved) {
+            Get.offAllNamed(Routes.home);
+          } else {
+            Get.offAllNamed(Routes.verificationPending);
+          }
+        } else {
+          Get.offAllNamed(Routes.login);
+        }
       }
     } else {
       Get.offAllNamed(Routes.login);
@@ -87,7 +102,6 @@ class AuthController extends GetxController {
       final response = await _authRepository.sendOtp(
         phone: phone.value,
         countryCode: countryCode.value,
-        userType: 'pilot',
       );
 
       if (response['success'] == true) {
@@ -118,14 +132,11 @@ class AuthController extends GetxController {
         phone: phone.value,
         countryCode: countryCode.value,
         otp: otp.value,
-        userType: 'pilot',
       );
 
       if (response['success'] == true) {
         final isNewUser = response['is_new_user'] ?? true;
-        final pilot = response['pilot'] != null 
-            ? PilotModel.fromJson(response['pilot']) 
-            : null;
+        final pilot = response['pilot'] as PilotModel?;
 
         if (isNewUser || pilot == null) {
           // New pilot - go to registration
@@ -161,7 +172,6 @@ class AuthController extends GetxController {
       final response = await _authRepository.sendOtp(
         phone: phone.value,
         countryCode: countryCode.value,
-        userType: 'pilot',
       );
 
       if (response['success'] == true) {
@@ -169,6 +179,8 @@ class AuthController extends GetxController {
           'OTP Sent',
           'A new OTP has been sent to your phone',
           snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green.withValues(alpha: 0.9),
+          colorText: Colors.white,
         );
         _startResendTimer();
       } else {

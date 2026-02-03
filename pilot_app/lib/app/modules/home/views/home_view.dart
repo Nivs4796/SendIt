@@ -58,12 +58,6 @@ class HomeView extends GetView<HomeController> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Obx(() => Text(
-                'Hey ${controller.pilot.value?.name.split(' ').first ?? 'Pilot'},',
-                style: AppTextStyles.h3.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              )),
               Text(
                 controller.greeting,
                 style: AppTextStyles.bodyMedium.copyWith(
@@ -206,36 +200,39 @@ class HomeView extends GetView<HomeController> {
         )),
         const SizedBox(height: 16),
         // Stats Grid
-        Obx(() => Row(
-          children: [
-            Expanded(
-              child: _buildStatCard(
-                theme,
-                icon: Icons.currency_rupee,
-                label: 'Earnings',
-                value: '₹${controller.selectedStatsTab.value == 0 ? controller.todayEarnings.value.toStringAsFixed(0) : controller.weekEarnings.value.toStringAsFixed(0)}',
+        Obx(() {
+          final earnings = controller.currentEarnings;
+          return Row(
+            children: [
+              Expanded(
+                child: _buildStatCard(
+                  theme,
+                  icon: Icons.currency_rupee,
+                  label: 'Earnings',
+                  value: earnings?.earningsDisplay ?? '₹0',
+                ),
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildStatCard(
-                theme,
-                icon: Icons.access_time,
-                label: 'Hours',
-                value: '${controller.selectedStatsTab.value == 0 ? controller.todayHours.value.toStringAsFixed(1) : controller.weekHours.value.toStringAsFixed(1)}h',
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildStatCard(
+                  theme,
+                  icon: Icons.access_time,
+                  label: 'Hours',
+                  value: earnings?.hoursDisplay ?? '0h',
+                ),
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildStatCard(
-                theme,
-                icon: Icons.local_shipping_outlined,
-                label: 'Rides',
-                value: '${controller.selectedStatsTab.value == 0 ? controller.todayRides.value : controller.weekRides.value}',
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildStatCard(
+                  theme,
+                  icon: Icons.local_shipping_outlined,
+                  label: 'Rides',
+                  value: '${earnings?.totalRides ?? 0}',
+                ),
               ),
-            ),
-          ],
-        )),
+            ],
+          );
+        }),
       ],
     );
   }

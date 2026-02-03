@@ -7,6 +7,8 @@ import 'app/core/theme/app_theme.dart';
 import 'app/routes/app_pages.dart';
 import 'app/routes/app_routes.dart';
 import 'app/core/controllers/theme_controller.dart';
+import 'app/services/storage_service.dart';
+import 'app/data/providers/api_client.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,10 +22,22 @@ void main() async {
     DeviceOrientation.portraitDown,
   ]);
 
-  // Initialize controllers
-  Get.put(ThemeController());
+  // Initialize services
+  await initServices();
 
   runApp(const SendItPilotApp());
+}
+
+/// Initialize all services
+Future<void> initServices() async {
+  // Storage Service
+  await Get.putAsync(() => StorageService().init());
+  
+  // API Client
+  Get.put(ApiClient());
+  
+  // Theme Controller
+  Get.put(ThemeController());
 }
 
 class SendItPilotApp extends StatelessWidget {

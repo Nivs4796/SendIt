@@ -2,23 +2,25 @@ import 'package:get/get.dart';
 
 import '../../../data/models/pilot_model.dart';
 import '../../../data/models/vehicle_model.dart';
+import '../../../data/models/earnings_model.dart';
+import '../../../data/repositories/pilot_repository.dart';
 import '../../../data/repositories/auth_repository.dart';
+import '../../../services/storage_service.dart';
 
 class HomeController extends GetxController {
-  final AuthRepository _authRepository = AuthRepository();
+  late PilotRepository _pilotRepository;
+  late AuthRepository _authRepository;
+  late StorageService _storage;
 
   // Pilot state
   final Rx<PilotModel?> pilot = Rx<PilotModel?>(null);
   final isOnline = false.obs;
   final isLoading = false.obs;
+  final isLoadingStats = false.obs;
 
-  // Stats
-  final todayEarnings = 0.0.obs;
-  final todayHours = 0.0.obs;
-  final todayRides = 0.obs;
-  final weekEarnings = 0.0.obs;
-  final weekHours = 0.0.obs;
-  final weekRides = 0.obs;
+  // Earnings
+  final Rx<EarningsModel?> todayEarnings = Rx<EarningsModel?>(null);
+  final Rx<EarningsModel?> weekEarnings = Rx<EarningsModel?>(null);
   final missedOrderValue = 0.0.obs;
 
   // Active vehicle
@@ -27,29 +29,88 @@ class HomeController extends GetxController {
   // Selected stats tab (0 = Today, 1 = This Week)
   final selectedStatsTab = 0.obs;
 
+  // Error state
+  final errorMessage = ''.obs;
+
   @override
   void onInit() {
     super.onInit();
-    _loadPilotData();
-    _loadStats();
-  }
-
-  Future<void> _loadPilotData() async {
-    pilot.value = await _authRepository.getCurrentPilot();
-  }
-
-  Future<void> _loadStats() async {
-    // TODO: Load from API
-    // Simulated data
-    todayEarnings.value = 980.0;
-    todayHours.value = 4.5;
-    todayRides.value = 8;
+    _pilotRepository = PilotRepository();
+    _authRepository = AuthRepository();
+    _storage = Get.find<StorageService>();
     
-    weekEarnings.value = 4500.0;
-    weekHours.value = 32.0;
-    weekRides.value = 45;
+    _loadPilotData();
+    _loadEarnings();
+  }
 
-    missedOrderValue.value = 1850.0;
+  /// Load pilot data from storage or API
+  Future<void> _loadPilotData() async {
+    try {
+      isLoading.value = true;
+      
+      // First try from storage
+      final localPilot = _authRepository.currentPilot;
+      if (localPilot != null) {
+        pilot.value = localPilot;
+        isOnline.value = localPilot.isOnline;
+      }
+
+      // Then refresh from API
+      final response = await _pilotRepository.getProfile();
+      if (response['success'] == true) {
+        pilot.value = response['pilot'] as PilotModel;
+        isOnline.value = pilot.value?.isOnline ?? false;
+      }
+    } catch (e) {
+      // Use local data if API fails
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  /// Load earnings from API
+  Future<void> _loadEarnings() async {
+    try {
+      isLoadingStats.value = true;
+      errorMessage.value = '';
+
+      // Load today's earnings
+      final todayResponse = await _pilotRepository.getEarnings(period: 'today');
+      if (todayResponse['success'] == true) {
+        todayEarnings.value = todayResponse['earnings'] as EarningsModel?;
+      }
+
+      // Load week's earnings
+      final weekResponse = await _pilotRepository.getEarnings(period: 'week');
+      if (weekResponse['success'] == true) {
+        weekEarnings.value = weekResponse['earnings'] as EarningsModel?;
+      }
+
+      // Calculate missed order value (mock for now)
+      missedOrderValue.value = 1850.0;
+    } catch (e) {
+      // Use mock data if API fails
+      _loadMockStats();
+    } finally {
+      isLoadingStats.value = false;
+    }
+  }
+
+  /// Load mock stats as fallback
+  void _loadMockStats() {
+    todayEarnings.value = EarningsModel(
+      totalEarnings: 980.0,
+      totalHours: 4.5,
+      totalRides: 8,
+      period: 'today',
+    );
+    
+    weekEarnings.value = EarningsModel(
+      totalEarnings: 4500.0,
+      totalHours: 32.0,
+      totalRides: 45,
+      period: 'week',
+    );
   }
 
   /// Toggle online/offline status
@@ -57,28 +118,51 @@ class HomeController extends GetxController {
     try {
       isLoading.value = true;
       
-      // TODO: Call API to update status
-      // await _pilotRepository.updateOnlineStatus(!isOnline.value);
+      final newStatus = !isOnline.value;
+      final response = await _pilotRepository.updateOnlineStatus(newStatus);
       
-      await Future.delayed(const Duration(milliseconds: 500));
-      isOnline.value = !isOnline.value;
-
-      if (isOnline.value) {
-        // Start location tracking
-        _startLocationTracking();
-        // Connect to WebSocket
-        _connectWebSocket();
+      if (response['success'] == true) {
+        isOnline.value = newStatus;
+        
+        if (newStatus) {
+          // Start location tracking
+          _startLocationTracking();
+          // Connect to WebSocket
+          _connectWebSocket();
+          
+          Get.snackbar(
+            'You\'re Online',
+            'You will now receive delivery requests',
+            snackPosition: SnackPosition.BOTTOM,
+          );
+        } else {
+          // Stop location tracking
+          _stopLocationTracking();
+          // Disconnect WebSocket
+          _disconnectWebSocket();
+          
+          Get.snackbar(
+            'You\'re Offline',
+            'You won\'t receive new delivery requests',
+            snackPosition: SnackPosition.BOTTOM,
+          );
+        }
       } else {
-        // Stop location tracking
-        _stopLocationTracking();
-        // Disconnect WebSocket
-        _disconnectWebSocket();
+        Get.snackbar('Error', response['message'] ?? 'Failed to update status');
       }
     } catch (e) {
       Get.snackbar('Error', 'Failed to update status');
     } finally {
       isLoading.value = false;
     }
+  }
+
+  /// Refresh all data
+  Future<void> refreshData() async {
+    await Future.wait([
+      _loadPilotData(),
+      _loadEarnings(),
+    ]);
   }
 
   void _startLocationTracking() {
@@ -95,6 +179,11 @@ class HomeController extends GetxController {
 
   void _disconnectWebSocket() {
     // TODO: Disconnect WebSocket
+  }
+
+  /// Get current earnings based on selected tab
+  EarningsModel? get currentEarnings {
+    return selectedStatsTab.value == 0 ? todayEarnings.value : weekEarnings.value;
   }
 
   /// Get greeting based on time of day

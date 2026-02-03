@@ -1,3 +1,4 @@
+/// API Constants for Pilot App
 class ApiConstants {
   ApiConstants._();
 
@@ -7,43 +8,54 @@ class ApiConstants {
   static const String baseUrl = 'http://172.16.17.55:5000/api/v1';
   static const String socketUrl = 'http://172.16.17.55:5000';
 
-  // Auth Endpoints
-  static const String sendOtp = '/auth/user/send-otp';
-  static const String verifyOtp = '/auth/user/verify-otp';
+  // ============================================
+  // AUTH ENDPOINTS
+  // ============================================
+  static const String sendOtp = '/auth/pilot/send-otp';
+  static const String verifyOtp = '/auth/pilot/verify-otp';
   static const String refreshToken = '/auth/refresh-token';
 
-  // User Endpoints
-  static const String userProfile = '/users/profile';
-  static const String deleteAccount = '/users/account';
+  // ============================================
+  // PILOT ENDPOINTS
+  // ============================================
+  static const String pilotRegister = '/pilots/register';
+  static const String pilotProfile = '/pilots/profile';
+  static const String pilotLocation = '/pilots/location';
+  static const String pilotStatus = '/pilots/status';
+  static const String pilotEarnings = '/pilots/earnings';
+  static const String pilotBookings = '/pilots/bookings';
 
-  // Address Endpoints
-  static const String addresses = '/addresses';
-
-  // Booking Endpoints
-  static const String bookings = '/bookings';
-  static const String calculatePrice = '/bookings/calculate-price';
-  static const String myBookings = '/bookings/my-bookings';
-
-  // Vehicle Endpoints
+  // ============================================
+  // VEHICLE ENDPOINTS
+  // ============================================
+  static const String vehicles = '/vehicles';
   static const String vehicleTypes = '/vehicles/types';
 
-  // Wallet Endpoints
-  static const String walletBalance = '/wallet/balance';
-  static const String walletTransactions = '/wallet/transactions';
-  static const String addMoney = '/wallet/add';
-  static const String checkBalance = '/wallet/check';
+  // ============================================
+  // BOOKING ENDPOINTS
+  // ============================================
+  static const String bookings = '/bookings';
+  static String acceptBooking(String id) => '/bookings/$id/accept';
+  static String bookingStatus(String id) => '/bookings/$id/status';
+  static String bookingDetails(String id) => '/bookings/$id';
 
-  // Coupon Endpoints
-  static const String validateCoupon = '/coupons/validate';
-  static const String availableCoupons = '/coupons/available';
+  // ============================================
+  // UPLOAD ENDPOINTS
+  // ============================================
+  static const String uploadImage = '/upload/image';
+  static const String uploadDocument = '/upload/document';
+  static const String uploadAvatar = '/upload/pilot/avatar';
 
-  // Review Endpoints
-  static const String reviews = '/reviews';
+  // ============================================
+  // WALLET ENDPOINTS
+  // ============================================
+  static const String walletBalance = '/wallet/pilot/balance';
+  static const String walletTransactions = '/wallet/pilot/transactions';
+  static const String withdrawRequest = '/wallet/pilot/withdraw';
 
-  // Upload Endpoints
-  static const String uploadAvatar = '/upload/user/avatar';
-
-  // Timeouts
+  // ============================================
+  // TIMEOUTS
+  // ============================================
   static const int connectTimeout = 30000;
   static const int receiveTimeout = 30000;
 }

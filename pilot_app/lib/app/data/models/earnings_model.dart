@@ -1,3 +1,30 @@
+/// Simple earnings model for dashboard
+class EarningsModel {
+  final double totalEarnings;
+  final double totalHours;
+  final int totalRides;
+  final String? period;
+
+  EarningsModel({
+    required this.totalEarnings,
+    required this.totalHours,
+    required this.totalRides,
+    this.period,
+  });
+
+  factory EarningsModel.fromJson(Map<String, dynamic> json) {
+    return EarningsModel(
+      totalEarnings: (json['total_earnings'] as num?)?.toDouble() ?? 0.0,
+      totalHours: (json['total_hours'] as num?)?.toDouble() ?? 0.0,
+      totalRides: (json['total_rides'] as int?) ?? 0,
+      period: json['period'] as String?,
+    );
+  }
+
+  String get earningsDisplay => '₹${totalEarnings.toStringAsFixed(0)}';
+  String get hoursDisplay => '${totalHours.toStringAsFixed(1)}h';
+}
+
 /// Earnings summary model
 class EarningsSummary {
   final double totalEarnings;
