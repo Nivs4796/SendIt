@@ -2,14 +2,17 @@ import 'package:get/get.dart';
 
 import 'app_routes.dart';
 
-// Module imports (will be added as modules are created)
+// Module imports
 import '../modules/splash/bindings/splash_binding.dart';
 import '../modules/splash/views/splash_view.dart';
-// import '../modules/auth/bindings/auth_binding.dart';
-// import '../modules/auth/views/login_view.dart';
-// import '../modules/auth/views/otp_view.dart';
-// import '../modules/home/bindings/home_binding.dart';
-// import '../modules/home/views/home_view.dart';
+import '../modules/auth/bindings/auth_binding.dart';
+import '../modules/auth/views/login_view.dart';
+import '../modules/auth/views/otp_view.dart';
+import '../modules/registration/bindings/registration_binding.dart';
+import '../modules/registration/views/registration_view.dart';
+import '../modules/registration/views/verification_pending_view.dart';
+import '../modules/home/bindings/home_binding.dart';
+import '../modules/home/views/home_view.dart';
 
 /// App route pages configuration
 class AppPages {
@@ -23,31 +26,36 @@ class AppPages {
       binding: SplashBinding(),
     ),
 
-    // Auth (to be implemented)
-    // GetPage(
-    //   name: Routes.login,
-    //   page: () => const LoginView(),
-    //   binding: AuthBinding(),
-    // ),
-    // GetPage(
-    //   name: Routes.otp,
-    //   page: () => const OtpView(),
-    //   binding: AuthBinding(),
-    // ),
+    // Auth
+    GetPage(
+      name: Routes.login,
+      page: () => const LoginView(),
+      binding: AuthBinding(),
+    ),
+    GetPage(
+      name: Routes.otp,
+      page: () => const OtpView(),
+      binding: AuthBinding(),
+    ),
 
-    // Registration (to be implemented)
-    // GetPage(
-    //   name: Routes.registration,
-    //   page: () => const RegistrationView(),
-    //   binding: RegistrationBinding(),
-    // ),
+    // Registration
+    GetPage(
+      name: Routes.registration,
+      page: () => const RegistrationView(),
+      binding: RegistrationBinding(),
+    ),
+    GetPage(
+      name: Routes.verificationPending,
+      page: () => const VerificationPendingView(),
+      binding: RegistrationBinding(),
+    ),
 
-    // Home/Dashboard (to be implemented)
-    // GetPage(
-    //   name: Routes.home,
-    //   page: () => const HomeView(),
-    //   binding: HomeBinding(),
-    // ),
+    // Home/Dashboard
+    GetPage(
+      name: Routes.home,
+      page: () => const HomeView(),
+      binding: HomeBinding(),
+    ),
 
     // Jobs (to be implemented)
     // GetPage(

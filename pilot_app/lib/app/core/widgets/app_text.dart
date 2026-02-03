@@ -122,7 +122,7 @@ class AppText extends StatelessWidget {
       case AppTextVariant.h3:
         return AppTextStyles.h3;
       case AppTextVariant.h4:
-        return AppTextStyles.h4;
+        return AppTextStyles.bodyLarge;
       case AppTextVariant.bodyLarge:
         return AppTextStyles.bodyLarge;
       case AppTextVariant.bodyMedium:

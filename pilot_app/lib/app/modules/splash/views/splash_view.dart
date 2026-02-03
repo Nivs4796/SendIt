@@ -14,7 +14,7 @@ class SplashView extends GetView<SplashController> {
     final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark ? AppColors.backgroundDark : AppColors.primary,
+      backgroundColor: isDark ? AppColors.secondaryDark : AppColors.primary,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -44,7 +44,7 @@ class SplashView extends GetView<SplashController> {
             // App name
             Text(
               'SendIt Pilot',
-              style: AppTextStyles.headlineLarge.copyWith(
+              style: AppTextStyles.h1.copyWith(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
               ),

@@ -200,7 +200,7 @@ class _AppCurrencyFieldState extends State<AppCurrencyField> {
                     ),
                     child: Text(
                       widget.currencySymbol,
-                      style: AppTextStyles.h4.copyWith(
+                      style: AppTextStyles.bodyLarge.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
@@ -226,7 +226,7 @@ class _AppCurrencyFieldState extends State<AppCurrencyField> {
                           maxValue: widget.maxValue,
                         ),
                       ],
-                      style: AppTextStyles.h4.copyWith(
+                      style: AppTextStyles.bodyLarge.copyWith(
                         fontWeight: FontWeight.w600,
                         color: theme.colorScheme.onSurface,
                       ),
@@ -236,7 +236,7 @@ class _AppCurrencyFieldState extends State<AppCurrencyField> {
                       onEditingComplete: widget.onEditingComplete,
                       decoration: InputDecoration(
                         hintText: widget.hint,
-                        hintStyle: AppTextStyles.h4.copyWith(
+                        hintStyle: AppTextStyles.bodyLarge.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                           fontWeight: FontWeight.w400,
                         ),

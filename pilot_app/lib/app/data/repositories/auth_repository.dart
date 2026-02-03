@@ -1,143 +1,175 @@
-import 'package:get/get.dart';
-import '../models/user_model.dart';
-import '../models/api_response.dart';
-import '../providers/api_client.dart';
-import '../../core/constants/api_constants.dart';
-import '../../services/storage_service.dart';
+import 'package:get_storage/get_storage.dart';
 
+import '../models/pilot_model.dart';
+
+/// Repository for handling pilot authentication
 class AuthRepository {
-  final ApiClient _apiClient = ApiClient();
-  final StorageService _storage = Get.find<StorageService>();
+  final GetStorage _storage = GetStorage();
 
-  Future<ApiResponse> sendOtp(String phone, {String countryCode = '+91'}) async {
-    // Send phone with country code
-    final fullPhone = '$countryCode$phone';
-    final response = await _apiClient.post(
-      ApiConstants.sendOtp,
-      data: {'phone': fullPhone},
-    );
-    return ApiResponse.fromJson(response.data, null);
+  static const String _tokenKey = 'auth_token';
+  static const String _pilotKey = 'current_pilot';
+  static const String _isLoggedInKey = 'is_logged_in';
+
+  // TODO: Replace with actual API client
+  // final ApiClient _apiClient = Get.find<ApiClient>();
+
+  /// Check if pilot is logged in
+  Future<bool> isLoggedIn() async {
+    return _storage.read<bool>(_isLoggedInKey) ?? false;
   }
 
-  Future<ApiResponse<UserModel>> verifyOtp(String phone, String otp, {String countryCode = '+91'}) async {
-    // Send phone with country code
-    final fullPhone = '$countryCode$phone';
-    final response = await _apiClient.post(
-      ApiConstants.verifyOtp,
-      data: {'phone': fullPhone, 'otp': otp},
-    );
-
-    final apiResponse = ApiResponse<Map<String, dynamic>>.fromJson(
-      response.data,
-      (data) => data as Map<String, dynamic>,
-    );
-
-    if (apiResponse.success && apiResponse.data != null) {
-      // Store tokens
-      _storage.token = apiResponse.data!['accessToken'];
-      _storage.refreshToken = apiResponse.data!['refreshToken'];
-
-      // Parse and store user
-      final user = UserModel.fromJson(apiResponse.data!['user']);
-      _storage.user = user.toJson();
-
-      return ApiResponse(
-        success: true,
-        message: apiResponse.message,
-        data: user,
-      );
-    }
-
-    return ApiResponse(
-      success: false,
-      message: apiResponse.message ?? 'Verification failed',
-      code: apiResponse.code,
-    );
-  }
-
-  Future<ApiResponse<UserModel>> getProfile() async {
-    final response = await _apiClient.get(ApiConstants.userProfile);
-    final apiResponse = ApiResponse<Map<String, dynamic>>.fromJson(
-      response.data,
-      (data) => data as Map<String, dynamic>,
-    );
-
-    if (apiResponse.success && apiResponse.data != null) {
-      // API returns user nested inside data.user
-      final userData = apiResponse.data!['user'] ?? apiResponse.data;
-      final user = UserModel.fromJson(userData);
-      return ApiResponse(
-        success: true,
-        message: apiResponse.message,
-        data: user,
-      );
-    }
-
-    return ApiResponse(
-      success: false,
-      message: apiResponse.message ?? 'Failed to get profile',
-    );
-  }
-
-  Future<ApiResponse<UserModel>> updateProfile({
-    String? name,
-    String? email,
-    String? avatar,
-  }) async {
-    final data = <String, dynamic>{};
-    if (name != null) data['name'] = name;
-    if (email != null) data['email'] = email;
-    if (avatar != null) data['avatar'] = avatar;
-
-    final response = await _apiClient.patch(
-      ApiConstants.userProfile,
-      data: data,
-    );
-
-    final apiResponse = ApiResponse<Map<String, dynamic>>.fromJson(
-      response.data,
-      (data) => data as Map<String, dynamic>,
-    );
-
-    if (apiResponse.success && apiResponse.data != null) {
-      // API returns user nested inside data.user
-      final userData = apiResponse.data!['user'] ?? apiResponse.data;
-      final user = UserModel.fromJson(userData);
-      _storage.user = user.toJson();
-
-      return ApiResponse(
-        success: true,
-        message: apiResponse.message,
-        data: user,
-      );
-    }
-
-    return ApiResponse(
-      success: false,
-      message: apiResponse.message ?? 'Failed to update profile',
-    );
-  }
-
-  Future<ApiResponse> deleteAccount() async {
-    try {
-      final response = await _apiClient.delete(ApiConstants.deleteAccount);
-      return ApiResponse.fromJson(response.data, null);
-    } catch (e) {
-      return ApiResponse(success: false, message: e.toString());
-    }
-  }
-
-  void logout() {
-    _storage.clearAuth();
-  }
-
-  bool get isLoggedIn => _storage.isLoggedIn;
-
-  UserModel? get currentUser {
-    final userData = _storage.user;
-    if (userData != null) {
-      return UserModel.fromJson(userData);
+  /// Get current pilot from storage
+  Future<PilotModel?> getCurrentPilot() async {
+    final pilotJson = _storage.read<Map<String, dynamic>>(_pilotKey);
+    if (pilotJson != null) {
+      return PilotModel.fromJson(pilotJson);
     }
     return null;
+  }
+
+  /// Save pilot to storage
+  Future<void> savePilot(PilotModel pilot) async {
+    await _storage.write(_pilotKey, pilot.toJson());
+  }
+
+  /// Get auth token
+  String? get token => _storage.read<String>(_tokenKey);
+
+  /// Send OTP to phone number
+  Future<Map<String, dynamic>> sendOtp({
+    required String phone,
+    required String countryCode,
+    required String userType,
+  }) async {
+    // TODO: Implement actual API call
+    // final response = await _apiClient.post('/auth/send-otp', data: {
+    //   'phone': phone,
+    //   'country_code': countryCode,
+    //   'user_type': userType,
+    // });
+
+    // Simulated response for development
+    await Future.delayed(const Duration(seconds: 1));
+    return {
+      'success': true,
+      'message': 'OTP sent successfully',
+    };
+  }
+
+  /// Verify OTP
+  Future<Map<String, dynamic>> verifyOtp({
+    required String phone,
+    required String countryCode,
+    required String otp,
+    required String userType,
+  }) async {
+    // TODO: Implement actual API call
+    // final response = await _apiClient.post('/auth/verify-otp', data: {
+    //   'phone': phone,
+    //   'country_code': countryCode,
+    //   'otp': otp,
+    //   'user_type': userType,
+    // });
+
+    // Simulated response for development
+    await Future.delayed(const Duration(seconds: 1));
+
+    // Simulate: OTP 123456 = existing user, any other = new user
+    final isNewUser = otp != '123456';
+
+    if (isNewUser) {
+      return {
+        'success': true,
+        'is_new_user': true,
+        'token': 'dummy_token_${DateTime.now().millisecondsSinceEpoch}',
+      };
+    }
+
+    // Existing pilot
+    final pilot = PilotModel(
+      id: 'pilot_123',
+      name: 'Test Pilot',
+      phone: phone,
+      email: 'pilot@example.com',
+      status: PilotStatus.active,
+      verificationStatus: VerificationStatus.approved,
+      isOnline: false,
+      rating: 4.5,
+      totalRides: 150,
+      createdAt: DateTime.now(),
+    );
+
+    await _storage.write(_tokenKey, 'dummy_token');
+    await _storage.write(_isLoggedInKey, true);
+    await savePilot(pilot);
+
+    return {
+      'success': true,
+      'is_new_user': false,
+      'token': 'dummy_token',
+      'pilot': pilot.toJson(),
+    };
+  }
+
+  /// Register new pilot
+  Future<Map<String, dynamic>> registerPilot({
+    required Map<String, dynamic> personalDetails,
+    required Map<String, dynamic> vehicleDetails,
+    required Map<String, dynamic> documents,
+    required Map<String, dynamic> bankDetails,
+  }) async {
+    // TODO: Implement actual API call
+    // final response = await _apiClient.post('/pilots/register', data: {
+    //   ...personalDetails,
+    //   'vehicle_details': vehicleDetails,
+    //   'documents': documents,
+    //   'bank_details': bankDetails,
+    // });
+
+    // Simulated response
+    await Future.delayed(const Duration(seconds: 2));
+
+    final pilot = PilotModel(
+      id: 'pilot_${DateTime.now().millisecondsSinceEpoch}',
+      name: personalDetails['name'] as String,
+      phone: personalDetails['phone'] as String,
+      email: personalDetails['email'] as String?,
+      address: personalDetails['address'] as String?,
+      city: personalDetails['city'] as String?,
+      state: personalDetails['state'] as String?,
+      pincode: personalDetails['pincode'] as String?,
+      status: PilotStatus.pending,
+      verificationStatus: VerificationStatus.pending,
+      isOnline: false,
+      createdAt: DateTime.now(),
+    );
+
+    await _storage.write(_isLoggedInKey, true);
+    await savePilot(pilot);
+
+    return {
+      'success': true,
+      'message': 'Registration submitted successfully',
+      'pilot': pilot.toJson(),
+    };
+  }
+
+  /// Check verification status
+  Future<Map<String, dynamic>> checkVerificationStatus() async {
+    // TODO: Implement actual API call
+    final pilot = await getCurrentPilot();
+    
+    return {
+      'success': true,
+      'status': pilot?.verificationStatus.value ?? 'pending',
+      'pilot': pilot?.toJson(),
+    };
+  }
+
+  /// Logout
+  Future<void> logout() async {
+    await _storage.remove(_tokenKey);
+    await _storage.remove(_pilotKey);
+    await _storage.write(_isLoggedInKey, false);
   }
 }

@@ -34,7 +34,7 @@ class SendItPilotApp extends StatelessWidget {
           debugShowCheckedModeBanner: false,
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
-          themeMode: themeController.themeMode,
+          themeMode: themeController.themeMode.value,
           initialRoute: Routes.splash,
           getPages: AppPages.routes,
           defaultTransition: Transition.cupertino,

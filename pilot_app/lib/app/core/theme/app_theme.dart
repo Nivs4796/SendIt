@@ -48,7 +48,7 @@ class AppTheme {
         foregroundColor: AppColors.textPrimary,
         surfaceTintColor: Colors.transparent,
         iconTheme: const IconThemeData(color: AppColors.textPrimary),
-        titleTextStyle: AppTextStyles.h4,
+        titleTextStyle: AppTextStyles.bodyLarge,
       ),
 
       // Card Theme - Glassmorphism style
@@ -329,7 +329,7 @@ class AppTheme {
         foregroundColor: darkTextPrimary,
         surfaceTintColor: Colors.transparent,
         iconTheme: const IconThemeData(color: darkTextPrimary),
-        titleTextStyle: AppTextStyles.h4.copyWith(color: darkTextPrimary),
+        titleTextStyle: AppTextStyles.bodyLarge.copyWith(color: darkTextPrimary),
       ),
 
       // Card Theme - Dark glassmorphism style
@@ -575,8 +575,8 @@ class AppTheme {
         displayLarge: AppTextStyles.h1.copyWith(color: darkTextPrimary),
         displayMedium: AppTextStyles.h2.copyWith(color: darkTextPrimary),
         displaySmall: AppTextStyles.h3.copyWith(color: darkTextPrimary),
-        headlineMedium: AppTextStyles.h4.copyWith(color: darkTextPrimary),
-        headlineSmall: AppTextStyles.h4.copyWith(color: darkTextPrimary, fontSize: 16),
+        headlineMedium: AppTextStyles.bodyLarge.copyWith(color: darkTextPrimary),
+        headlineSmall: AppTextStyles.bodyLarge.copyWith(color: darkTextPrimary, fontSize: 16),
         titleLarge: AppTextStyles.bodyLarge.copyWith(color: darkTextPrimary, fontWeight: FontWeight.w600),
         titleMedium: AppTextStyles.bodyMedium.copyWith(color: darkTextPrimary, fontWeight: FontWeight.w600),
         bodyLarge: AppTextStyles.bodyLarge.copyWith(color: darkTextPrimary),
