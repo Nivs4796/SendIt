@@ -5,7 +5,6 @@ import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
-import '../../../core/widgets/inputs/app_text_field.dart';
 import '../controllers/registration_controller.dart';
 
 class PersonalDetailsStep extends GetView<RegistrationController> {
@@ -16,7 +15,7 @@ class PersonalDetailsStep extends GetView<RegistrationController> {
     final theme = Theme.of(context);
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -24,20 +23,20 @@ class PersonalDetailsStep extends GetView<RegistrationController> {
           Row(
             children: [
               Obx(() => _buildCompactProfilePhoto(theme)),
-              const SizedBox(width: 12),
+              const SizedBox(width: 10),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Personal Details', style: AppTextStyles.bodyLarge.copyWith(fontWeight: FontWeight.bold)),
-                    Text('Let\'s get to know you', style: AppTextStyles.caption.copyWith(color: theme.colorScheme.onSurface.withValues(alpha: 0.6))),
+                    Text('Personal Details', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                    Text('Let\'s get to know you', style: TextStyle(fontSize: 11, color: theme.colorScheme.onSurface.withValues(alpha: 0.6))),
                   ],
                 ),
               ),
             ],
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
 
           // Full Name
           _buildCompactField(
@@ -47,7 +46,7 @@ class PersonalDetailsStep extends GetView<RegistrationController> {
             icon: Icons.person_outline,
           ),
 
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
 
           // Email
           _buildCompactField(
@@ -58,7 +57,7 @@ class PersonalDetailsStep extends GetView<RegistrationController> {
             keyboardType: TextInputType.emailAddress,
           ),
 
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
 
           // Date of Birth
           GestureDetector(
@@ -78,11 +77,11 @@ class PersonalDetailsStep extends GetView<RegistrationController> {
             ),
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 10),
 
           // Address Section Header
-          Text('Address', style: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w600)),
-          const SizedBox(height: 10),
+          Text('Address', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+          const SizedBox(height: 6),
 
           // Street Address
           _buildCompactField(
@@ -92,7 +91,7 @@ class PersonalDetailsStep extends GetView<RegistrationController> {
             icon: Icons.home_outlined,
           ),
 
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
 
           // City & State Row
           Row(
@@ -104,7 +103,7 @@ class PersonalDetailsStep extends GetView<RegistrationController> {
                   hint: 'City',
                 ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 8),
               Expanded(
                 child: _buildCompactField(
                   controller: controller.stateController,
@@ -115,7 +114,7 @@ class PersonalDetailsStep extends GetView<RegistrationController> {
             ],
           ),
 
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
 
           // Pincode
           _buildCompactField(
@@ -127,7 +126,7 @@ class PersonalDetailsStep extends GetView<RegistrationController> {
             maxLength: 6,
           ),
 
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
         ],
       ),
     );
@@ -145,48 +144,29 @@ class PersonalDetailsStep extends GetView<RegistrationController> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: AppTextStyles.caption.copyWith(fontWeight: FontWeight.w500)),
-        const SizedBox(height: 6),
+        Text(label, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500)),
+        const SizedBox(height: 4),
         Container(
-          height: 48,
+          height: 42,
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.05),
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(8),
             border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
           ),
           child: TextField(
             controller: controller,
             keyboardType: keyboardType,
             maxLength: maxLength,
-            style: AppTextStyles.bodySmall,
+            style: const TextStyle(fontSize: 13),
             decoration: InputDecoration(
               hintText: hint,
-              hintStyle: AppTextStyles.bodySmall.copyWith(color: Colors.white.withValues(alpha: 0.3)),
-              prefixIcon: icon != null ? Icon(icon, size: 18, color: AppColors.primary) : null,
-              suffixIcon: suffixIcon != null ? Icon(suffixIcon, size: 20, color: Colors.white54) : null,
+              hintStyle: TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.3)),
+              prefixIcon: icon != null ? Icon(icon, size: 16, color: AppColors.primary) : null,
+              suffixIcon: suffixIcon != null ? Icon(suffixIcon, size: 18, color: Colors.white54) : null,
               border: InputBorder.none,
-              contentPadding: EdgeInsets.symmetric(horizontal: icon != null ? 0 : 12, vertical: 14),
+              contentPadding: EdgeInsets.symmetric(horizontal: icon != null ? 0 : 10, vertical: 12),
               counterText: '',
             ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildCompactHeader(ThemeData theme, {required String title, required String subtitle}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: AppTextStyles.h4.copyWith(fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          subtitle,
-          style: AppTextStyles.bodySmall.copyWith(
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
           ),
         ),
       ],
@@ -199,8 +179,8 @@ class PersonalDetailsStep extends GetView<RegistrationController> {
       child: Stack(
         children: [
           Container(
-            width: 72,
-            height: 72,
+            width: 56,
+            height: 56,
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
@@ -223,7 +203,7 @@ class PersonalDetailsStep extends GetView<RegistrationController> {
             child: controller.profilePhoto.value == null
                 ? Icon(
                     Icons.person_rounded,
-                    size: 32,
+                    size: 24,
                     color: AppColors.primary.withValues(alpha: 0.5),
                   )
                 : null,
@@ -232,161 +212,12 @@ class PersonalDetailsStep extends GetView<RegistrationController> {
             bottom: 0,
             right: 0,
             child: Container(
-              padding: const EdgeInsets.all(4),
+              padding: const EdgeInsets.all(3),
               decoration: BoxDecoration(
                 color: AppColors.primary,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.camera_alt_rounded, size: 14, color: Colors.white),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSectionHeader(
-    ThemeData theme, {
-    required IconData icon,
-    required String title,
-    required String subtitle,
-  }) {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: AppColors.primary.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(
-            icon,
-            color: AppColors.primary,
-            size: 24,
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: AppTextStyles.h4.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                subtitle,
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSectionLabel(ThemeData theme, String label) {
-    return Text(
-      label,
-      style: AppTextStyles.bodyMedium.copyWith(
-        fontWeight: FontWeight.w600,
-        color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
-      ),
-    );
-  }
-
-  Widget _buildFormCard(ThemeData theme, {required List<Widget> children}) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: theme.colorScheme.outline.withValues(alpha: 0.1),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: children,
-      ),
-    );
-  }
-
-  Widget _buildProfilePhoto(ThemeData theme) {
-    return GestureDetector(
-      onTap: () => _showImagePicker(Get.context!),
-      child: Column(
-        children: [
-          Stack(
-            children: [
-              Container(
-                width: 110,
-                height: 110,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      AppColors.primary.withValues(alpha: 0.1),
-                      AppColors.primary.withValues(alpha: 0.05),
-                    ],
-                  ),
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: AppColors.primary.withValues(alpha: 0.3),
-                    width: 3,
-                  ),
-                  image: controller.profilePhoto.value != null
-                      ? DecorationImage(
-                          image: FileImage(controller.profilePhoto.value!),
-                          fit: BoxFit.cover,
-                        )
-                      : null,
-                ),
-                child: controller.profilePhoto.value == null
-                    ? Icon(
-                        Icons.person_rounded,
-                        size: 48,
-                        color: AppColors.primary.withValues(alpha: 0.5),
-                      )
-                    : null,
-              ),
-              Positioned(
-                bottom: 0,
-                right: 0,
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.primary.withValues(alpha: 0.4),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: const Icon(
-                    Icons.camera_alt_rounded,
-                    size: 18,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            controller.profilePhoto.value != null ? 'Change Photo' : 'Add Profile Photo',
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: AppColors.primary,
-              fontWeight: FontWeight.w500,
+              child: const Icon(Icons.camera_alt_rounded, size: 10, color: Colors.white),
             ),
           ),
         ],
@@ -403,30 +234,28 @@ class PersonalDetailsStep extends GetView<RegistrationController> {
       builder: (context) => Container(
         decoration: BoxDecoration(
           color: theme.colorScheme.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
         ),
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(16),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                  width: 40,
-                  height: 4,
+                  width: 32,
+                  height: 3,
                   decoration: BoxDecoration(
                     color: theme.colorScheme.outline.withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
                 Text(
-                  'Choose Photo Source',
-                  style: AppTextStyles.bodyLarge.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                  'Choose Photo',
+                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
@@ -450,7 +279,7 @@ class PersonalDetailsStep extends GetView<RegistrationController> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 8),
               ],
             ),
           ),
@@ -470,25 +299,16 @@ class PersonalDetailsStep extends GetView<RegistrationController> {
       child: Column(
         children: [
           Container(
-            width: 70,
-            height: 70,
+            width: 50,
+            height: 50,
             decoration: BoxDecoration(
               color: AppColors.primary.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(
-              icon,
-              size: 32,
-              color: AppColors.primary,
-            ),
+            child: Icon(icon, size: 22, color: AppColors.primary),
           ),
-          const SizedBox(height: 8),
-          Text(
-            label,
-            style: AppTextStyles.bodyMedium.copyWith(
-              fontWeight: FontWeight.w500,
-            ),
-          ),
+          const SizedBox(height: 6),
+          Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
         ],
       ),
     );

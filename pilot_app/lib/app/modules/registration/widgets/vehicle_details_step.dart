@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_text_styles.dart';
-import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/inputs/app_text_field.dart';
 import '../../../data/models/vehicle_model.dart';
 import '../controllers/registration_controller.dart';
@@ -16,35 +14,23 @@ class VehicleDetailsStep extends GetView<RegistrationController> {
     final theme = Theme.of(context);
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Header
-          Text(
-            'Vehicle Details',
-            style: AppTextStyles.h4.copyWith(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Tell us about your ride',
-            style: AppTextStyles.bodySmall.copyWith(
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-            ),
-          ),
+          Text('Vehicle Details', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+          Text('Tell us about your ride', style: TextStyle(fontSize: 11, color: theme.colorScheme.onSurface.withValues(alpha: 0.6))),
 
-          const SizedBox(height: 20),
+          const SizedBox(height: 10),
 
           // Vehicle Type Selection
-          Text(
-            'Vehicle Type',
-            style: AppTextStyles.labelLarge.copyWith(fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 12),
+          Text('Vehicle Type', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
+          const SizedBox(height: 8),
           
           Obx(() => _buildVehicleTypeGrid(theme)),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 10),
 
           // Fuel Type (Category)
           Obx(() {
@@ -54,20 +40,17 @@ class VehicleDetailsStep extends GetView<RegistrationController> {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Fuel Type',
-                  style: AppTextStyles.labelLarge.copyWith(fontWeight: FontWeight.w600),
-                ),
-                const SizedBox(height: 12),
+                Text('Fuel Type', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 8),
                 Wrap(
-                  spacing: 10,
-                  runSpacing: 10,
+                  spacing: 8,
+                  runSpacing: 8,
                   children: controller.availableCategories.map((category) {
                     final isSelected = controller.selectedVehicleCategory.value == category;
                     return _buildFuelTypeChip(theme, category, isSelected);
                   }).toList(),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 10),
               ],
             );
           }),
@@ -77,27 +60,26 @@ class VehicleDetailsStep extends GetView<RegistrationController> {
             theme,
             children: [
               // Vehicle Number
-              AppTextField(
+              _buildCompactTextField(
                 controller: controller.vehicleNumberController,
                 label: 'Vehicle Number',
                 hint: 'e.g., GJ-01-AB-1234',
-                prefixIcon: const Icon(Icons.confirmation_number_outlined),
-                textCapitalization: TextCapitalization.characters,
+                icon: Icons.confirmation_number_outlined,
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: 10),
 
               // Vehicle Model
-              AppTextField(
+              _buildCompactTextField(
                 controller: controller.vehicleModelController,
                 label: 'Vehicle Model (Optional)',
                 hint: 'e.g., Honda Activa 6G',
-                prefixIcon: const Icon(Icons.local_shipping_outlined),
+                icon: Icons.local_shipping_outlined,
               ),
             ],
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 10),
 
           // Age Warning for motorized vehicles
           Obx(() {
@@ -110,51 +92,41 @@ class VehicleDetailsStep extends GetView<RegistrationController> {
           // Info tip
           _buildInfoTip(theme),
 
-          const SizedBox(height: 32),
+          const SizedBox(height: 16),
         ],
       ),
     );
   }
 
-  Widget _buildSectionHeader(
-    ThemeData theme, {
+  Widget _buildCompactTextField({
+    required TextEditingController controller,
+    required String label,
+    required String hint,
     required IconData icon,
-    required String title,
-    required String subtitle,
   }) {
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Text(label, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500)),
+        const SizedBox(height: 4),
         Container(
-          padding: const EdgeInsets.all(12),
+          height: 42,
           decoration: BoxDecoration(
-            color: AppColors.primary.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(12),
+            color: Colors.white.withValues(alpha: 0.05),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
           ),
-          child: Icon(
-            icon,
-            color: AppColors.primary,
-            size: 24,
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: AppTextStyles.h4.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                subtitle,
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                ),
-              ),
-            ],
+          child: TextField(
+            controller: controller,
+            style: const TextStyle(fontSize: 13),
+            textCapitalization: TextCapitalization.characters,
+            decoration: InputDecoration(
+              hintText: hint,
+              hintStyle: TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.3)),
+              prefixIcon: Icon(icon, size: 16, color: AppColors.primary),
+              border: InputBorder.none,
+              contentPadding: const EdgeInsets.symmetric(vertical: 12),
+            ),
           ),
         ),
       ],
@@ -163,10 +135,10 @@ class VehicleDetailsStep extends GetView<RegistrationController> {
 
   Widget _buildFormCard(ThemeData theme, {required List<Widget> children}) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10),
         border: Border.all(
           color: theme.colorScheme.outline.withValues(alpha: 0.1),
         ),
@@ -184,9 +156,9 @@ class VehicleDetailsStep extends GetView<RegistrationController> {
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
-        mainAxisSpacing: 12,
-        crossAxisSpacing: 12,
-        childAspectRatio: 1,
+        mainAxisSpacing: 8,
+        crossAxisSpacing: 8,
+        childAspectRatio: 1.1,
       ),
       itemCount: VehicleType.values.length,
       itemBuilder: (context, index) {
@@ -209,37 +181,29 @@ class VehicleDetailsStep extends GetView<RegistrationController> {
           color: isSelected
               ? AppColors.primary.withValues(alpha: 0.1)
               : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(10),
           border: Border.all(
             color: isSelected
                 ? AppColors.primary
                 : theme.colorScheme.outline.withValues(alpha: 0.1),
             width: isSelected ? 2 : 1,
           ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.2),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ]
-              : null,
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
               _getVehicleIcon(type),
-              size: 32,
+              size: 24,
               color: isSelected
                   ? AppColors.primary
                   : theme.colorScheme.onSurface.withValues(alpha: 0.6),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 4),
             Text(
               type.displayText,
-              style: AppTextStyles.labelSmall.copyWith(
+              style: TextStyle(
+                fontSize: 10,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                 color: isSelected
                     ? AppColors.primary
@@ -260,39 +224,31 @@ class VehicleDetailsStep extends GetView<RegistrationController> {
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
           color: isSelected
               ? AppColors.primary
               : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-          borderRadius: BorderRadius.circular(25),
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSelected
                 ? AppColors.primary
                 : theme.colorScheme.outline.withValues(alpha: 0.2),
           ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.3),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ]
-              : null,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
               _getFuelIcon(category),
-              size: 18,
+              size: 14,
               color: isSelected ? Colors.white : theme.colorScheme.onSurface,
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 4),
             Text(
               category.displayText,
-              style: AppTextStyles.bodyMedium.copyWith(
+              style: TextStyle(
+                fontSize: 11,
                 color: isSelected ? Colors.white : theme.colorScheme.onSurface,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
               ),
@@ -305,49 +261,21 @@ class VehicleDetailsStep extends GetView<RegistrationController> {
 
   Widget _buildWarningCard(ThemeData theme) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 24),
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: Colors.orange.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Colors.orange.withValues(alpha: 0.3),
-        ),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.orange.withValues(alpha: 0.2),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.warning_amber_rounded,
-              color: Colors.orange,
-              size: 20,
-            ),
-          ),
-          const SizedBox(width: 12),
+          Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 18),
+          const SizedBox(width: 8),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Age Restriction',
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: Colors.orange.shade800,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'You must be 18+ to use motorized vehicles. Please select Cycle or EV Cycle.',
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: Colors.orange.shade700,
-                  ),
-                ),
-              ],
+            child: Text(
+              'You must be 18+ for motorized vehicles. Select Cycle or EV Cycle.',
+              style: TextStyle(fontSize: 11, color: Colors.orange.shade700),
             ),
           ),
         ],
@@ -357,28 +285,20 @@ class VehicleDetailsStep extends GetView<RegistrationController> {
 
   Widget _buildInfoTip(ThemeData theme) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: AppColors.primary.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: AppColors.primary.withValues(alpha: 0.1),
-        ),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.1)),
       ),
       child: Row(
         children: [
-          Icon(
-            Icons.lightbulb_outline_rounded,
-            color: AppColors.primary,
-            size: 20,
-          ),
-          const SizedBox(width: 12),
+          Icon(Icons.lightbulb_outline_rounded, color: AppColors.primary, size: 16),
+          const SizedBox(width: 8),
           Expanded(
             child: Text(
               'Choose the vehicle you\'ll use most for deliveries',
-              style: AppTextStyles.bodySmall.copyWith(
-                color: AppColors.primary,
-              ),
+              style: TextStyle(fontSize: 11, color: AppColors.primary),
             ),
           ),
         ],
