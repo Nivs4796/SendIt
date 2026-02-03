@@ -293,7 +293,7 @@ class RegistrationView extends GetView<RegistrationController> {
             Expanded(
               flex: isFirstStep ? 1 : 1,
               child: AppButton(
-                text: isLastStep ? 'Submit Application' : 'Continue',
+                text: isLastStep ? 'Submit' : 'Continue',
                 onPressed: controller.nextStep,
                 isLoading: controller.isLoading.value,
                 icon: isLastStep ? Icons.check_circle_rounded : Icons.arrow_forward_rounded,
