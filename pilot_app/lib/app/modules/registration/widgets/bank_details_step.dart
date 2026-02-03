@@ -15,7 +15,7 @@ class BankDetailsStep extends GetView<RegistrationController> {
     final theme = Theme.of(context);
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -27,12 +27,12 @@ class BankDetailsStep extends GetView<RegistrationController> {
             subtitle: 'Where should we send your earnings?',
           ),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
 
           // Earnings Info Card
           _buildEarningsInfoCard(theme),
 
-          const SizedBox(height: 32),
+          const SizedBox(height: 20),
 
           // Account Details Section
           Text(
@@ -103,7 +103,7 @@ class BankDetailsStep extends GetView<RegistrationController> {
             ],
           ),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
 
           // Supporting Document
           Text(
@@ -124,17 +124,17 @@ class BankDetailsStep extends GetView<RegistrationController> {
 
           _buildDocumentUpload(context, theme),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
 
           // Security Note
           _buildSecurityNote(theme),
 
-          const SizedBox(height: 32),
+          const SizedBox(height: 20),
 
           // Final Step Note
           _buildFinalStepNote(theme),
 
-          const SizedBox(height: 32),
+          const SizedBox(height: 20),
         ],
       ),
     );
@@ -187,7 +187,7 @@ class BankDetailsStep extends GetView<RegistrationController> {
 
   Widget _buildFormCard(ThemeData theme, {required List<Widget> children}) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(16),
@@ -204,7 +204,7 @@ class BankDetailsStep extends GetView<RegistrationController> {
 
   Widget _buildEarningsInfoCard(ThemeData theme) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -268,7 +268,7 @@ class BankDetailsStep extends GetView<RegistrationController> {
         onTap: () => _showImagePicker(context),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: isUploaded
                 ? AppColors.success.withValues(alpha: 0.05)
@@ -399,7 +399,7 @@ class BankDetailsStep extends GetView<RegistrationController> {
 
   Widget _buildFinalStepNote(ThemeData theme) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -472,7 +472,7 @@ class BankDetailsStep extends GetView<RegistrationController> {
         ),
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -484,7 +484,7 @@ class BankDetailsStep extends GetView<RegistrationController> {
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
                 Text(
                   'Upload Bank Document',
                   style: AppTextStyles.bodyLarge.copyWith(
@@ -498,7 +498,7 @@ class BankDetailsStep extends GetView<RegistrationController> {
                     color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [

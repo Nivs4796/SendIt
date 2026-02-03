@@ -16,26 +16,28 @@ class PersonalDetailsStep extends GetView<RegistrationController> {
     final theme = Theme.of(context);
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
-          _buildSectionHeader(
-            theme,
-            icon: Icons.person_rounded,
-            title: 'Personal Details',
-            subtitle: 'Let\'s get to know you better',
+          // Header + Profile Photo Row
+          Row(
+            children: [
+              // Header
+              Expanded(
+                child: _buildCompactHeader(
+                  theme,
+                  title: 'Personal Details',
+                  subtitle: 'Let\'s get to know you',
+                ),
+              ),
+              const SizedBox(width: 16),
+              // Profile Photo
+              Obx(() => _buildCompactProfilePhoto(theme)),
+            ],
           ),
 
-          const SizedBox(height: 32),
-
-          // Profile Photo
-          Center(
-            child: Obx(() => _buildProfilePhoto(theme)),
-          ),
-
-          const SizedBox(height: 32),
+          const SizedBox(height: 20),
 
           // Form Card
           _buildFormCard(
@@ -50,7 +52,7 @@ class PersonalDetailsStep extends GetView<RegistrationController> {
                 textCapitalization: TextCapitalization.words,
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
 
               // Email
               AppTextField(
@@ -61,7 +63,7 @@ class PersonalDetailsStep extends GetView<RegistrationController> {
                 type: AppTextFieldType.email,
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
 
               // Date of Birth
               GestureDetector(
@@ -69,7 +71,7 @@ class PersonalDetailsStep extends GetView<RegistrationController> {
                 child: AbsorbPointer(
                   child: Obx(() => AppTextField(
                     label: 'Date of Birth',
-                    hint: 'Select your date of birth',
+                    hint: 'Select date of birth',
                     prefixIcon: const Icon(Icons.cake_outlined),
                     controller: TextEditingController(
                       text: controller.dateOfBirth.value != null
@@ -86,11 +88,11 @@ class PersonalDetailsStep extends GetView<RegistrationController> {
             ],
           ),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
 
           // Address Section
-          _buildSectionLabel(theme, 'Address Information'),
-          const SizedBox(height: 16),
+          _buildSectionLabel(theme, 'Address'),
+          const SizedBox(height: 12),
 
           _buildFormCard(
             theme,
@@ -104,7 +106,7 @@ class PersonalDetailsStep extends GetView<RegistrationController> {
                 maxLines: 2,
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
 
               // City & State Row
               Row(
@@ -114,28 +116,26 @@ class PersonalDetailsStep extends GetView<RegistrationController> {
                       controller: controller.cityController,
                       label: 'City',
                       hint: 'City',
-                      prefixIcon: const Icon(Icons.location_city_rounded),
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: AppTextField(
                       controller: controller.stateController,
                       label: 'State',
                       hint: 'State',
-                      prefixIcon: const Icon(Icons.map_outlined),
                     ),
                   ),
                 ],
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
 
               // Pincode
               AppTextField(
                 controller: controller.pincodeController,
                 label: 'PIN Code',
-                hint: 'Enter 6-digit PIN',
+                hint: '6-digit PIN',
                 prefixIcon: const Icon(Icons.pin_drop_outlined),
                 type: AppTextFieldType.number,
                 maxLength: 6,
@@ -143,7 +143,78 @@ class PersonalDetailsStep extends GetView<RegistrationController> {
             ],
           ),
 
-          const SizedBox(height: 32),
+          const SizedBox(height: 16),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCompactHeader(ThemeData theme, {required String title, required String subtitle}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: AppTextStyles.h4.copyWith(fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          subtitle,
+          style: AppTextStyles.bodySmall.copyWith(
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCompactProfilePhoto(ThemeData theme) {
+    return GestureDetector(
+      onTap: () => _showImagePicker(Get.context!),
+      child: Stack(
+        children: [
+          Container(
+            width: 72,
+            height: 72,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  AppColors.primary.withValues(alpha: 0.1),
+                  AppColors.primary.withValues(alpha: 0.05),
+                ],
+              ),
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: AppColors.primary.withValues(alpha: 0.3),
+                width: 2,
+              ),
+              image: controller.profilePhoto.value != null
+                  ? DecorationImage(
+                      image: FileImage(controller.profilePhoto.value!),
+                      fit: BoxFit.cover,
+                    )
+                  : null,
+            ),
+            child: controller.profilePhoto.value == null
+                ? Icon(
+                    Icons.person_rounded,
+                    size: 32,
+                    color: AppColors.primary.withValues(alpha: 0.5),
+                  )
+                : null,
+          ),
+          Positioned(
+            bottom: 0,
+            right: 0,
+            child: Container(
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: AppColors.primary,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.camera_alt_rounded, size: 14, color: Colors.white),
+            ),
+          ),
         ],
       ),
     );
@@ -206,10 +277,10 @@ class PersonalDetailsStep extends GetView<RegistrationController> {
 
   Widget _buildFormCard(ThemeData theme, {required List<Widget> children}) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: theme.colorScheme.outline.withValues(alpha: 0.1),
         ),

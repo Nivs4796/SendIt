@@ -14,7 +14,7 @@ class DocumentsStep extends GetView<RegistrationController> {
     final theme = Theme.of(context);
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -26,12 +26,12 @@ class DocumentsStep extends GetView<RegistrationController> {
             subtitle: 'We need these for verification',
           ),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
 
           // Progress indicator
           _buildUploadProgress(theme),
 
-          const SizedBox(height: 32),
+          const SizedBox(height: 20),
 
           // Required Documents Section
           Text(
@@ -82,7 +82,7 @@ class DocumentsStep extends GetView<RegistrationController> {
                   type: 'vehicle_rc',
                   isRequired: true,
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
               ],
             );
           }),
@@ -113,7 +113,7 @@ class DocumentsStep extends GetView<RegistrationController> {
                     type: 'insurance',
                     isRequired: false,
                   ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
               ],
             );
           }),
@@ -143,7 +143,7 @@ class DocumentsStep extends GetView<RegistrationController> {
                   type: 'parental_consent',
                   isRequired: true,
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
               ],
             );
           }),
@@ -151,7 +151,7 @@ class DocumentsStep extends GetView<RegistrationController> {
           // Info Box
           _buildInfoCard(theme),
 
-          const SizedBox(height: 32),
+          const SizedBox(height: 20),
         ],
       ),
     );
@@ -479,7 +479,7 @@ class DocumentsStep extends GetView<RegistrationController> {
         ),
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -491,7 +491,7 @@ class DocumentsStep extends GetView<RegistrationController> {
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
                 Text(
                   'Upload Document',
                   style: AppTextStyles.bodyLarge.copyWith(
@@ -505,7 +505,7 @@ class DocumentsStep extends GetView<RegistrationController> {
                     color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [

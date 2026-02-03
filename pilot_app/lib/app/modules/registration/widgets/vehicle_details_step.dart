@@ -16,33 +16,35 @@ class VehicleDetailsStep extends GetView<RegistrationController> {
     final theme = Theme.of(context);
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Header
-          _buildSectionHeader(
-            theme,
-            icon: Icons.directions_bike_rounded,
-            title: 'Vehicle Details',
-            subtitle: 'Tell us about your ride',
+          Text(
+            'Vehicle Details',
+            style: AppTextStyles.h4.copyWith(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Tell us about your ride',
+            style: AppTextStyles.bodySmall.copyWith(
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+            ),
           ),
 
-          const SizedBox(height: 32),
+          const SizedBox(height: 20),
 
           // Vehicle Type Selection
           Text(
-            'Select Vehicle Type',
-            style: AppTextStyles.bodyMedium.copyWith(
-              fontWeight: FontWeight.w600,
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
-            ),
+            'Vehicle Type',
+            style: AppTextStyles.labelLarge.copyWith(fontWeight: FontWeight.w600),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           
           Obx(() => _buildVehicleTypeGrid(theme)),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
 
           // Fuel Type (Category)
           Obx(() {
@@ -53,22 +55,19 @@ class VehicleDetailsStep extends GetView<RegistrationController> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Select Fuel Type',
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
-                  ),
+                  'Fuel Type',
+                  style: AppTextStyles.labelLarge.copyWith(fontWeight: FontWeight.w600),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
                 Wrap(
-                  spacing: 12,
-                  runSpacing: 12,
+                  spacing: 10,
+                  runSpacing: 10,
                   children: controller.availableCategories.map((category) {
                     final isSelected = controller.selectedVehicleCategory.value == category;
                     return _buildFuelTypeChip(theme, category, isSelected);
                   }).toList(),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
               ],
             );
           }),
@@ -86,7 +85,7 @@ class VehicleDetailsStep extends GetView<RegistrationController> {
                 textCapitalization: TextCapitalization.characters,
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
 
               // Vehicle Model
               AppTextField(
@@ -98,7 +97,7 @@ class VehicleDetailsStep extends GetView<RegistrationController> {
             ],
           ),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
 
           // Age Warning for motorized vehicles
           Obx(() {
@@ -164,10 +163,10 @@ class VehicleDetailsStep extends GetView<RegistrationController> {
 
   Widget _buildFormCard(ThemeData theme, {required List<Widget> children}) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: theme.colorScheme.outline.withValues(alpha: 0.1),
         ),
