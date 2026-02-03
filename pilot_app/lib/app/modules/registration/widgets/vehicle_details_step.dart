@@ -24,13 +24,13 @@ class VehicleDetailsStep extends GetView<RegistrationController> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Header
-          Text('Vehicle Details', style: AppTextStyles.h4),
-          Text('Tell us about your ride', style: AppTextStyles.caption),
+          Text('Vehicle Details', style: AppTextStyles.h4.copyWith(color: theme.colorScheme.onSurface)),
+          Text('Tell us about your ride', style: AppTextStyles.caption.copyWith(color: theme.colorScheme.onSurface.withValues(alpha: 0.6))),
 
           SizedBox(height: AppTheme.spacingMd),
 
           // Vehicle Type
-          Text('Vehicle Type', style: AppTextStyles.labelLarge),
+          Text('Vehicle Type', style: AppTextStyles.labelLarge.copyWith(color: theme.colorScheme.onSurface)),
           SizedBox(height: AppTheme.spacingSm),
 
           Obx(() => _buildVehicleTypeGrid(theme)),
@@ -45,7 +45,7 @@ class VehicleDetailsStep extends GetView<RegistrationController> {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Fuel Type', style: AppTextStyles.labelLarge),
+                Text('Fuel Type', style: AppTextStyles.labelLarge.copyWith(color: theme.colorScheme.onSurface)),
                 SizedBox(height: AppTheme.spacingSm),
                 Wrap(
                   spacing: AppTheme.spacingSm,
@@ -99,21 +99,20 @@ class VehicleDetailsStep extends GetView<RegistrationController> {
   }
 
   Widget _buildVehicleTypeGrid(ThemeData theme) {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        mainAxisSpacing: 8,
-        crossAxisSpacing: 8,
-        childAspectRatio: 1.15,
-      ),
-      itemCount: VehicleType.values.length,
-      itemBuilder: (context, index) {
-        final type = VehicleType.values[index];
+    final screenWidth = MediaQuery.of(Get.context!).size.width;
+    final cardWidth = (screenWidth - 32 - 16) / 3; // padding + gaps
+
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: VehicleType.values.map((type) {
         final isSelected = controller.selectedVehicleType.value == type;
-        return _buildVehicleCard(theme, type, isSelected);
-      },
+        return SizedBox(
+          width: cardWidth,
+          height: cardWidth * 0.9,
+          child: _buildVehicleCard(theme, type, isSelected),
+        );
+      }).toList(),
     );
   }
 
@@ -126,11 +125,11 @@ class VehicleDetailsStep extends GetView<RegistrationController> {
       child: Container(
         decoration: BoxDecoration(
           color: isSelected
-              ? AppColors.primary.withValues(alpha: 0.1)
-              : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+              ? AppColors.primary.withValues(alpha: 0.15)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
           border: Border.all(
-            color: isSelected ? AppColors.primary : theme.colorScheme.outline.withValues(alpha: 0.2),
+            color: isSelected ? AppColors.primary : theme.colorScheme.outline,
             width: isSelected ? 1.5 : 1,
           ),
         ),
@@ -140,14 +139,14 @@ class VehicleDetailsStep extends GetView<RegistrationController> {
             Icon(
               _getVehicleIcon(type),
               size: 22,
-              color: isSelected ? AppColors.primary : theme.colorScheme.onSurface.withValues(alpha: 0.6),
+              color: isSelected ? AppColors.primary : theme.colorScheme.onSurface.withValues(alpha: 0.7),
             ),
             SizedBox(height: AppTheme.spacingXs),
             Text(
               type.displayText,
               style: AppTextStyles.labelSmall.copyWith(
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                color: isSelected ? AppColors.primary : theme.colorScheme.onSurface.withValues(alpha: 0.8),
+                color: isSelected ? AppColors.primary : theme.colorScheme.onSurface,
               ),
               textAlign: TextAlign.center,
             ),
@@ -166,10 +165,10 @@ class VehicleDetailsStep extends GetView<RegistrationController> {
           vertical: AppTheme.spacingSm,
         ),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+          color: isSelected ? AppColors.primary : Colors.transparent,
           borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
           border: Border.all(
-            color: isSelected ? AppColors.primary : theme.colorScheme.outline.withValues(alpha: 0.2),
+            color: isSelected ? AppColors.primary : theme.colorScheme.outline,
           ),
         ),
         child: Row(

@@ -127,9 +127,9 @@ class RegistrationController extends GetxController {
     }
   }
 
-  /// Go to specific step
+  /// Go to specific step (allow any step for dev testing)
   void goToStep(int step) {
-    if (step >= 0 && step <= 3 && step <= currentStep.value) {
+    if (step >= 0 && step <= 3) {
       currentStep.value = step;
     }
   }
