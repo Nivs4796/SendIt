@@ -112,17 +112,16 @@ class AppTheme {
       ),
 
       inputDecorationTheme: InputDecorationTheme(
-        filled: true,
-        fillColor: AppColors.glassInputBackground,
+        filled: false,
         isDense: true,
         contentPadding: const EdgeInsets.symmetric(horizontal: inputPaddingH, vertical: inputPaddingV),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(radiusMedium),
-          borderSide: BorderSide(color: AppColors.glassInputBorder),
+          borderSide: BorderSide(color: AppColors.glassInputBorder, width: 1),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(radiusMedium),
-          borderSide: BorderSide(color: AppColors.glassInputBorder),
+          borderSide: BorderSide(color: AppColors.glassInputBorder, width: 1),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(radiusMedium),
@@ -130,7 +129,7 @@ class AppTheme {
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(radiusMedium),
-          borderSide: const BorderSide(color: AppColors.error),
+          borderSide: const BorderSide(color: AppColors.error, width: 1),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(radiusMedium),
@@ -315,17 +314,16 @@ class AppTheme {
       ),
 
       inputDecorationTheme: InputDecorationTheme(
-        filled: true,
-        fillColor: darkSurface.withValues(alpha: 0.5),
+        filled: false,
         isDense: true,
         contentPadding: const EdgeInsets.symmetric(horizontal: inputPaddingH, vertical: inputPaddingV),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(radiusMedium),
-          borderSide: const BorderSide(color: darkBorder),
+          borderSide: BorderSide(color: darkBorder, width: 1),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(radiusMedium),
-          borderSide: const BorderSide(color: darkBorder),
+          borderSide: BorderSide(color: darkBorder, width: 1),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(radiusMedium),
@@ -333,7 +331,7 @@ class AppTheme {
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(radiusMedium),
-          borderSide: const BorderSide(color: darkError),
+          borderSide: const BorderSide(color: darkError, width: 1),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(radiusMedium),
