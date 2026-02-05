@@ -513,6 +513,7 @@ class JobsController extends GetxController {
       case JobStatus.arrivedAtPickup:
         return 'Package Collected';
       case JobStatus.packageCollected:
+        return 'Start Trip';
       case JobStatus.inTransit:
         return 'Arrived at Drop';
       case JobStatus.arrivedAtDrop:
@@ -521,8 +522,9 @@ class JobsController extends GetxController {
         return 'Update Status';
     }
   }
-  
+
   /// Get next status based on current status
+  /// Flow: ACCEPTED → ARRIVED_PICKUP → PICKED_UP → IN_TRANSIT → ARRIVED_DROP → DELIVERED
   JobStatus? getNextStatus() {
     final status = activeJob.value?.status;
     switch (status) {
@@ -532,8 +534,9 @@ class JobsController extends GetxController {
       case JobStatus.arrivedAtPickup:
         return JobStatus.packageCollected;
       case JobStatus.packageCollected:
+        return JobStatus.inTransit; // PICKED_UP → IN_TRANSIT
       case JobStatus.inTransit:
-        return JobStatus.arrivedAtDrop;
+        return JobStatus.arrivedAtDrop; // IN_TRANSIT → ARRIVED_DROP
       case JobStatus.arrivedAtDrop:
         return JobStatus.delivered;
       default:

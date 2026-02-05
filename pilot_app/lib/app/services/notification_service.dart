@@ -86,14 +86,21 @@ class NotificationService extends GetxService {
     }
   }
 
-  Future<void> _sendTokenToServer(String token) async {
+  Future<void> _sendTokenToServer(String token, {bool force = false}) async {
     try {
       // Only send if user is logged in
       final storageService = Get.find<StorageService>();
       final authToken = storageService.token;
-      
+
       if (authToken == null || authToken.isEmpty) {
         debugPrint('Not logged in, skipping FCM token registration');
+        return;
+      }
+
+      // Check if token is already registered (avoid redundant API calls)
+      final lastRegisteredToken = storageService.fcmToken;
+      if (!force && lastRegisteredToken == token) {
+        debugPrint('FCM token already registered, skipping');
         return;
       }
 
@@ -102,6 +109,9 @@ class NotificationService extends GetxService {
         ApiConstants.fcmRegister,
         data: {'fcmToken': token},
       );
+
+      // Store the registered token
+      storageService.fcmToken = token;
       debugPrint('✅ FCM token registered with server');
     } catch (e) {
       debugPrint('❌ Failed to register FCM token: $e');
@@ -111,7 +121,7 @@ class NotificationService extends GetxService {
   /// Call this after login to register FCM token
   Future<void> registerTokenAfterLogin() async {
     if (_fcmToken != null) {
-      await _sendTokenToServer(_fcmToken!);
+      await _sendTokenToServer(_fcmToken!, force: true);
     }
   }
   

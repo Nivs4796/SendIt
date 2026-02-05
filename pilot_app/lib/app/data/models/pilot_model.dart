@@ -179,6 +179,7 @@ class PilotModel {
 enum PilotStatus {
   pending('pending'),
   active('active'),
+  approved('approved'),
   suspended('suspended'),
   inactive('inactive');
 
@@ -186,10 +187,20 @@ enum PilotStatus {
   const PilotStatus(this.value);
 
   static PilotStatus fromString(String value) {
-    return PilotStatus.values.firstWhere(
-      (e) => e.value == value,
-      orElse: () => PilotStatus.pending,
-    );
+    final lowerValue = value.toLowerCase();
+
+    // Handle various formats from backend
+    if (lowerValue == 'approved' || lowerValue == 'active') {
+      return PilotStatus.active;
+    }
+    if (lowerValue == 'suspended') {
+      return PilotStatus.suspended;
+    }
+    if (lowerValue == 'inactive') {
+      return PilotStatus.inactive;
+    }
+
+    return PilotStatus.pending;
   }
 }
 

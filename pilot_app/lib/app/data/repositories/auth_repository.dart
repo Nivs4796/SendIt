@@ -227,7 +227,9 @@ class AuthRepository {
       final response = await _api.get(ApiConstants.pilotProfile);
 
       if (response.statusCode == 200 && response.data['success'] == true) {
-        final pilotData = response.data['data'];
+        // API returns {data: {pilot: {...}}} - extract the pilot object
+        final data = response.data['data'];
+        final pilotData = data['pilot'] ?? data;
         _storage.pilot = pilotData;
 
         return {
@@ -316,7 +318,9 @@ class AuthRepository {
       final response = await _api.get(ApiConstants.pilotProfile);
 
       if (response.statusCode == 200 && response.data['success'] == true) {
-        final pilotData = response.data['data'];
+        // API returns {data: {pilot: {...}}} - extract the pilot object
+        final data = response.data['data'];
+        final pilotData = data['pilot'] ?? data;
         _storage.pilot = pilotData;
 
         final pilot = PilotModel.fromJson(pilotData);

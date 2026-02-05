@@ -63,7 +63,8 @@ export const getBookings = async (req: Request, res: Response, next: NextFunctio
   try {
     const page = parseInt(req.query.page as string) || 1
     const limit = parseInt(req.query.limit as string) || 10
-    const result = await pilotService.getPilotBookings(req.user!.id, page, limit)
+    const status = req.query.status as string | undefined
+    const result = await pilotService.getPilotBookings(req.user!.id, page, limit, status)
     res.status(200).json(formatResponse(true, 'Bookings retrieved', { bookings: result.bookings }, result.meta))
   } catch (error) {
     next(error)

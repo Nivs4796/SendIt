@@ -25,6 +25,7 @@ class HomeController extends GetxController {
   final isOnline = false.obs;
   final isLoading = false.obs;
   final isLoadingStats = false.obs;
+  final isInitializing = true.obs; // Show loading state during init
 
   // Earnings
   final Rx<EarningsModel?> todayEarnings = Rx<EarningsModel?>(null);
@@ -49,31 +50,37 @@ class HomeController extends GetxController {
     _socketService = Get.find<SocketService>();
     _locationService = Get.find<LocationService>();
     _jobsController = Get.find<JobsController>();
-    
+
+    // Load initial state from storage synchronously to avoid flash
+    _loadInitialState();
+
     _loadPilotData();
     _loadEarnings();
   }
 
-  /// Load pilot data from storage or API
+  /// Load initial state from storage (synchronous)
+  void _loadInitialState() {
+    final localPilot = _authRepository.currentPilot;
+    if (localPilot != null) {
+      pilot.value = localPilot;
+      isOnline.value = localPilot.isOnline;
+    }
+    isInitializing.value = false;
+  }
+
+  /// Load pilot data from API and sync with server
   Future<void> _loadPilotData() async {
     try {
       isLoading.value = true;
-      
-      // First try from storage
-      final localPilot = _authRepository.currentPilot;
-      if (localPilot != null) {
-        pilot.value = localPilot;
-        isOnline.value = localPilot.isOnline;
-      }
 
-      // Then refresh from API
+      // Refresh from API to get latest status
       final response = await _pilotRepository.getProfile();
       if (response['success'] == true) {
         pilot.value = response['pilot'] as PilotModel;
         isOnline.value = pilot.value?.isOnline ?? false;
       }
     } catch (e) {
-      // Use local data if API fails
+      // Keep local data if API fails (already loaded in _loadInitialState)
     } finally {
       isLoading.value = false;
     }

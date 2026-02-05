@@ -229,12 +229,35 @@ export const getPilotEarnings = async (id: string, page: number = 1, limit: numb
   }
 }
 
-export const getPilotBookings = async (id: string, page: number = 1, limit: number = 10) => {
+export const getPilotBookings = async (
+  id: string,
+  page: number = 1,
+  limit: number = 10,
+  status?: string
+) => {
   const { skip, take } = getPaginationParams(page, limit)
+
+  // Define active statuses for filtering
+  const activeStatuses = ['ACCEPTED', 'ARRIVED_PICKUP', 'PICKED_UP', 'IN_TRANSIT', 'ARRIVED_DROP']
+
+  // Build where clause
+  const whereClause: any = { pilotId: id }
+
+  if (status === 'active') {
+    // Filter only active (in-progress) bookings
+    whereClause.status = { in: activeStatuses }
+  } else if (status === 'completed') {
+    // Filter only completed bookings
+    whereClause.status = 'DELIVERED'
+  } else if (status === 'cancelled') {
+    // Filter only cancelled bookings
+    whereClause.status = 'CANCELLED'
+  }
+  // If no status specified, return all bookings
 
   const [bookings, total] = await Promise.all([
     prisma.booking.findMany({
-      where: { pilotId: id },
+      where: whereClause,
       skip,
       take,
       orderBy: { createdAt: 'desc' },
@@ -245,7 +268,7 @@ export const getPilotBookings = async (id: string, page: number = 1, limit: numb
         vehicleType: true,
       },
     }),
-    prisma.booking.count({ where: { pilotId: id } }),
+    prisma.booking.count({ where: whereClause }),
   ])
 
   return {

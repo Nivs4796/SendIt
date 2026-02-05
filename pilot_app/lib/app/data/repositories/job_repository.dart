@@ -165,7 +165,20 @@ class JobRepository {
 
       if (response.statusCode == 200 && response.data['success'] == true) {
         final bookings = response.data['data']['bookings'] as List? ?? [];
+
+        // Filter only truly active jobs (not delivered/cancelled)
+        // Active statuses: assigned, navigating_to_pickup, arrived_at_pickup,
+        //                  package_collected, in_transit, arrived_at_drop
+        const activeStatuses = [
+          'ACCEPTED',
+          'ARRIVED_PICKUP',
+          'PICKED_UP',
+          'IN_TRANSIT',
+          'ARRIVED_DROP',
+        ];
+
         return bookings
+            .where((b) => activeStatuses.contains(b['status']))
             .map((b) => JobModel.fromJson(_transformBookingToJob(b)))
             .toList();
       }
