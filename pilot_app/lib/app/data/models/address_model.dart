@@ -1,49 +1,69 @@
 class AddressModel {
   final String id;
-  final String userId;
+  final String? userId;
   final String label;
   final String address;
   final String? landmark;
-  final String city;
-  final String state;
-  final String pincode;
+  final String? city;
+  final String? state;
+  final String? pincode;
   final double lat;
   final double lng;
   final bool isDefault;
-  final DateTime createdAt;
-  final DateTime updatedAt;
+  final String? contactName;
+  final String? contactPhone;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   AddressModel({
     required this.id,
-    required this.userId,
+    this.userId,
     required this.label,
     required this.address,
     this.landmark,
-    required this.city,
-    required this.state,
-    required this.pincode,
+    this.city,
+    this.state,
+    this.pincode,
     required this.lat,
     required this.lng,
     this.isDefault = false,
-    required this.createdAt,
-    required this.updatedAt,
+    this.contactName,
+    this.contactPhone,
+    this.createdAt,
+    this.updatedAt,
   });
 
   factory AddressModel.fromJson(Map<String, dynamic> json) {
+    // Handle createdAt/updatedAt parsing safely
+    DateTime? parseDate(dynamic value) {
+      if (value == null) return null;
+      if (value is DateTime) return value;
+      if (value is String) {
+        try {
+          return DateTime.parse(value);
+        } catch (_) {
+          return null;
+        }
+      }
+      return null;
+    }
+
     return AddressModel(
-      id: json['id'],
-      userId: json['userId'],
-      label: json['label'],
-      address: json['address'],
-      landmark: json['landmark'],
-      city: json['city'],
-      state: json['state'],
-      pincode: json['pincode'],
-      lat: (json['lat'] ?? 0).toDouble(),
-      lng: (json['lng'] ?? 0).toDouble(),
-      isDefault: json['isDefault'] ?? false,
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
+      id: json['id'] as String? ?? '',
+      userId: json['userId'] ?? json['user_id'] as String?,
+      label: json['label'] as String? ?? 'Address',
+      address: json['address'] as String? ?? '',
+      landmark: json['landmark'] as String?,
+      city: json['city'] as String?,
+      state: json['state'] as String?,
+      pincode: json['pincode'] as String?,
+      lat: (json['lat'] as num?)?.toDouble() ?? 0.0,
+      lng: (json['lng'] as num?)?.toDouble() ?? 0.0,
+      isDefault: json['isDefault'] ?? json['is_default'] as bool? ?? false,
+      contactName: json['contactName'] ?? json['contact_name'] as String?,
+      contactPhone: json['contactPhone'] ?? json['contact_phone'] as String?,
+      createdAt: parseDate(json['createdAt'] ?? json['created_at']),
+      updatedAt: parseDate(json['updatedAt'] ?? json['updated_at']),
     );
   }
 
@@ -60,8 +80,10 @@ class AddressModel {
       'lat': lat,
       'lng': lng,
       'isDefault': isDefault,
-      'createdAt': createdAt.toIso8601String(),
-      'updatedAt': updatedAt.toIso8601String(),
+      'contactName': contactName,
+      'contactPhone': contactPhone,
+      'createdAt': createdAt?.toIso8601String(),
+      'updatedAt': updatedAt?.toIso8601String(),
     };
   }
 

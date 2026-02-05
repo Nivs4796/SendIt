@@ -250,6 +250,8 @@ class VehicleDetailsStep extends GetView<RegistrationController> {
         return Icons.two_wheeler_rounded;
       case VehicleType.threeWheeler:
         return Icons.electric_rickshaw_rounded;
+      case VehicleType.fourWheeler:
+        return Icons.directions_car_rounded;
       case VehicleType.truck:
         return Icons.local_shipping_rounded;
     }

@@ -5,6 +5,7 @@ import { BookingStatus } from '@prisma/client'
 import logger from '../config/logger'
 import { emitToPilot } from '../socket'
 import { BookingOfferPayload } from '../socket/types'
+import { handlePilotAccepted, handlePilotDeclined } from './assignment-queue.service'
 
 // Configuration for matching algorithm
 const MATCHING_CONFIG = {
@@ -429,6 +430,9 @@ export const respondToJobOffer = async (
     offer.status = 'ACCEPTED'
     activeJobOffers.set(offerId, offer)
 
+    // Notify assignment queue
+    await handlePilotAccepted(offer.bookingId, pilotId)
+
     logger.info(`Job offer ${offerId} accepted by pilot ${pilotId}`)
 
     return {
@@ -438,6 +442,9 @@ export const respondToJobOffer = async (
   } else {
     offer.status = 'DECLINED'
     activeJobOffers.set(offerId, offer)
+
+    // Notify assignment queue to try next pilot
+    await handlePilotDeclined(offer.bookingId, pilotId)
 
     logger.info(`Job offer ${offerId} declined by pilot ${pilotId}`)
 

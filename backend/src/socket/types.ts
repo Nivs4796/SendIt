@@ -100,6 +100,58 @@ export interface NotificationPayload {
   createdAt: string
 }
 
+// Booking Created Payload
+export interface BookingCreatedPayload {
+  bookingId: string
+  bookingNumber: string
+  status: string
+  message: string
+}
+
+// Assignment Flow Payload Types
+export interface SearchStatusPayload {
+  bookingId: string
+  message: string
+}
+
+export interface OfferSentPayload {
+  bookingId: string
+  pilotNumber: number
+  message: string
+}
+
+export interface DriverAssignedPayload {
+  bookingId: string
+  pilot: {
+    id: string | undefined
+    name: string | undefined
+    phone: string | undefined
+    avatar: string | null | undefined
+    rating: number | undefined
+  }
+  message: string
+}
+
+export interface NoPilotsPayload {
+  bookingId: string
+  message: string
+  canRetry: boolean
+  canCancel: boolean
+}
+
+export interface SearchTimeoutPayload {
+  bookingId: string
+  message: string
+  canRetry: boolean
+  canCancel: boolean
+}
+
+export interface BookingAssignedPayload {
+  bookingId: string
+  pilotId: string
+  pilotName: string | undefined
+}
+
 export interface ServerToClientEvents {
   // Location updates (to booking room)
   'location:update': (data: LocationUpdatePayload) => void
@@ -110,6 +162,21 @@ export interface ServerToClientEvents {
   // New booking offer (to pilot)
   'booking:offer': (data: BookingOfferPayload) => void
   'offer:expired': (data: { bookingId: string }) => void
+
+  // Booking created (User)
+  'booking:created': (data: BookingCreatedPayload) => void
+
+  // Assignment flow events (User)
+  'booking:search_started': (data: SearchStatusPayload) => void
+  'booking:offer_sent': (data: OfferSentPayload) => void
+  'booking:offer_expired': (data: SearchStatusPayload) => void
+  'booking:offer_declined': (data: SearchStatusPayload) => void
+  'booking:driver_assigned': (data: DriverAssignedPayload) => void
+  'booking:no_pilots': (data: NoPilotsPayload) => void
+  'booking:search_timeout': (data: SearchTimeoutPayload) => void
+
+  // Admin assignment events
+  'booking:assigned': (data: BookingAssignedPayload) => void
 
   // Admin dashboard stats
   'dashboard:stats': (data: DashboardStatsPayload) => void

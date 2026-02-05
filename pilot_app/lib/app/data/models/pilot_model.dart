@@ -5,6 +5,8 @@ class PilotModel {
   final String phone;
   final String? email;
   final String? avatar;
+  final String? profilePhotoUrl;
+  final String? emergencyContact;
   final DateTime? dateOfBirth;
   final int? age;
   final String? address;
@@ -25,6 +27,8 @@ class PilotModel {
     required this.phone,
     this.email,
     this.avatar,
+    this.profilePhotoUrl,
+    this.emergencyContact,
     this.dateOfBirth,
     this.age,
     this.address,
@@ -46,12 +50,35 @@ class PilotModel {
     final updatedAtStr = json['updatedAt'] ?? json['updated_at'];
     final dateOfBirthStr = json['dateOfBirth'] ?? json['date_of_birth'];
     
+    // Determine verification status from multiple possible fields:
+    // 1. isVerified boolean (from login response)
+    // 2. verificationStatus/verification_status string (from profile response)
+    VerificationStatus verificationStatus;
+    final isVerifiedBool = json['isVerified'] ?? json['is_verified'];
+    final verificationStatusStr = json['verificationStatus'] ?? json['verification_status'];
+    
+    if (isVerifiedBool == true) {
+      // If isVerified is true, pilot is approved
+      verificationStatus = VerificationStatus.approved;
+    } else if (verificationStatusStr != null) {
+      // Use the string value if available
+      verificationStatus = VerificationStatus.fromString(verificationStatusStr as String);
+    } else if (isVerifiedBool == false) {
+      // If explicitly false, pilot is pending
+      verificationStatus = VerificationStatus.pending;
+    } else {
+      // Default to pending
+      verificationStatus = VerificationStatus.pending;
+    }
+    
     return PilotModel(
       id: json['id'] as String,
-      name: json['name'] as String,
+      name: json['name'] as String? ?? '',
       phone: json['phone'] as String,
       email: json['email'] as String?,
       avatar: json['avatar'] as String?,
+      profilePhotoUrl: (json['profilePhotoUrl'] ?? json['profile_photo_url'] ?? json['avatar']) as String?,
+      emergencyContact: (json['emergencyContact'] ?? json['emergency_contact']) as String?,
       dateOfBirth: dateOfBirthStr != null
           ? DateTime.parse(dateOfBirthStr as String)
           : null,
@@ -60,9 +87,8 @@ class PilotModel {
       city: json['city'] as String?,
       state: json['state'] as String?,
       pincode: json['pincode'] as String?,
-      status: PilotStatus.fromString(json['status'] as String? ?? 'pending'),
-      verificationStatus: VerificationStatus.fromString(
-          json['verificationStatus'] ?? json['verification_status'] as String? ?? 'pending'),
+      status: PilotStatus.fromString(json['status'] as String? ?? 'active'),
+      verificationStatus: verificationStatus,
       isOnline: json['isOnline'] ?? json['is_online'] as bool? ?? false,
       rating: (json['rating'] as num?)?.toDouble(),
       totalRides: json['totalRides'] ?? json['total_rides'] as int? ?? 0,
@@ -82,6 +108,8 @@ class PilotModel {
       'phone': phone,
       'email': email,
       'avatar': avatar,
+      'profile_photo_url': profilePhotoUrl,
+      'emergency_contact': emergencyContact,
       'date_of_birth': dateOfBirth?.toIso8601String(),
       'age': age,
       'address': address,
@@ -98,12 +126,17 @@ class PilotModel {
     };
   }
 
+  /// Check if pilot is verified
+  bool get isVerified => verificationStatus == VerificationStatus.approved;
+
   PilotModel copyWith({
     String? id,
     String? name,
     String? phone,
     String? email,
     String? avatar,
+    String? profilePhotoUrl,
+    String? emergencyContact,
     DateTime? dateOfBirth,
     int? age,
     String? address,
@@ -124,6 +157,8 @@ class PilotModel {
       phone: phone ?? this.phone,
       email: email ?? this.email,
       avatar: avatar ?? this.avatar,
+      profilePhotoUrl: profilePhotoUrl ?? this.profilePhotoUrl,
+      emergencyContact: emergencyContact ?? this.emergencyContact,
       dateOfBirth: dateOfBirth ?? this.dateOfBirth,
       age: age ?? this.age,
       address: address ?? this.address,
@@ -168,9 +203,19 @@ enum VerificationStatus {
   const VerificationStatus(this.value);
 
   static VerificationStatus fromString(String value) {
-    return VerificationStatus.values.firstWhere(
-      (e) => e.value == value,
-      orElse: () => VerificationStatus.pending,
-    );
+    final lowerValue = value.toLowerCase();
+    
+    // Handle various formats from backend
+    if (lowerValue == 'approved' || lowerValue == 'verified') {
+      return VerificationStatus.approved;
+    }
+    if (lowerValue == 'in_review' || lowerValue == 'inreview' || lowerValue == 'in-review' || lowerValue == 'review') {
+      return VerificationStatus.inReview;
+    }
+    if (lowerValue == 'rejected' || lowerValue == 'declined') {
+      return VerificationStatus.rejected;
+    }
+    
+    return VerificationStatus.pending;
   }
 }

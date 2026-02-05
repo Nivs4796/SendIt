@@ -66,3 +66,29 @@ export const adminLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
 })
+
+// Payment verification - strict limit (5 attempts per 15 minutes)
+export const paymentVerifyLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // 5 verification attempts
+  message: {
+    success: false,
+    message: 'Too many payment verification attempts. Please try again later.',
+    code: ErrorCodes.RATE_LIMIT_EXCEEDED,
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+})
+
+// Payment order creation - moderate limit (20 per hour)
+export const paymentCreateLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 20, // 20 payment orders per hour
+  message: {
+    success: false,
+    message: 'Too many payment requests. Please try again later.',
+    code: ErrorCodes.RATE_LIMIT_EXCEEDED,
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+})

@@ -1,22 +1,52 @@
 /// Simple earnings model for dashboard
 class EarningsModel {
   final double totalEarnings;
+  final double tripEarnings;
+  final double bonusEarnings;
+  final double incentiveEarnings;
+  final double tipEarnings;
   final double totalHours;
   final int totalRides;
+  final double acceptanceRate;
+  final double completionRate;
+  final double? rating;
   final String? period;
 
   EarningsModel({
     required this.totalEarnings,
-    required this.totalHours,
-    required this.totalRides,
+    this.tripEarnings = 0,
+    this.bonusEarnings = 0,
+    this.incentiveEarnings = 0,
+    this.tipEarnings = 0,
+    this.totalHours = 0,
+    this.totalRides = 0,
+    this.acceptanceRate = 0,
+    this.completionRate = 0,
+    this.rating,
     this.period,
   });
 
   factory EarningsModel.fromJson(Map<String, dynamic> json) {
     return EarningsModel(
-      totalEarnings: (json['total_earnings'] as num?)?.toDouble() ?? 0.0,
-      totalHours: (json['total_hours'] as num?)?.toDouble() ?? 0.0,
-      totalRides: (json['total_rides'] as int?) ?? 0,
+      totalEarnings: (json['total_earnings'] as num?)?.toDouble() ?? 
+                     (json['totalEarnings'] as num?)?.toDouble() ?? 0.0,
+      tripEarnings: (json['trip_earnings'] as num?)?.toDouble() ??
+                    (json['tripEarnings'] as num?)?.toDouble() ?? 0.0,
+      bonusEarnings: (json['bonus_earnings'] as num?)?.toDouble() ??
+                     (json['bonusEarnings'] as num?)?.toDouble() ?? 0.0,
+      incentiveEarnings: (json['incentive_earnings'] as num?)?.toDouble() ??
+                         (json['incentiveEarnings'] as num?)?.toDouble() ?? 0.0,
+      tipEarnings: (json['tip_earnings'] as num?)?.toDouble() ??
+                   (json['tipEarnings'] as num?)?.toDouble() ?? 0.0,
+      totalHours: (json['total_hours'] as num?)?.toDouble() ??
+                  (json['totalHours'] as num?)?.toDouble() ?? 0.0,
+      totalRides: (json['total_rides'] as int?) ??
+                  (json['totalRides'] as int?) ?? 0,
+      acceptanceRate: (json['acceptance_rate'] as num?)?.toDouble() ??
+                      (json['acceptanceRate'] as num?)?.toDouble() ?? 0.0,
+      completionRate: (json['completion_rate'] as num?)?.toDouble() ??
+                      (json['completionRate'] as num?)?.toDouble() ?? 0.0,
+      rating: (json['rating'] as num?)?.toDouble(),
       period: json['period'] as String?,
     );
   }
@@ -25,7 +55,7 @@ class EarningsModel {
   String get hoursDisplay => '${totalHours.toStringAsFixed(1)}h';
 }
 
-/// Earnings summary model
+/// Earnings summary model (extended)
 class EarningsSummary {
   final double totalEarnings;
   final int totalRides;
@@ -98,7 +128,7 @@ class DailyEarning {
   }
 }
 
-/// Wallet model
+/// Wallet model (legacy - see wallet_repository.dart for newer version)
 class WalletModel {
   final String id;
   final String pilotId;
@@ -130,7 +160,7 @@ class WalletModel {
       '₹${availableBalance.toStringAsFixed(2)}';
 }
 
-/// Transaction model
+/// Transaction model (legacy)
 class TransactionModel {
   final String id;
   final String walletId;

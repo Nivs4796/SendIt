@@ -45,5 +45,23 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<!-- Location Permissions -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>SendIt needs your location to show nearby deliveries and navigate to pickup/drop locations.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>SendIt needs background location access to track your delivery progress even when the app is in background.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>SendIt needs background location access to track your delivery progress.</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>location</string>
+		<string>fetch</string>
+		<string>remote-notification</string>
+	</array>
+	<!-- Camera Permission -->
+	<key>NSCameraUsageDescription</key>
+	<string>SendIt needs camera access to take delivery photos and document uploads.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>SendIt needs photo library access to upload documents and delivery photos.</string>
 </dict>
 </plist>

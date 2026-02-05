@@ -277,7 +277,7 @@ export const getPilotDetails = async (pilotId: string) => {
     include: {
       vehicles: { include: { vehicleType: true } },
       documents: true,
-      bankAccount: true,
+      bankAccounts: true,
       bookings: {
         take: 10,
         orderBy: { createdAt: 'desc' },

@@ -200,6 +200,107 @@ class BookingCancelledData {
       'BookingCancelledData(bookingId: $bookingId, reason: $reason)';
 }
 
+/// Data class for search started event
+class SearchStartedData {
+  final String bookingId;
+  final String message;
+
+  SearchStartedData({
+    required this.bookingId,
+    required this.message,
+  });
+
+  factory SearchStartedData.fromJson(Map<String, dynamic> json) {
+    return SearchStartedData(
+      bookingId: json['bookingId'] ?? '',
+      message: json['message'] ?? 'Searching for drivers...',
+    );
+  }
+
+  @override
+  String toString() => 'SearchStartedData(bookingId: $bookingId)';
+}
+
+/// Data class for offer sent to pilot event
+class OfferSentData {
+  final String bookingId;
+  final int pilotNumber;
+  final String message;
+
+  OfferSentData({
+    required this.bookingId,
+    required this.pilotNumber,
+    required this.message,
+  });
+
+  factory OfferSentData.fromJson(Map<String, dynamic> json) {
+    return OfferSentData(
+      bookingId: json['bookingId'] ?? '',
+      pilotNumber: json['pilotNumber'] ?? 1,
+      message: json['message'] ?? 'Contacting driver...',
+    );
+  }
+
+  @override
+  String toString() =>
+      'OfferSentData(bookingId: $bookingId, pilotNumber: $pilotNumber)';
+}
+
+/// Data class for no pilots available event
+class NoPilotsData {
+  final String bookingId;
+  final String message;
+  final bool canRetry;
+  final bool canCancel;
+
+  NoPilotsData({
+    required this.bookingId,
+    required this.message,
+    this.canRetry = true,
+    this.canCancel = true,
+  });
+
+  factory NoPilotsData.fromJson(Map<String, dynamic> json) {
+    return NoPilotsData(
+      bookingId: json['bookingId'] ?? '',
+      message: json['message'] ?? 'No drivers available in your area',
+      canRetry: json['canRetry'] ?? true,
+      canCancel: json['canCancel'] ?? true,
+    );
+  }
+
+  @override
+  String toString() => 'NoPilotsData(bookingId: $bookingId, canRetry: $canRetry)';
+}
+
+/// Data class for search timeout event
+class SearchTimeoutData {
+  final String bookingId;
+  final String message;
+  final bool canRetry;
+  final bool canCancel;
+
+  SearchTimeoutData({
+    required this.bookingId,
+    required this.message,
+    this.canRetry = true,
+    this.canCancel = true,
+  });
+
+  factory SearchTimeoutData.fromJson(Map<String, dynamic> json) {
+    return SearchTimeoutData(
+      bookingId: json['bookingId'] ?? '',
+      message: json['message'] ?? 'Search timed out. All drivers are busy.',
+      canRetry: json['canRetry'] ?? true,
+      canCancel: json['canCancel'] ?? true,
+    );
+  }
+
+  @override
+  String toString() =>
+      'SearchTimeoutData(bookingId: $bookingId, canRetry: $canRetry)';
+}
+
 /// SocketService for real-time tracking and booking updates
 class SocketService extends GetxService {
   io.Socket? _socket;
@@ -223,6 +324,16 @@ class SocketService extends GetxService {
   final StreamController<BookingCancelledData> _bookingCancelledController =
       StreamController<BookingCancelledData>.broadcast();
 
+  // Assignment flow stream controllers
+  final StreamController<SearchStartedData> _searchStartedController =
+      StreamController<SearchStartedData>.broadcast();
+  final StreamController<OfferSentData> _offerSentController =
+      StreamController<OfferSentData>.broadcast();
+  final StreamController<NoPilotsData> _noPilotsController =
+      StreamController<NoPilotsData>.broadcast();
+  final StreamController<SearchTimeoutData> _searchTimeoutController =
+      StreamController<SearchTimeoutData>.broadcast();
+
   // Track joined rooms for reconnection
   final Set<String> _joinedRooms = {};
 
@@ -238,6 +349,14 @@ class SocketService extends GetxService {
       _bookingCompletedController.stream;
   Stream<BookingCancelledData> get bookingCancelledStream =>
       _bookingCancelledController.stream;
+
+  // Assignment flow streams
+  Stream<SearchStartedData> get searchStartedStream =>
+      _searchStartedController.stream;
+  Stream<OfferSentData> get offerSentStream => _offerSentController.stream;
+  Stream<NoPilotsData> get noPilotsStream => _noPilotsController.stream;
+  Stream<SearchTimeoutData> get searchTimeoutStream =>
+      _searchTimeoutController.stream;
 
   /// Connect to the socket server with authentication
   Future<void> connect() async {
@@ -327,8 +446,17 @@ class SocketService extends GetxService {
     _socket!.on('booking:status', _handleStatusUpdate);
     _socket!.on('booking:eta', _handleEtaUpdate);
     _socket!.on('booking:driver-assigned', _handleDriverAssigned);
+    _socket!.on('booking:driver_assigned', _handleDriverAssigned); // Also handle underscore version
     _socket!.on('booking:completed', _handleBookingCompleted);
     _socket!.on('booking:cancelled', _handleBookingCancelled);
+
+    // Assignment flow events
+    _socket!.on('booking:search_started', _handleSearchStarted);
+    _socket!.on('booking:offer_sent', _handleOfferSent);
+    _socket!.on('booking:offer_expired', _handleOfferExpired);
+    _socket!.on('booking:offer_declined', _handleOfferDeclined);
+    _socket!.on('booking:no_pilots', _handleNoPilots);
+    _socket!.on('booking:search_timeout', _handleSearchTimeout);
 
     // Acknowledgement events
     _socket!.on('room:joined', (data) {
@@ -420,6 +548,94 @@ class SocketService extends GetxService {
     }
   }
 
+  /// Handle search started event
+  void _handleSearchStarted(dynamic data) {
+    try {
+      print('[SocketService] Search started: $data');
+      final searchData = SearchStartedData.fromJson(
+        data is Map<String, dynamic> ? data : Map<String, dynamic>.from(data),
+      );
+      _searchStartedController.add(searchData);
+    } catch (e) {
+      print('[SocketService] Error parsing search started: $e');
+    }
+  }
+
+  /// Handle offer sent event
+  void _handleOfferSent(dynamic data) {
+    try {
+      print('[SocketService] Offer sent: $data');
+      final offerData = OfferSentData.fromJson(
+        data is Map<String, dynamic> ? data : Map<String, dynamic>.from(data),
+      );
+      _offerSentController.add(offerData);
+    } catch (e) {
+      print('[SocketService] Error parsing offer sent: $e');
+    }
+  }
+
+  /// Handle offer expired event (pilot didn't respond in time)
+  void _handleOfferExpired(dynamic data) {
+    try {
+      print('[SocketService] Offer expired: $data');
+      // Treat as implicit offer sent to next pilot - UI will show progress
+      final jsonData =
+          data is Map<String, dynamic> ? data : Map<String, dynamic>.from(data);
+      final offerData = OfferSentData(
+        bookingId: jsonData['bookingId'] ?? '',
+        pilotNumber: (jsonData['pilotNumber'] ?? 1) + 1,
+        message: 'Trying another driver...',
+      );
+      _offerSentController.add(offerData);
+    } catch (e) {
+      print('[SocketService] Error parsing offer expired: $e');
+    }
+  }
+
+  /// Handle offer declined event
+  void _handleOfferDeclined(dynamic data) {
+    try {
+      print('[SocketService] Offer declined: $data');
+      // Treat as implicit offer sent to next pilot - UI will show progress
+      final jsonData =
+          data is Map<String, dynamic> ? data : Map<String, dynamic>.from(data);
+      final offerData = OfferSentData(
+        bookingId: jsonData['bookingId'] ?? '',
+        pilotNumber: (jsonData['pilotNumber'] ?? 1) + 1,
+        message: 'Driver unavailable, trying another...',
+      );
+      _offerSentController.add(offerData);
+    } catch (e) {
+      print('[SocketService] Error parsing offer declined: $e');
+    }
+  }
+
+  /// Handle no pilots available event
+  void _handleNoPilots(dynamic data) {
+    try {
+      print('[SocketService] No pilots available: $data');
+      final noPilotsData = NoPilotsData.fromJson(
+        data is Map<String, dynamic> ? data : Map<String, dynamic>.from(data),
+      );
+      _noPilotsController.add(noPilotsData);
+    } catch (e) {
+      print('[SocketService] Error parsing no pilots: $e');
+    }
+  }
+
+  /// Handle search timeout event
+  void _handleSearchTimeout(dynamic data) {
+    try {
+      print('[SocketService] Search timeout: $data');
+      final timeoutData = SearchTimeoutData.fromJson(
+        data is Map<String, dynamic> ? data : Map<String, dynamic>.from(data),
+      );
+      _searchTimeoutController.add(timeoutData);
+    } catch (e) {
+      print('[SocketService] Error parsing search timeout: $e');
+    }
+  }
+
   /// Join a booking room for updates
   void joinBookingRoom(String bookingId) {
     if (bookingId.isEmpty) {
@@ -498,6 +714,12 @@ class SocketService extends GetxService {
     _driverAssignedController.close();
     _bookingCompletedController.close();
     _bookingCancelledController.close();
+
+    // Close assignment flow stream controllers
+    _searchStartedController.close();
+    _offerSentController.close();
+    _noPilotsController.close();
+    _searchTimeoutController.close();
 
     super.onClose();
   }

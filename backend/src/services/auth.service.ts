@@ -81,7 +81,11 @@ export const verifyUserOTP = async (
   phone: string,
   otp: string
 ): Promise<VerifyOTPResult> => {
-  // DEV MODE: Accept static OTP 111111 for testing (no SMS setup)
+  // ============================================
+  // DEVELOPMENT OTP BYPASS
+  // Static OTP: 111111 - ONLY works when NODE_ENV=development
+  // In production, actual SMS OTP is required
+  // ============================================
   const isDevOTP = config.nodeEnv === 'development' && otp === '111111'
   
   if (!isDevOTP) {
@@ -182,7 +186,11 @@ export const verifyPilotOTP = async (
   phone: string,
   otp: string
 ): Promise<VerifyOTPResult> => {
-  // DEV MODE: Accept static OTP 111111 for testing (no SMS setup)
+  // ============================================
+  // DEVELOPMENT OTP BYPASS
+  // Static OTP: 111111 - ONLY works when NODE_ENV=development
+  // In production, actual SMS OTP is required
+  // ============================================
   const isDevOTP = config.nodeEnv === 'development' && otp === '111111'
   
   if (!isDevOTP) {
@@ -212,8 +220,8 @@ export const verifyPilotOTP = async (
 
   // New pilot - return isNewUser: true, app will redirect to registration
   if (!pilot) {
-    // Generate temporary token for registration
-    const tempToken = generateToken({ phone, type: 'pilot_registration' })
+    // Generate temporary token for registration (use phone as id for temp token)
+    const tempToken = generateToken({ id: phone, type: 'pilot' })
     
     return {
       success: true,

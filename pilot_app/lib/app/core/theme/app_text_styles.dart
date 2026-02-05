@@ -103,6 +103,50 @@ class AppTextStyles {
     height: 1.3,
   );
 
+  // Display Styles (for large hero text)
+  static TextStyle get displayLarge => GoogleFonts.poppins(
+    fontSize: 36,
+    fontWeight: FontWeight.bold,
+    color: AppColors.textPrimary,
+    height: 1.2,
+  );
+
+  static TextStyle get displayMedium => GoogleFonts.poppins(
+    fontSize: 32,
+    fontWeight: FontWeight.bold,
+    color: AppColors.textPrimary,
+    height: 1.2,
+  );
+
+  static TextStyle get displaySmall => GoogleFonts.poppins(
+    fontSize: 28,
+    fontWeight: FontWeight.bold,
+    color: AppColors.textPrimary,
+    height: 1.2,
+  );
+
+  // Title Styles (for section headers)
+  static TextStyle get titleLarge => GoogleFonts.poppins(
+    fontSize: 20,
+    fontWeight: FontWeight.w600,
+    color: AppColors.textPrimary,
+    height: 1.3,
+  );
+
+  static TextStyle get titleMedium => GoogleFonts.poppins(
+    fontSize: 16,
+    fontWeight: FontWeight.w600,
+    color: AppColors.textPrimary,
+    height: 1.3,
+  );
+
+  static TextStyle get titleSmall => GoogleFonts.poppins(
+    fontSize: 14,
+    fontWeight: FontWeight.w600,
+    color: AppColors.textPrimary,
+    height: 1.3,
+  );
+
   // Price
   static TextStyle get price => GoogleFonts.poppins(
     fontSize: 16,

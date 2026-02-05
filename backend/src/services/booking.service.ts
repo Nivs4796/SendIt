@@ -9,6 +9,8 @@ import {
 import { BookingStatus, PaymentMethod, PackageType } from '@prisma/client'
 import { emitToBooking, emitToUser, emitToAdmin } from '../socket'
 import { BookingStatusPayload, DashboardStatsPayload } from '../socket/types'
+import { startAssignment, cancelAssignment } from './assignment-queue.service'
+import logger from '../config/logger'
 
 interface CreateBookingInput {
   userId: string
@@ -154,8 +156,19 @@ export const createBooking = async (input: CreateBookingInput) => {
     },
   })
 
-  // TODO: Send notification to nearby pilots
-  // TODO: Send confirmation to user
+  // Start automatic pilot assignment
+  // This runs asynchronously - don't await
+  startAssignment(booking.id).catch(error => {
+    logger.error(`Failed to start assignment for booking ${booking.id}:`, error)
+  })
+
+  // Emit booking created event to user
+  emitToUser(userId, 'booking:created', {
+    bookingId: booking.id,
+    bookingNumber: booking.bookingNumber,
+    status: booking.status,
+    message: 'Booking created! Finding a driver...',
+  })
 
   return booking
 }
@@ -487,6 +500,9 @@ export const cancelBooking = async (
 
   // Update admin dashboard
   broadcastDashboardStats()
+
+  // Cancel any ongoing assignment process
+  cancelAssignment(bookingId)
 
   return updatedBooking
 }

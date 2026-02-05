@@ -76,6 +76,7 @@ class _JobOfferPopupState extends State<JobOfferPopup>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return PopScope(
       canPop: false, // Prevent back button
       child: Dialog(
@@ -84,11 +85,11 @@ class _JobOfferPopupState extends State<JobOfferPopup>
         child: Container(
           constraints: const BoxConstraints(maxWidth: 400),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: theme.cardColor,
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.2),
+                color: Colors.black.withValues(alpha: theme.brightness == Brightness.dark ? 0.4 : 0.2),
                 blurRadius: 20,
                 offset: const Offset(0, 10),
               ),
@@ -98,29 +99,29 @@ class _JobOfferPopupState extends State<JobOfferPopup>
             mainAxisSize: MainAxisSize.min,
             children: [
               // Timer Header
-              _buildTimerHeader(),
-              
+              _buildTimerHeader(context),
+
               // Job Details
               Padding(
                 padding: const EdgeInsets.all(20),
                 child: Column(
                   children: [
                     // Fare & Distance
-                    _buildFareSection(),
-                    
+                    _buildFareSection(context),
+
                     const SizedBox(height: 20),
-                    
+
                     // Pickup & Drop
-                    _buildAddressSection(),
-                    
+                    _buildAddressSection(context),
+
                     const SizedBox(height: 20),
-                    
+
                     // Package Type
                     if (widget.offer.packageType != null)
-                      _buildPackageInfo(),
-                    
+                      _buildPackageInfo(context),
+
                     const SizedBox(height: 24),
-                    
+
                     // Action Buttons
                     _buildActionButtons(),
                   ],
@@ -133,14 +134,20 @@ class _JobOfferPopupState extends State<JobOfferPopup>
     );
   }
 
-  Widget _buildTimerHeader() {
+  Widget _buildTimerHeader(BuildContext context) {
+    final theme = Theme.of(context);
     final isUrgent = _remainingSeconds <= 10;
-    
+    final errorColor = theme.brightness == Brightness.dark
+        ? const Color(0xFFF87171)
+        : Colors.red.shade500;
+    final headerColor = isUrgent ? errorColor : theme.colorScheme.primary;
+    final onHeaderColor = theme.colorScheme.onPrimary;
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 16),
       decoration: BoxDecoration(
-        color: isUrgent ? Colors.red.shade500 : AppColors.primary,
+        color: headerColor,
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(20),
           topRight: Radius.circular(20),
@@ -151,7 +158,7 @@ class _JobOfferPopupState extends State<JobOfferPopup>
           Text(
             'NEW JOB REQUEST',
             style: AppTextStyles.labelMedium.copyWith(
-              color: Colors.white.withValues(alpha: 0.8),
+              color: onHeaderColor.withValues(alpha: 0.8),
               letterSpacing: 1.2,
             ),
           ),
@@ -164,22 +171,22 @@ class _JobOfferPopupState extends State<JobOfferPopup>
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.2),
+                    color: onHeaderColor.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(30),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.timer,
-                        color: Colors.white,
+                        color: onHeaderColor,
                         size: 20,
                       ),
                       const SizedBox(width: 8),
                       Text(
                         '${_remainingSeconds}s',
                         style: AppTextStyles.h2.copyWith(
-                          color: Colors.white,
+                          color: onHeaderColor,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -194,36 +201,45 @@ class _JobOfferPopupState extends State<JobOfferPopup>
     );
   }
 
-  Widget _buildFareSection() {
+  Widget _buildFareSection(BuildContext context) {
+    final theme = Theme.of(context);
+    final infoColor = theme.brightness == Brightness.dark
+        ? const Color(0xFF60A5FA)
+        : Colors.blue;
+
     return Row(
       children: [
         Expanded(
           child: _buildInfoCard(
+            context,
             icon: Icons.currency_rupee,
             label: 'Fare',
             value: '₹${widget.offer.fare.toStringAsFixed(0)}',
-            color: AppColors.primary,
+            color: theme.colorScheme.primary,
           ),
         ),
         const SizedBox(width: 12),
         Expanded(
           child: _buildInfoCard(
+            context,
             icon: Icons.route,
             label: 'Distance',
             value: '${widget.offer.distance.toStringAsFixed(1)} km',
-            color: Colors.blue,
+            color: infoColor,
           ),
         ),
       ],
     );
   }
 
-  Widget _buildInfoCard({
+  Widget _buildInfoCard(
+    BuildContext context, {
     required IconData icon,
     required String label,
     required String value,
     required Color color,
   }) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -245,7 +261,7 @@ class _JobOfferPopupState extends State<JobOfferPopup>
           Text(
             label,
             style: AppTextStyles.bodySmall.copyWith(
-              color: Colors.grey.shade600,
+              color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
         ],
@@ -253,30 +269,40 @@ class _JobOfferPopupState extends State<JobOfferPopup>
     );
   }
 
-  Widget _buildAddressSection() {
+  Widget _buildAddressSection(BuildContext context) {
+    final theme = Theme.of(context);
+    final successColor = theme.brightness == Brightness.dark
+        ? const Color(0xFF34D399)
+        : Colors.green;
+    final errorColor = theme.brightness == Brightness.dark
+        ? const Color(0xFFF87171)
+        : Colors.red;
+
     return Column(
       children: [
         // Pickup
         _buildAddressRow(
+          context,
           icon: Icons.radio_button_checked,
-          color: Colors.green,
+          color: successColor,
           address: widget.offer.pickupAddress.address,
           label: 'Pickup',
         ),
-        
+
         // Dotted line connector
         Container(
           margin: const EdgeInsets.only(left: 11),
           height: 24,
           child: CustomPaint(
-            painter: _DottedLinePainter(),
+            painter: _DottedLinePainter(color: theme.dividerColor),
           ),
         ),
-        
+
         // Drop
         _buildAddressRow(
+          context,
           icon: Icons.location_on,
-          color: Colors.red,
+          color: errorColor,
           address: widget.offer.dropAddress.address,
           label: 'Drop',
         ),
@@ -284,12 +310,14 @@ class _JobOfferPopupState extends State<JobOfferPopup>
     );
   }
 
-  Widget _buildAddressRow({
+  Widget _buildAddressRow(
+    BuildContext context, {
     required IconData icon,
     required Color color,
     required String address,
     required String label,
   }) {
+    final theme = Theme.of(context);
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -302,13 +330,14 @@ class _JobOfferPopupState extends State<JobOfferPopup>
               Text(
                 label,
                 style: AppTextStyles.labelSmall.copyWith(
-                  color: Colors.grey.shade500,
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
               Text(
                 address,
                 style: AppTextStyles.bodyMedium.copyWith(
                   fontWeight: FontWeight.w500,
+                  color: theme.colorScheme.onSurface,
                 ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
@@ -320,22 +349,23 @@ class _JobOfferPopupState extends State<JobOfferPopup>
     );
   }
 
-  Widget _buildPackageInfo() {
+  Widget _buildPackageInfo(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.grey.shade100,
+        color: theme.colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
         children: [
-          Icon(Icons.inventory_2_outlined, color: Colors.grey.shade600, size: 20),
+          Icon(Icons.inventory_2_outlined, color: theme.colorScheme.onSurfaceVariant, size: 20),
           const SizedBox(width: 8),
           Text(
             widget.offer.packageType!,
             style: AppTextStyles.bodyMedium.copyWith(
-              color: Colors.grey.shade700,
+              color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
         ],
@@ -381,10 +411,14 @@ class _JobOfferPopupState extends State<JobOfferPopup>
 
 /// Painter for dotted line between pickup and drop
 class _DottedLinePainter extends CustomPainter {
+  final Color color;
+
+  _DottedLinePainter({required this.color});
+
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.grey.shade400
+      ..color = color
       ..strokeWidth = 2
       ..strokeCap = StrokeCap.round;
 

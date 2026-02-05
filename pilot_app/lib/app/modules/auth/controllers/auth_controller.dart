@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import '../../../data/models/pilot_model.dart';
 import '../../../data/repositories/auth_repository.dart';
 import '../../../routes/app_routes.dart';
+import '../../../services/notification_service.dart';
 
 class AuthController extends GetxController {
   late AuthRepository _authRepository;
@@ -145,6 +146,14 @@ class AuthController extends GetxController {
         } else {
           currentPilot.value = pilot;
           
+          // Register FCM token with server
+          try {
+            final notificationService = Get.find<NotificationService>();
+            await notificationService.registerTokenAfterLogin();
+          } catch (e) {
+            debugPrint('FCM token registration failed: $e');
+          }
+          
           // Existing pilot - check verification status
           if (pilot.verificationStatus == VerificationStatus.approved) {
             Get.offAllNamed(Routes.home);
@@ -212,6 +221,14 @@ class AuthController extends GetxController {
 
   /// Logout
   Future<void> logout() async {
+    // Clear FCM token from server
+    try {
+      final notificationService = Get.find<NotificationService>();
+      await notificationService.clearTokenOnLogout();
+    } catch (e) {
+      debugPrint('FCM token clear failed: $e');
+    }
+    
     await _authRepository.logout();
     currentPilot.value = null;
     phone.value = '';

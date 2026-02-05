@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -10,6 +11,7 @@ import '../../../data/providers/api_exceptions.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../routes/app_routes.dart';
 import '../../../services/storage_service.dart';
+import '../../../services/notification_service.dart';
 
 class AuthController extends GetxController {
   final AuthRepository _authRepository = AuthRepository();
@@ -125,6 +127,14 @@ class AuthController extends GetxController {
 
       if (response.success && response.data != null) {
         currentUser.value = response.data;
+
+        // Register FCM token with server
+        try {
+          final notificationService = Get.find<NotificationService>();
+          await notificationService.registerTokenAfterLogin();
+        } catch (e) {
+          debugPrint('FCM token registration failed: $e');
+        }
 
         // Check if profile is complete
         if (response.data!.name == null || response.data!.name!.isEmpty) {
@@ -357,7 +367,15 @@ class AuthController extends GetxController {
   }
 
   // Logout
-  void logout() {
+  Future<void> logout() async {
+    // Clear FCM token from server
+    try {
+      final notificationService = Get.find<NotificationService>();
+      await notificationService.clearTokenOnLogout();
+    } catch (e) {
+      debugPrint('FCM token clear failed: $e');
+    }
+    
     _authRepository.logout();
     currentUser.value = null;
     phone.value = '';

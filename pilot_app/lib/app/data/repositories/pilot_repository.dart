@@ -1,4 +1,6 @@
-import 'package:get/get.dart';
+import 'dart:io';
+import 'package:dio/dio.dart';
+import 'package:get/get.dart' hide Response, FormData, MultipartFile;
 
 import '../models/pilot_model.dart';
 import '../models/earnings_model.dart';
@@ -184,20 +186,11 @@ class PilotRepository {
   }
 
   /// Update pilot profile
-  Future<Map<String, dynamic>> updateProfile({
-    String? name,
-    String? email,
-    String? avatar,
-  }) async {
+  Future<Map<String, dynamic>> updateProfile(Map<String, dynamic> updates) async {
     try {
-      final data = <String, dynamic>{};
-      if (name != null) data['name'] = name;
-      if (email != null) data['email'] = email;
-      if (avatar != null) data['avatar'] = avatar;
-
       final response = await _api.patch(
         ApiConstants.pilotProfile,
-        data: data,
+        data: updates,
       );
 
       if (response.statusCode == 200 && response.data['success'] == true) {
@@ -223,6 +216,66 @@ class PilotRepository {
       return {
         'success': false,
         'message': 'Failed to update profile',
+      };
+    }
+  }
+
+  /// Upload profile photo
+  Future<Map<String, dynamic>> uploadProfilePhoto(File photo) async {
+    try {
+      final formData = FormData.fromMap({
+        'photo': await MultipartFile.fromFile(
+          photo.path,
+          filename: photo.path.split('/').last,
+        ),
+      });
+
+      final response = await _api.uploadFile(
+        ApiConstants.pilotProfilePhoto,
+        formData: formData,
+      );
+
+      if (response.data['success'] == true) {
+        return {
+          'success': true,
+          'photoUrl': response.data['data']['url'],
+        };
+      }
+
+      return {
+        'success': false,
+        'message': response.data['message'] ?? 'Failed to upload photo',
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Failed to upload photo',
+      };
+    }
+  }
+
+  /// Delete pilot account
+  Future<Map<String, dynamic>> deleteAccount() async {
+    try {
+      final response = await _api.delete(ApiConstants.pilotProfile);
+
+      if (response.statusCode == 200) {
+        return {'success': true};
+      }
+
+      return {
+        'success': false,
+        'message': response.data['message'] ?? 'Failed to delete account',
+      };
+    } on ApiException catch (e) {
+      return {
+        'success': false,
+        'message': e.message,
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Failed to delete account',
       };
     }
   }

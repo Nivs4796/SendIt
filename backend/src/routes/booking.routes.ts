@@ -180,6 +180,30 @@ router.post('/:id/cancel', authenticate, authorizeUser, validate(cancelBookingSc
 
 /**
  * @swagger
+ * /bookings/{id}/retry-assignment:
+ *   post:
+ *     summary: Retry driver assignment for a booking
+ *     tags: [Bookings]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Assignment retry started
+ *       400:
+ *         description: Cannot retry assignment
+ *       404:
+ *         description: Booking not found
+ */
+router.post('/:id/retry-assignment', authenticate, authorizeUser, validate(bookingIdParamSchema), bookingController.retryAssignment)
+
+/**
+ * @swagger
  * /bookings/{id}/accept:
  *   post:
  *     summary: Pilot accepts a booking

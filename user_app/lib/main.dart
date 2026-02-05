@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 import 'app/core/controllers/theme_controller.dart';
 import 'app/core/theme/app_theme.dart';
@@ -10,10 +11,15 @@ import 'app/services/storage_service.dart';
 import 'app/services/location_service.dart';
 import 'app/services/socket_service.dart';
 import 'app/services/maps_service.dart';
+import 'app/services/razorpay_service.dart';
 import 'app/services/payment_service.dart';
+import 'app/services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Firebase
+  await Firebase.initializeApp();
 
   // Initialize GetStorage
   await GetStorage.init();
@@ -55,8 +61,14 @@ Future<void> initServices() async {
   // MapsService for map-related operations
   Get.put(MapsService());
 
-  // PaymentService for payment processing
+  // RazorpayService for Razorpay payment gateway
+  Get.put(RazorpayService());
+
+  // PaymentService for payment processing (depends on RazorpayService)
   Get.put(PaymentService());
+
+  // NotificationService for push notifications
+  Get.put(NotificationService());
 }
 
 class SendItApp extends StatelessWidget {

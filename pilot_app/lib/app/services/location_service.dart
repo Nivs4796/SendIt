@@ -64,9 +64,12 @@ class LocationService extends GetxService {
   // Callback for location updates
   Function(LocationData)? onLocationUpdate;
 
-  /// Initialize service
+  /// Initialize service (non-blocking)
   Future<LocationService> init() async {
-    await checkPermission();
+    // Don't await permission request during startup - let UI handle it
+    checkPermission().catchError((e) {
+      // Silently handle error - will request permission when needed
+    });
     return this;
   }
 

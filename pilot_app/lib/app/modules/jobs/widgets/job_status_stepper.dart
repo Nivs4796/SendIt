@@ -39,36 +39,42 @@ class JobStatusStepper extends StatelessWidget {
     final steps = _getSteps();
     final currentIndex = _getCurrentStepIndex();
 
-    return Row(
-      children: List.generate(steps.length * 2 - 1, (index) {
-        if (index.isOdd) {
-          // Connector line
-          final stepIndex = index ~/ 2;
-          final isCompleted = stepIndex < currentIndex;
-          
-          return Expanded(
-            child: Container(
-              height: 3,
-              color: isCompleted 
-                  ? AppColors.primary 
-                  : Colors.grey.shade300,
-            ),
-          );
-        }
-        
-        // Step circle
-        final stepIndex = index ~/ 2;
-        final step = steps[stepIndex];
-        final isCompleted = stepIndex < currentIndex;
-        final isCurrent = stepIndex == currentIndex;
-        
-        return _buildStep(
-          icon: step.icon,
-          label: step.label,
-          isCompleted: isCompleted,
-          isCurrent: isCurrent,
-        );
-      }),
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minWidth: 340),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: List.generate(steps.length * 2 - 1, (index) {
+            if (index.isOdd) {
+              // Connector line
+              final stepIndex = index ~/ 2;
+              final isCompleted = stepIndex < currentIndex;
+              
+              return Container(
+                width: 24,
+                height: 3,
+                color: isCompleted 
+                    ? AppColors.primary 
+                    : Colors.grey.shade300,
+              );
+            }
+            
+            // Step circle
+            final stepIndex = index ~/ 2;
+            final step = steps[stepIndex];
+            final isCompleted = stepIndex < currentIndex;
+            final isCurrent = stepIndex == currentIndex;
+            
+            return _buildStep(
+              icon: step.icon,
+              label: step.label,
+              isCompleted: isCompleted,
+              isCurrent: isCurrent,
+            );
+          }),
+        ),
+      ),
     );
   }
 
@@ -96,8 +102,8 @@ class JobStatusStepper extends StatelessWidget {
       children: [
         AnimatedContainer(
           duration: const Duration(milliseconds: 300),
-          width: isCurrent ? 44 : 36,
-          height: isCurrent ? 44 : 36,
+          width: isCurrent ? 40 : 32,
+          height: isCurrent ? 40 : 32,
           decoration: BoxDecoration(
             color: backgroundColor,
             shape: BoxShape.circle,
@@ -115,12 +121,12 @@ class JobStatusStepper extends StatelessWidget {
           child: Icon(
             isCompleted ? Icons.check : icon,
             color: iconColor,
-            size: isCurrent ? 22 : 18,
+            size: isCurrent ? 20 : 16,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
         SizedBox(
-          width: 60,
+          width: 52,
           child: Text(
             label,
             style: AppTextStyles.caption.copyWith(
@@ -128,6 +134,7 @@ class JobStatusStepper extends StatelessWidget {
                   ? AppColors.primary 
                   : (isCompleted ? Colors.grey.shade700 : Colors.grey.shade500),
               fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal,
+              fontSize: 10,
             ),
             textAlign: TextAlign.center,
             maxLines: 2,

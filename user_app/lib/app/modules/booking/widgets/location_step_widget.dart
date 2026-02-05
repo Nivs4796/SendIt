@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/map_location_picker.dart';
 import '../../../routes/app_routes.dart';
 import '../controllers/booking_controller.dart';
 
@@ -163,7 +164,7 @@ class LocationStepWidget extends GetView<BookingController> {
             iconColor: theme.colorScheme.primary,
             addressObservable: controller.pickupAddress,
             showCurrentButton: true,
-            onTap: () => Get.toNamed(Routes.pickupLocation, arguments: {'isPickup': true}),
+            onTap: () => _showLocationPicker(context, isPickup: true),
             onCurrentPressed: controller.useCurrentLocationAsPickup,
           ),
 
@@ -177,7 +178,7 @@ class LocationStepWidget extends GetView<BookingController> {
             iconColor: theme.colorScheme.error,
             addressObservable: controller.dropAddress,
             showCurrentButton: false,
-            onTap: () => Get.toNamed(Routes.dropLocation, arguments: {'isPickup': false}),
+            onTap: () => _showLocationPicker(context, isPickup: false),
           ),
         ],
       ),
@@ -326,5 +327,147 @@ class LocationStepWidget extends GetView<BookingController> {
   String _truncateAddress(String address) {
     if (address.length <= 20) return address;
     return '${address.substring(0, 20)}...';
+  }
+
+  /// Shows bottom sheet with location selection options
+  void _showLocationPicker(BuildContext context, {required bool isPickup}) {
+    final theme = Theme.of(context);
+    final title = isPickup ? 'Select Pickup Location' : 'Select Drop Location';
+
+    Get.bottomSheet(
+      Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: theme.cardColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Handle
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: theme.dividerColor,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // Title
+            Text(
+              title,
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // Option 1: Choose on Map
+            _buildLocationOption(
+              context: context,
+              icon: Icons.map_rounded,
+              title: 'Choose on Map',
+              subtitle: 'Pin exact location on map',
+              onTap: () {
+                Get.back(); // Close bottom sheet
+                controller.openMapPicker(isPickup: isPickup);
+              },
+            ),
+
+            const SizedBox(height: 12),
+
+            // Option 2: Saved Addresses
+            _buildLocationOption(
+              context: context,
+              icon: Icons.bookmark_rounded,
+              title: 'Saved Addresses',
+              subtitle: 'Select from your saved locations',
+              onTap: () {
+                Get.back(); // Close bottom sheet
+                if (isPickup) {
+                  Get.toNamed(Routes.pickupLocation, arguments: {'isPickup': true});
+                } else {
+                  Get.toNamed(Routes.dropLocation, arguments: {'isPickup': false});
+                }
+              },
+            ),
+
+            SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
+          ],
+        ),
+      ),
+      isScrollControlled: true,
+    );
+  }
+
+  /// Builds a location option tile for the bottom sheet
+  Widget _buildLocationOption({
+    required BuildContext context,
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
+    final theme = Theme.of(context);
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            border: Border.all(color: theme.dividerColor),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  icon,
+                  color: theme.colorScheme.primary,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    Text(
+                      subtitle,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.hintColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.chevron_right_rounded,
+                color: theme.hintColor,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

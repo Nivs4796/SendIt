@@ -369,18 +369,24 @@ class TrackingView extends GetView<TrackingController> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: AppColors.infoLight,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Icon(
-                        Icons.route_rounded,
-                        color: AppColors.info,
-                        size: 24,
-                      ),
-                    ),
+                    Builder(builder: (context) {
+                      final theme = Theme.of(context);
+                      final infoColor = theme.brightness == Brightness.dark
+                          ? const Color(0xFF60A5FA)
+                          : AppColors.info;
+                      return Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: infoColor.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(
+                          Icons.route_rounded,
+                          color: infoColor,
+                          size: 24,
+                        ),
+                      );
+                    }),
                     const SizedBox(width: 8),
                     Flexible(
                       child: Column(
@@ -446,21 +452,27 @@ class TrackingView extends GetView<TrackingController> {
             // Status header
             Row(
               children: [
-                Container(
-                  width: 12,
-                  height: 12,
-                  decoration: BoxDecoration(
-                    color: AppColors.success,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.success.withValues(alpha: 0.4),
-                        blurRadius: 8,
-                        spreadRadius: 2,
-                      ),
-                    ],
-                  ),
-                ),
+                Builder(builder: (context) {
+                  final theme = Theme.of(context);
+                  final successColor = theme.brightness == Brightness.dark
+                      ? const Color(0xFF34D399)
+                      : AppColors.success;
+                  return Container(
+                    width: 12,
+                    height: 12,
+                    decoration: BoxDecoration(
+                      color: successColor,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: successColor.withValues(alpha: 0.4),
+                          blurRadius: 8,
+                          spreadRadius: 2,
+                        ),
+                      ],
+                    ),
+                  );
+                }),
                 const SizedBox(width: 10),
                 Text(
                   booking.statusDisplay,
@@ -661,20 +673,26 @@ class TrackingView extends GetView<TrackingController> {
             ),
 
             // Call button
-            Container(
-              decoration: BoxDecoration(
-                color: AppColors.successLight,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: IconButton(
-                onPressed: controller.callDriver,
-                icon: const Icon(
-                  Icons.call_rounded,
-                  color: AppColors.success,
+            Builder(builder: (context) {
+              final theme = Theme.of(context);
+              final successColor = theme.brightness == Brightness.dark
+                  ? const Color(0xFF34D399)
+                  : AppColors.success;
+              return Container(
+                decoration: BoxDecoration(
+                  color: successColor.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                tooltip: 'Call Driver',
-              ),
-            ),
+                child: IconButton(
+                  onPressed: controller.callDriver,
+                  icon: Icon(
+                    Icons.call_rounded,
+                    color: successColor,
+                  ),
+                  tooltip: 'Call Driver',
+                ),
+              );
+            }),
             const SizedBox(width: 8),
 
             // Chat button

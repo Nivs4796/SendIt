@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express'
 import * as bookingService from '../services/booking.service'
+import { retryAssignment as retryAssignmentService } from '../services/assignment-queue.service'
 import { formatResponse } from '../utils/helpers'
 import { BookingStatus } from '@prisma/client'
 
@@ -180,6 +181,43 @@ export const cancelBooking = async (
     const booking = await bookingService.cancelBooking(id, userId, reason || 'User cancelled')
 
     res.status(200).json(formatResponse(true, 'Booking cancelled', { booking }))
+  } catch (error) {
+    next(error)
+  }
+}
+
+// Retry driver assignment (User)
+export const retryAssignment = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const bookingId = getParamAsString(req.params.id)
+    const userId = req.user!.id
+
+    // Verify the booking belongs to this user and is in PENDING status
+    const booking = await bookingService.getBookingById(bookingId)
+
+    if (!booking) {
+      res.status(404).json(formatResponse(false, 'Booking not found'))
+      return
+    }
+
+    if (booking.userId !== userId) {
+      res.status(403).json(formatResponse(false, 'Access denied'))
+      return
+    }
+
+    if (booking.status !== BookingStatus.PENDING) {
+      res.status(400).json(formatResponse(false, 'Can only retry assignment for pending bookings'))
+      return
+    }
+
+    // Start the retry process
+    await retryAssignmentService(bookingId)
+
+    res.status(200).json(formatResponse(true, 'Assignment retry started'))
   } catch (error) {
     next(error)
   }

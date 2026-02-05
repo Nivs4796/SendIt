@@ -3,9 +3,11 @@ import 'package:get/get.dart';
 import '../../../data/models/wallet_model.dart';
 import '../../../data/repositories/wallet_repository.dart';
 import '../../../data/providers/api_exceptions.dart';
+import '../../../services/payment_service.dart';
 
 class WalletController extends GetxController {
   final WalletRepository _walletRepository = WalletRepository();
+  late final PaymentService _paymentService;
 
   // Observable state
   final balance = 0.0.obs;
@@ -31,13 +33,16 @@ class WalletController extends GetxController {
   late TextEditingController amountController;
   final List<int> predefinedAmounts = [100, 200, 500, 1000, 2000, 5000];
 
+  // Payment mode selection
+  final RxBool useRazorpay = true.obs; // Default to Razorpay for real payments
+
   // Getters for formatted display
   String get balanceDisplay => _formatCurrency(balance.value);
   String get totalCreditsDisplay => _formatCurrency(totalCredits.value);
   String get totalDebitsDisplay => _formatCurrency(totalDebits.value);
 
   String _formatCurrency(double amount) {
-    return '\u20B9${amount.toStringAsFixed(2).replaceAllMapped(
+    return '₹${amount.toStringAsFixed(2).replaceAllMapped(
           RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
           (Match m) => '${m[1]},',
         )}';
@@ -47,6 +52,7 @@ class WalletController extends GetxController {
   void onInit() {
     super.onInit();
     amountController = TextEditingController();
+    _paymentService = Get.find<PaymentService>();
     refreshAll();
   }
 
@@ -213,7 +219,12 @@ class WalletController extends GetxController {
     amountController.text = amount.toString();
   }
 
-  /// Add money to wallet
+  /// Toggle payment mode (Razorpay vs Simulated)
+  void togglePaymentMode() {
+    useRazorpay.value = !useRazorpay.value;
+  }
+
+  /// Add money to wallet - routes to appropriate method based on mode
   Future<void> addMoney() async {
     final amountText = amountController.text.trim();
 
@@ -229,15 +240,83 @@ class WalletController extends GetxController {
     }
 
     if (amount < 1) {
-      errorMessage.value = 'Minimum amount is \u20B91';
+      errorMessage.value = 'Minimum amount is ₹1';
       return;
     }
 
     if (amount > 100000) {
-      errorMessage.value = 'Maximum amount is \u20B91,00,000';
+      errorMessage.value = 'Maximum amount is ₹1,00,000';
       return;
     }
 
+    if (useRazorpay.value) {
+      await _addMoneyViaRazorpay(amount);
+    } else {
+      await _addMoneySimulated(amount);
+    }
+  }
+
+  /// Add money via Razorpay payment gateway
+  Future<void> _addMoneyViaRazorpay(double amount) async {
+    try {
+      isAddingMoney.value = true;
+      errorMessage.value = '';
+
+      // Close bottom sheet first
+      Get.back();
+
+      final result = await _paymentService.addMoneyViaRazorpay(amount: amount);
+
+      if (result['success'] == true) {
+        // Update balance from response
+        balance.value = result['balance'] as double;
+
+        // Clear form
+        amountController.clear();
+
+        // Show success message
+        Get.snackbar(
+          'Success',
+          '₹${(result['amountAdded'] as double).toStringAsFixed(2)} added to wallet',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+          duration: const Duration(seconds: 3),
+        );
+
+        // Refresh transactions to show the new one
+        fetchTransactions(refresh: true);
+      } else {
+        final error = result['error'] as String? ?? 'Payment failed';
+        errorMessage.value = error;
+
+        // Don't show error snackbar if payment was cancelled
+        if (!error.toLowerCase().contains('cancelled')) {
+          Get.snackbar(
+            'Payment Failed',
+            error,
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+          );
+        }
+      }
+    } catch (e) {
+      errorMessage.value = 'Something went wrong';
+      Get.snackbar(
+        'Error',
+        'Something went wrong',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } finally {
+      isAddingMoney.value = false;
+    }
+  }
+
+  /// Add money using simulated payment (for testing)
+  Future<void> _addMoneySimulated(double amount) async {
     try {
       isAddingMoney.value = true;
       errorMessage.value = '';

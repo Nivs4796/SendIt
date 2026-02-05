@@ -17,19 +17,24 @@ model User {
   email         String?   @unique
   name          String?
   avatar        String?
-  walletBalance Float     @default(0)
+  walletBalance Decimal   @default(0) @db.Decimal(10, 2)
   isVerified    Boolean   @default(false)
   isActive      Boolean   @default(true)
+  fcmToken      String?   // Firebase Cloud Messaging token
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
   // Relations
-  addresses     Address[]
-  bookings      Booking[]
-  reviews       Review[]
-  notifications Notification[]
-  otps          OTP[]
+  addresses           Address[]
+  bookings            Booking[]
+  reviews             Review[]
+  notifications       Notification[]
+  otps                OTP[]
+  supportTickets      SupportTicket[]
+  walletTransactions  WalletTransaction[]
 
+  @@index([isActive])
+  @@index([createdAt])
   @@map("users")
 }
 
@@ -61,7 +66,10 @@ model Pilot {
   // Stats
   totalDeliveries Int         @default(0)
   rating          Float       @default(0)
-  totalEarnings   Float       @default(0)
+  totalEarnings   Decimal     @default(0) @db.Decimal(10, 2)
+
+  // Push Notifications
+  fcmToken        String?     // Firebase Cloud Messaging token
 
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
@@ -74,8 +82,13 @@ model Pilot {
   documents       Document[]
   notifications   Notification[]
   otps            OTP[]
-  bankAccount     BankAccount?
+  bankAccounts    BankAccount[]
+  supportTickets  SupportTicket[]
 
+  @@index([status])
+  @@index([isActive])
+  @@index([isOnline])
+  @@index([createdAt])
   @@map("pilots")
 }
 
@@ -129,8 +142,8 @@ model VehicleType {
   description     String?
   icon            String?
   maxWeight       Float     // in KG
-  basePrice       Float     // Base fare
-  pricePerKm      Float     // Per km charge
+  basePrice       Decimal   @db.Decimal(10, 2)
+  pricePerKm      Decimal   @db.Decimal(10, 2)
   isActive        Boolean   @default(true)
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
@@ -185,11 +198,11 @@ model Booking {
 
   // Pricing
   distance          Float         // in KM
-  baseFare          Float
-  distanceFare      Float
-  taxes             Float         @default(0)
-  discount          Float         @default(0)
-  totalAmount       Float
+  baseFare          Decimal       @db.Decimal(10, 2)
+  distanceFare      Decimal       @db.Decimal(10, 2)
+  taxes             Decimal       @default(0) @db.Decimal(10, 2)
+  discount          Decimal       @default(0) @db.Decimal(10, 2)
+  totalAmount       Decimal       @db.Decimal(10, 2)
   paymentMethod     PaymentMethod @default(CASH)
   paymentStatus     PaymentStatus @default(PENDING)
 
@@ -225,6 +238,11 @@ model Booking {
   payment           Payment?
   trackingHistory   TrackingHistory[]
 
+  @@index([userId])
+  @@index([pilotId])
+  @@index([status])
+  @@index([createdAt])
+  @@index([paymentStatus])
   @@map("bookings")
 }
 
@@ -250,7 +268,7 @@ model TrackingHistory {
 model Payment {
   id              String        @id @default(cuid())
   bookingId       String        @unique
-  amount          Float
+  amount          Decimal       @db.Decimal(10, 2)
   method          PaymentMethod
   status          PaymentStatus @default(PENDING)
   transactionId   String?
@@ -262,6 +280,8 @@ model Payment {
   // Relations
   booking         Booking       @relation(fields: [bookingId], references: [id])
 
+  @@index([status])
+  @@index([createdAt])
   @@map("payments")
 }
 
@@ -269,7 +289,7 @@ model Earning {
   id          String      @id @default(cuid())
   pilotId     String
   bookingId   String?
-  amount      Float
+  amount      Decimal     @db.Decimal(10, 2)
   type        EarningType @default(DELIVERY)
   description String?
   status      EarningStatus @default(PENDING)
@@ -278,16 +298,21 @@ model Earning {
   // Relations
   pilot       Pilot       @relation(fields: [pilotId], references: [id])
 
+  @@index([pilotId])
+  @@index([status])
+  @@index([createdAt])
   @@map("earnings")
 }
 
 model BankAccount {
   id            String    @id @default(cuid())
-  pilotId       String    @unique
+  pilotId       String    // Multiple accounts per pilot allowed
   accountName   String
   accountNumber String
   ifscCode      String
   bankName      String
+  branchName    String?
+  isPrimary     Boolean   @default(false)
   isVerified    Boolean   @default(false)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -296,6 +321,126 @@ model BankAccount {
   pilot         Pilot     @relation(fields: [pilotId], references: [id], onDelete: Cascade)
 
   @@map("bank_accounts")
+}
+
+// ============================================
+// SUPPORT & FAQ
+// ============================================
+
+model SupportTicket {
+  id          String    @id @default(cuid())
+  pilotId     String?
+  userId      String?
+  subject     String
+  description String
+  category    String    @default("GENERAL")
+  status      String    @default("OPEN")
+  priority    String    @default("MEDIUM")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  resolvedAt  DateTime?
+
+  // Relations
+  pilot       Pilot?    @relation(fields: [pilotId], references: [id], onDelete: Cascade)
+  user        User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([pilotId])
+  @@index([userId])
+  @@index([status])
+  @@map("support_tickets")
+}
+
+model FAQ {
+  id        String    @id @default(cuid())
+  question  String
+  answer    String
+  category  String
+  sortOrder Int       @default(0)
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@map("faqs")
+}
+
+// ============================================
+// WITHDRAWALS
+// ============================================
+
+model WithdrawalRequest {
+  id            String    @id @default(cuid())
+  pilotId       String
+  bankAccountId String
+  amount        Decimal   @db.Decimal(10, 2)
+  status        String    @default("PENDING")
+  adminNote     String?
+  processedAt   DateTime?
+  processedBy   String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("withdrawal_requests")
+}
+
+// ============================================
+// REFERRALS & ACHIEVEMENTS
+// ============================================
+
+model Referral {
+  id            String    @id @default(cuid())
+  referrerId    String
+  referredId    String?
+  referralCode  String    @unique
+  status        String    @default("PENDING")
+  bonusAmount   Decimal   @default(0) @db.Decimal(10, 2)
+  completedAt   DateTime?
+  createdAt     DateTime  @default(now())
+
+  @@map("referrals")
+}
+
+model Achievement {
+  id          String    @id @default(cuid())
+  name        String
+  description String
+  icon        String?
+  requirement Json?
+  rewardAmount Decimal  @default(0) @db.Decimal(10, 2)
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+
+  @@map("achievements")
+}
+
+model PilotAchievement {
+  id            String    @id @default(cuid())
+  pilotId       String
+  achievementId String
+  earnedAt      DateTime  @default(now())
+  claimed       Boolean   @default(false)
+  claimedAt     DateTime?
+
+  @@unique([pilotId, achievementId])
+  @@map("pilot_achievements")
+}
+
+// ============================================
+// NOTIFICATION SETTINGS
+// ============================================
+
+model NotificationSetting {
+  id              String    @id @default(cuid())
+  pilotId         String    @unique
+  pushEnabled     Boolean   @default(true)
+  emailEnabled    Boolean   @default(false)
+  smsEnabled      Boolean   @default(false)
+  jobAlerts       Boolean   @default(true)
+  promotions      Boolean   @default(true)
+  updates         Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@map("notification_settings")
 }
 
 // ============================================
@@ -420,9 +565,9 @@ model Coupon {
   code            String        @unique
   description     String?
   discountType    DiscountType  @default(PERCENTAGE)
-  discountValue   Float         // Percentage or fixed amount
-  minOrderAmount  Float?        // Minimum order to apply
-  maxDiscount     Float?        // Cap for percentage discounts
+  discountValue   Decimal       @db.Decimal(10, 2)
+  minOrderAmount  Decimal?      @db.Decimal(10, 2)
+  maxDiscount     Decimal?      @db.Decimal(10, 2)
   usageLimit      Int?          // Total uses allowed
   usageCount      Int           @default(0)
   perUserLimit    Int           @default(1) // Uses per user
@@ -444,7 +589,7 @@ model CouponUsage {
   couponId  String
   userId    String
   bookingId String?
-  discount  Float     // Actual discount applied
+  discount  Decimal   @db.Decimal(10, 2)
   usedAt    DateTime  @default(now())
 
   // Relations
@@ -462,15 +607,21 @@ model WalletTransaction {
   id            String            @id @default(cuid())
   userId        String
   type          WalletTxnType
-  amount        Float
-  balanceBefore Float
-  balanceAfter  Float
+  amount        Decimal           @db.Decimal(10, 2)
+  balanceBefore Decimal           @db.Decimal(10, 2)
+  balanceAfter  Decimal           @db.Decimal(10, 2)
   description   String?
   referenceId   String?           // Booking ID, refund ID, etc.
   referenceType String?           // BOOKING, REFUND, TOPUP, etc.
   status        WalletTxnStatus   @default(COMPLETED)
   createdAt     DateTime          @default(now())
 
+  // Relation
+  user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
   @@map("wallet_transactions")
 }
 

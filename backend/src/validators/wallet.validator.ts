@@ -34,3 +34,20 @@ export const refundSchema = z.object({
     reason: z.string().max(200).optional(),
   }),
 })
+
+// Pilot wallet schemas
+export const pilotWithdrawSchema = z.object({
+  body: z.object({
+    bankAccountId: z.string().min(1, 'Bank account ID is required'),
+    amount: z
+      .number()
+      .min(100, 'Minimum withdrawal amount is ₹100')
+      .max(100000, 'Maximum withdrawal amount is ₹100,000'),
+  }),
+})
+
+export const withdrawalIdParamSchema = z.object({
+  params: z.object({
+    id: z.string().min(1, 'Withdrawal ID is required'),
+  }),
+})

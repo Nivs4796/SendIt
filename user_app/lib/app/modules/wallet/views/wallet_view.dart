@@ -422,6 +422,8 @@ class _TransactionTile extends StatelessWidget {
     switch (transaction.referenceType?.toUpperCase()) {
       case 'TOPUP':
         return 'Wallet Top-up';
+      case 'RAZORPAY':
+        return 'Online Payment';
       case 'BOOKING':
         return 'Booking Payment';
       case 'REFUND':
@@ -582,7 +584,7 @@ class _AddMoneySheet extends StatelessWidget {
                       ),
                     ),
                     child: Text(
-                      '\u20B9$amount',
+                      '₹$amount',
                       style: AppTextStyles.labelMedium.copyWith(
                         color: theme.colorScheme.primary,
                         fontWeight: FontWeight.w600,
@@ -594,35 +596,14 @@ class _AddMoneySheet extends StatelessWidget {
             ),
             const SizedBox(height: 24),
 
-            // Info Box
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: AppColors.infoLight,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: AppColors.info.withValues(alpha: 0.3),
-                ),
-              ),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.info_outline_rounded,
-                    color: AppColors.info,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      'This is a simulated payment. Money will be added to your wallet instantly.',
-                      style: AppTextStyles.caption.copyWith(
-                        color: AppColors.infoDark,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            // Payment Method Toggle
+            Obx(() => _buildPaymentModeSelector(context)),
+            const SizedBox(height: 16),
+
+            // Info Box based on payment mode
+            Obx(() => controller.useRazorpay.value
+                ? _buildRazorpayInfo(context)
+                : _buildSimulatedInfo(context)),
             const SizedBox(height: 24),
 
             // Error Message
@@ -662,14 +643,197 @@ class _AddMoneySheet extends StatelessWidget {
 
             // Add Money Button
             Obx(() => AppButton.primary(
-                  text: 'Add Money',
+                  text: controller.useRazorpay.value
+                      ? 'Pay & Add Money'
+                      : 'Add Money (Test)',
                   isLoading: controller.isAddingMoney.value,
                   onPressed: controller.addMoney,
-                  icon: Icons.account_balance_wallet_outlined,
+                  icon: controller.useRazorpay.value
+                      ? Icons.lock_outline
+                      : Icons.account_balance_wallet_outlined,
                 )),
             const SizedBox(height: 8),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildPaymentModeSelector(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: isDark
+            ? theme.colorScheme.primary.withValues(alpha: 0.1)
+            : theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          // Razorpay Option
+          Expanded(
+            child: GestureDetector(
+              onTap: () {
+                if (!controller.useRazorpay.value) {
+                  controller.togglePaymentMode();
+                }
+              },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                decoration: BoxDecoration(
+                  color: controller.useRazorpay.value
+                      ? theme.colorScheme.primary
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.payment_rounded,
+                      size: 18,
+                      color: controller.useRazorpay.value
+                          ? Colors.white
+                          : theme.colorScheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Pay Online',
+                      style: AppTextStyles.labelMedium.copyWith(
+                        color: controller.useRazorpay.value
+                            ? Colors.white
+                            : theme.colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          // Simulated Option
+          Expanded(
+            child: GestureDetector(
+              onTap: () {
+                if (controller.useRazorpay.value) {
+                  controller.togglePaymentMode();
+                }
+              },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                decoration: BoxDecoration(
+                  color: !controller.useRazorpay.value
+                      ? theme.colorScheme.primary
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.science_outlined,
+                      size: 18,
+                      color: !controller.useRazorpay.value
+                          ? Colors.white
+                          : theme.colorScheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Test Mode',
+                      style: AppTextStyles.labelMedium.copyWith(
+                        color: !controller.useRazorpay.value
+                            ? Colors.white
+                            : theme.colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRazorpayInfo(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.successLight,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: AppColors.success.withValues(alpha: 0.3),
+        ),
+      ),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.verified_outlined,
+            color: AppColors.success,
+            size: 20,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Secure Payment via Razorpay',
+                  style: AppTextStyles.labelMedium.copyWith(
+                    color: AppColors.successDark,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Pay using UPI, Cards, or Net Banking',
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.successDark.withValues(alpha: 0.8),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSimulatedInfo(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.infoLight,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: AppColors.info.withValues(alpha: 0.3),
+        ),
+      ),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.info_outline_rounded,
+            color: AppColors.info,
+            size: 20,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              'Test mode: Money will be added instantly without actual payment.',
+              style: AppTextStyles.caption.copyWith(
+                color: AppColors.infoDark,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -109,14 +109,14 @@ export const registerPilot = async (input: RegisterPilotInput) => {
         'driving_license': 'DRIVING_LICENSE',
         'vehicle_rc': 'VEHICLE_RC',
         'insurance': 'INSURANCE',
-        'parental_consent': 'OTHER',
+        'parental_consent': 'PARENTAL_CONSENT',
       }
 
       const docsToCreate = Object.entries(input.documents)
         .filter(([_, url]) => url)
         .map(([type, url]) => ({
           pilotId: newPilot.id,
-          type: docTypeMap[type] || 'OTHER',
+          type: docTypeMap[type] || 'ID_PROOF',
           url: url as string,
           filename: (url as string).split('/').pop() || 'document',
         }))
@@ -157,7 +157,7 @@ export const getPilotById = async (id: string) => {
     where: { id },
     include: {
       vehicles: { include: { vehicleType: true } },
-      bankAccount: true,
+      bankAccounts: true,
       documents: true,
       _count: { select: { bookings: true, reviews: true } },
     },

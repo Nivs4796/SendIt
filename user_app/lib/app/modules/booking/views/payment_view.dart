@@ -5,6 +5,7 @@ import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/widgets.dart';
+import '../../../services/payment_service.dart';
 import '../controllers/booking_controller.dart';
 
 /// PaymentView - Review & Pay screen for booking confirmation.
@@ -298,17 +299,35 @@ class PaymentView extends GetView<BookingController> {
     );
   }
 
-  /// Builds the payment methods section with Wallet, Cash, and UPI options.
+  /// Builds the payment methods section with Wallet, Cash, UPI, and Card options.
   Widget _buildPaymentMethods(BuildContext context) {
     return Column(
       children: [
+        // Pay Online (UPI/Card) - New Razorpay option
+        Obx(() => _buildPaymentOption(
+              context,
+              icon: Icons.payment_rounded,
+              title: 'Pay Online',
+              subtitle: 'UPI, Cards, Net Banking',
+              isSelected:
+                  controller.selectedPaymentMethod.value == PaymentMethod.upi ||
+                  controller.selectedPaymentMethod.value == PaymentMethod.card ||
+                  controller.selectedPaymentMethod.value == PaymentMethod.netbanking,
+              isDisabled: false,
+              badge: 'Recommended',
+              badgeColor: AppColors.success,
+              onTap: () => controller.selectPaymentMethod(PaymentMethod.upi),
+            )),
+
+        const SizedBox(height: 12),
+
         // Wallet Payment Option
         Obx(() => _buildPaymentOption(
               context,
               icon: Icons.account_balance_wallet,
               title: 'Wallet',
               subtitle:
-                  'Balance: \u20B9${controller.walletBalance.value.toStringAsFixed(2)}',
+                  'Balance: ₹${controller.walletBalance.value.toStringAsFixed(2)}',
               isSelected:
                   controller.selectedPaymentMethod.value == PaymentMethod.wallet,
               isDisabled: !controller.hasSufficientBalance.value,
@@ -317,7 +336,7 @@ class PaymentView extends GetView<BookingController> {
                   : null,
               onTap: controller.hasSufficientBalance.value
                   ? () => controller.selectPaymentMethod(PaymentMethod.wallet)
-                  : null,
+                  : () => _showAddMoneyPrompt(context),
             )),
 
         const SizedBox(height: 12),
@@ -333,19 +352,6 @@ class PaymentView extends GetView<BookingController> {
               isDisabled: false,
               onTap: () => controller.selectPaymentMethod(PaymentMethod.cash),
             )),
-
-        const SizedBox(height: 12),
-
-        // UPI Option (Coming Soon)
-        _buildPaymentOption(
-          context,
-          icon: Icons.qr_code,
-          title: 'UPI',
-          subtitle: 'Coming soon',
-          isSelected: false,
-          isDisabled: true,
-          onTap: null,
-        ),
       ],
     );
   }
@@ -359,13 +365,15 @@ class PaymentView extends GetView<BookingController> {
     required bool isSelected,
     required bool isDisabled,
     String? warning,
+    String? badge,
+    Color? badgeColor,
     VoidCallback? onTap,
   }) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
     return GestureDetector(
-      onTap: isDisabled ? null : onTap,
+      onTap: isDisabled && warning == null ? null : onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.all(16),
@@ -417,13 +425,39 @@ class PaymentView extends GetView<BookingController> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    title,
-                    style: AppTextStyles.labelLarge.copyWith(
-                      color: isDisabled
-                          ? theme.disabledColor
-                          : theme.colorScheme.onSurface,
-                    ),
+                  Row(
+                    children: [
+                      Text(
+                        title,
+                        style: AppTextStyles.labelLarge.copyWith(
+                          color: isDisabled
+                              ? theme.disabledColor
+                              : theme.colorScheme.onSurface,
+                        ),
+                      ),
+                      if (badge != null) ...[
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: (badgeColor ?? AppColors.success)
+                                .withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            badge,
+                            style: AppTextStyles.labelSmall.copyWith(
+                              color: badgeColor ?? AppColors.success,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 10,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                   const SizedBox(height: 2),
                   Text(
@@ -436,21 +470,32 @@ class PaymentView extends GetView<BookingController> {
                   ),
                   if (warning != null) ...[
                     const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.warning_amber_rounded,
-                          size: 14,
-                          color: AppColors.warning,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          warning,
-                          style: AppTextStyles.labelSmall.copyWith(
+                    GestureDetector(
+                      onTap: () => _showAddMoneyPrompt(context),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.warning_amber_rounded,
+                            size: 14,
                             color: AppColors.warning,
                           ),
-                        ),
-                      ],
+                          const SizedBox(width: 4),
+                          Text(
+                            warning,
+                            style: AppTextStyles.labelSmall.copyWith(
+                              color: AppColors.warning,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '• Add Money',
+                            style: AppTextStyles.labelSmall.copyWith(
+                              color: theme.colorScheme.primary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ],
@@ -474,6 +519,110 @@ class PaymentView extends GetView<BookingController> {
               ),
           ],
         ),
+      ),
+    );
+  }
+
+  /// Shows prompt to add money to wallet
+  void _showAddMoneyPrompt(BuildContext context) {
+    final theme = Theme.of(context);
+    final shortfall = controller.finalAmount - controller.walletBalance.value;
+
+    Get.dialog(
+      AlertDialog(
+        backgroundColor: theme.scaffoldBackgroundColor,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: Row(
+          children: [
+            Icon(
+              Icons.account_balance_wallet_outlined,
+              color: theme.colorScheme.primary,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              'Insufficient Balance',
+              style: AppTextStyles.h4.copyWith(
+                color: theme.colorScheme.onSurface,
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Your wallet balance is ₹${controller.walletBalance.value.toStringAsFixed(2)}',
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'You need ₹${shortfall.toStringAsFixed(2)} more to complete this payment.',
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: theme.colorScheme.onSurface,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.infoLight,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.lightbulb_outline,
+                    color: AppColors.info,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'You can also pay online using UPI or Card',
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.infoDark,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Get.back();
+              controller.selectPaymentMethod(PaymentMethod.upi);
+            },
+            child: Text(
+              'Pay Online',
+              style: AppTextStyles.labelLarge.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Get.back();
+              // Navigate to wallet page to add money
+              Get.toNamed('/wallet');
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: theme.colorScheme.primary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text('Add Money'),
+          ),
+        ],
       ),
     );
   }
@@ -552,7 +701,7 @@ class PaymentView extends GetView<BookingController> {
                     ),
                     if (hasCoupon && controller.couponDiscount.value > 0)
                       Text(
-                        'You save \u20B9${controller.couponDiscount.value.toStringAsFixed(2)}',
+                        'You save ₹${controller.couponDiscount.value.toStringAsFixed(2)}',
                         style: AppTextStyles.caption.copyWith(
                           color: AppColors.success,
                         ),
@@ -645,7 +794,7 @@ class PaymentView extends GetView<BookingController> {
                 context,
                 label: 'Subtotal',
                 value:
-                    '\u20B9${controller.priceCalculation.value?.totalAmount.toStringAsFixed(2) ?? '0.00'}',
+                    '₹${controller.priceCalculation.value?.totalAmount.toStringAsFixed(2) ?? '0.00'}',
               )),
 
           const SizedBox(height: 8),
@@ -671,7 +820,7 @@ class PaymentView extends GetView<BookingController> {
                     context,
                     label: 'Discount',
                     value:
-                        '-\u20B9${controller.couponDiscount.value.toStringAsFixed(2)}',
+                        '-₹${controller.couponDiscount.value.toStringAsFixed(2)}',
                     valueColor: AppColors.success,
                   ),
                 ],
@@ -769,13 +918,251 @@ class PaymentView extends GetView<BookingController> {
           ),
         ],
       ),
-      child: Obx(() => AppButton.primary(
-            text: 'Confirm Booking \u2022 ${controller.finalAmountDisplay}',
-            isLoading: controller.bookingState.value == BookingState.creatingBooking,
-            isDisabled: !controller.canProceedToPayment,
-            onPressed: controller.createBooking,
-            icon: Icons.check_circle_outline_rounded,
-          )),
+      child: Obx(() {
+        final isOnlinePayment =
+            controller.selectedPaymentMethod.value == PaymentMethod.upi ||
+            controller.selectedPaymentMethod.value == PaymentMethod.card ||
+            controller.selectedPaymentMethod.value == PaymentMethod.netbanking;
+
+        return AppButton.primary(
+          text: isOnlinePayment
+              ? 'Pay Now • ${controller.finalAmountDisplay}'
+              : 'Confirm Booking • ${controller.finalAmountDisplay}',
+          isLoading:
+              controller.bookingState.value == BookingState.creatingBooking ||
+              Get.find<PaymentService>().isProcessing.value,
+          isDisabled: !controller.canProceedToPayment,
+          onPressed: () => _handlePayment(context),
+          icon: isOnlinePayment
+              ? Icons.lock_outline
+              : Icons.check_circle_outline_rounded,
+        );
+      }),
+    );
+  }
+
+  /// Handle payment based on selected method
+  void _handlePayment(BuildContext context) {
+    final method = controller.selectedPaymentMethod.value;
+
+    if (method == PaymentMethod.upi ||
+        method == PaymentMethod.card ||
+        method == PaymentMethod.netbanking) {
+      // Online payment via Razorpay
+      _initiateRazorpayPayment(context);
+    } else {
+      // Wallet or Cash payment - direct booking
+      controller.createBooking();
+    }
+  }
+
+  /// Initiate Razorpay payment flow
+  void _initiateRazorpayPayment(BuildContext context) async {
+    final paymentService = Get.find<PaymentService>();
+    final theme = Theme.of(context);
+
+    // Show loading
+    Get.dialog(
+      WillPopScope(
+        onWillPop: () async => false,
+        child: Center(
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: theme.cardColor,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(
+                  color: theme.colorScheme.primary,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Initializing payment...',
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+      barrierDismissible: false,
+    );
+
+    try {
+      final result = await paymentService.initiateRazorpayPayment(
+        amount: controller.finalAmount,
+        bookingId: 'TEMP_${DateTime.now().millisecondsSinceEpoch}',
+        description: 'SendIt Delivery Booking',
+        method: controller.selectedPaymentMethod.value,
+      );
+
+      // Close loading dialog
+      Get.back();
+
+      if (result.success) {
+        // Payment successful - create booking
+        _showPaymentSuccess(context, result);
+      } else {
+        // Payment failed
+        _showPaymentError(context, result.errorMessage ?? 'Payment failed');
+      }
+    } catch (e) {
+      Get.back();
+      _showPaymentError(context, 'An error occurred: $e');
+    }
+  }
+
+  /// Show payment success dialog
+  void _showPaymentSuccess(BuildContext context, PaymentResult result) {
+    final theme = Theme.of(context);
+
+    Get.dialog(
+      AlertDialog(
+        backgroundColor: theme.scaffoldBackgroundColor,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                color: AppColors.success.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.check_circle,
+                color: AppColors.success,
+                size: 40,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Payment Successful!',
+              style: AppTextStyles.h4.copyWith(
+                color: theme.colorScheme.onSurface,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '₹${result.amount.toStringAsFixed(2)} paid successfully',
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            if (result.razorpayPaymentId != null) ...[
+              const SizedBox(height: 4),
+              Text(
+                'Payment ID: ${result.razorpayPaymentId}',
+                style: AppTextStyles.caption.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ],
+        ),
+        actions: [
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () {
+                Get.back();
+                // Now create the booking with payment info
+                controller.createBooking();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.success,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: const Text('Continue'),
+            ),
+          ),
+        ],
+      ),
+      barrierDismissible: false,
+    );
+  }
+
+  /// Show payment error dialog
+  void _showPaymentError(BuildContext context, String message) {
+    final theme = Theme.of(context);
+
+    Get.dialog(
+      AlertDialog(
+        backgroundColor: theme.scaffoldBackgroundColor,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                color: AppColors.error.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.error_outline,
+                color: AppColors.error,
+                size: 40,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Payment Failed',
+              style: AppTextStyles.h4.copyWith(
+                color: theme.colorScheme.onSurface,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              message,
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: Text(
+              'Cancel',
+              style: AppTextStyles.labelLarge.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Get.back();
+              _initiateRazorpayPayment(context);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: theme.colorScheme.primary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text('Try Again'),
+          ),
+        ],
+      ),
     );
   }
 

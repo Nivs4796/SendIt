@@ -1,11 +1,12 @@
+import '../config/app_config.dart';
+
 class ApiConstants {
   ApiConstants._();
 
-  // Base URLs
-  // Use your computer's IP for physical device testing
-  // For emulator use: 10.0.2.2 (Android) or localhost (iOS Simulator)
-  static const String baseUrl = 'http://172.16.17.55:5000/api/v1';
-  static const String socketUrl = 'http://172.16.17.55:5000';
+  // Base URLs - now using AppConfig for environment support
+  // Override via: flutter run --dart-define=API_URL=https://your-api.com
+  static String get baseUrl => AppConfig.apiUrl;
+  static String get socketUrl => AppConfig.socketUrl;
 
   // Auth Endpoints
   static const String sendOtp = '/auth/user/send-otp';
@@ -33,6 +34,13 @@ class ApiConstants {
   static const String addMoney = '/wallet/add';
   static const String checkBalance = '/wallet/check';
 
+  // Payment Endpoints (Razorpay)
+  static const String createPaymentOrder = '/payments/create-order';
+  static const String createWalletOrder = '/payments/wallet-order';
+  static const String verifyPayment = '/payments/verify';
+  static const String verifyWalletPayment = '/payments/wallet-verify';
+  static const String paymentStatus = '/payments/status';
+
   // Coupon Endpoints
   static const String validateCoupon = '/coupons/validate';
   static const String availableCoupons = '/coupons/available';
@@ -42,6 +50,10 @@ class ApiConstants {
 
   // Upload Endpoints
   static const String uploadAvatar = '/upload/user/avatar';
+
+  // FCM Push Notifications
+  static const String fcmRegister = '/fcm/user/register';
+  static const String fcmClearToken = '/fcm/user/token';
 
   // Timeouts
   static const int connectTimeout = 30000;

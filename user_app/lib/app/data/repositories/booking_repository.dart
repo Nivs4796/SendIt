@@ -268,6 +268,39 @@ class BookingRepository {
     }
   }
 
+  /// Retry driver assignment for a booking
+  /// POST /bookings/{id}/retry-assignment
+  /// Response: { "success": true, "message": "Assignment retry started" }
+  Future<ApiResponse<void>> retryAssignment(String bookingId) async {
+    try {
+      final response = await _apiClient.post(
+        '${ApiConstants.bookings}/$bookingId/retry-assignment',
+      );
+
+      final apiResponse = ApiResponse<void>.fromJson(
+        response.data,
+        null,
+      );
+
+      if (apiResponse.success) {
+        return ApiResponse(
+          success: true,
+          message: apiResponse.message ?? 'Assignment retry started',
+        );
+      }
+
+      return ApiResponse(
+        success: false,
+        message: apiResponse.message ?? 'Failed to retry assignment',
+      );
+    } catch (e) {
+      return ApiResponse(
+        success: false,
+        message: e.toString(),
+      );
+    }
+  }
+
   /// Rate a delivery
   /// POST /bookings/{id}/rate
   /// Body: { "rating": 5, "review": "Great service!" }

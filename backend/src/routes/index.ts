@@ -11,6 +11,13 @@ import couponRoutes from './coupon.routes'
 import walletRoutes from './wallet.routes'
 import adminRoutes from './admin.routes'
 import uploadRoutes from './upload.routes'
+import documentsRoutes from './documents.routes'
+import bankRoutes from './bank.routes'
+import notificationsRoutes from './notifications.routes'
+import supportRoutes from './support.routes'
+import rewardsRoutes from './rewards.routes'
+import paymentRoutes from './payment.routes'
+import fcmRoutes from './fcm.routes'
 
 const router = Router()
 
@@ -46,5 +53,21 @@ router.use('/coupons', couponRoutes)
 router.use('/wallet', walletRoutes)
 router.use('/admin', adminRoutes)
 router.use('/upload', uploadRoutes)
+
+// New routes
+router.use('/pilots/documents', documentsRoutes)
+router.use('/pilots/bank-accounts', bankRoutes)
+router.use('/pilots/notifications', notificationsRoutes)
+router.use('/support', supportRoutes)
+router.use('/pilots', rewardsRoutes) // Mounts /pilots/referral, /pilots/rewards, /pilots/achievements
+
+// Utility routes (IFSC lookup)
+router.use('/utils', bankRoutes)
+
+// Payment routes (Razorpay)
+router.use('/payments', paymentRoutes)
+
+// FCM push notification token routes
+router.use('/fcm', fcmRoutes)
 
 export default router

@@ -3,12 +3,14 @@ import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../../../core/constants/app_constants.dart';
+import '../../../core/widgets/map_location_picker.dart';
 import '../../../data/models/address_model.dart';
 import '../../../data/models/booking_model.dart';
 import '../../../data/models/coupon_model.dart';
 import '../../../data/models/price_calculation_model.dart';
 import '../../../data/models/vehicle_type_model.dart';
 import '../../../data/providers/api_exceptions.dart';
+import '../../../data/repositories/address_repository.dart';
 import '../../../data/repositories/booking_repository.dart';
 import '../../../data/repositories/coupon_repository.dart';
 import '../../../routes/app_routes.dart';
@@ -31,6 +33,7 @@ class BookingController extends GetxController {
   // Dependencies
   final BookingRepository _bookingRepository = BookingRepository();
   final CouponRepository _couponRepository = CouponRepository();
+  final AddressRepository _addressRepository = AddressRepository();
   late final LocationService _locationService;
   late final PaymentService _paymentService;
 
@@ -356,6 +359,64 @@ class BookingController extends GetxController {
     _resetPriceCalculation();
   }
 
+  /// Opens the map location picker and saves the selected location as an address.
+  /// The saved address is then set as pickup or drop location.
+  Future<void> openMapPicker({required bool isPickup}) async {
+    final title = isPickup ? 'Select Pickup Location' : 'Select Drop Location';
+    
+    // Get initial location (current location or existing selection)
+    LatLng? initialLocation;
+    if (isPickup && pickupLocation.value != null) {
+      initialLocation = pickupLocation.value;
+    } else if (!isPickup && dropLocation.value != null) {
+      initialLocation = dropLocation.value;
+    }
+
+    // Show the map picker
+    final result = await MapLocationPicker.show(
+      title: title,
+      initialLocation: initialLocation,
+    );
+
+    if (result == null) return; // User cancelled
+
+    // Show loading
+    bookingState.value = BookingState.loadingVehicles;
+    errorMessage.value = '';
+
+    try {
+      // Create a temporary address label
+      final label = isPickup ? 'Pickup Location' : 'Drop Location';
+
+      // Save the address via API
+      final response = await _addressRepository.createAddress(
+        label: label,
+        address: result.address,
+        landmark: result.landmark,
+        city: result.city ?? '',
+        state: result.state ?? '',
+        pincode: result.pincode ?? '',
+        lat: result.lat,
+        lng: result.lng,
+        isDefault: false,
+      );
+
+      if (response.success && response.data != null) {
+        // Use the saved address for booking
+        setFromSavedAddress(
+          address: response.data!,
+          isPickup: isPickup,
+        );
+      } else {
+        _showError(response.message ?? 'Failed to save location');
+      }
+    } catch (e) {
+      _showError('Failed to save location');
+    } finally {
+      bookingState.value = BookingState.idle;
+    }
+  }
+
   // ============================================
   // Package & Vehicle Methods
   // ============================================
@@ -617,6 +678,36 @@ class BookingController extends GetxController {
       _showError('No internet connection');
     } catch (e) {
       bookingState.value = BookingState.idle;
+      _showError('Something went wrong');
+    }
+  }
+
+  /// Retries the driver search for the current booking.
+  /// Called when no drivers were found and user wants to try again.
+  Future<void> retryDriverSearch() async {
+    if (currentBooking.value == null) {
+      _showError('No active booking to retry');
+      return;
+    }
+
+    try {
+      bookingState.value = BookingState.findingDriver;
+      errorMessage.value = '';
+
+      final response = await _bookingRepository.retryAssignment(
+        currentBooking.value!.id,
+      );
+
+      if (response.success) {
+        _showSuccess('Searching for drivers again...');
+      } else {
+        _showError(response.message ?? 'Failed to retry search');
+      }
+    } on ApiException catch (e) {
+      _showError(e.message);
+    } on NetworkException {
+      _showError('No internet connection');
+    } catch (e) {
       _showError('Something went wrong');
     }
   }

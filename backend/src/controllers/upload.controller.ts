@@ -1,9 +1,25 @@
 import { Request, Response, NextFunction } from 'express'
+import path from 'path'
 import { ValidationError, ForbiddenError, NotFoundError, ErrorCodes } from '../middleware/errorHandler'
 import { getFileUrl, deleteFile } from '../middleware/upload'
 import { prisma } from '../config/database'
 import logger from '../config/logger'
 import { DocumentType } from '@prisma/client'
+
+// ============================================
+// PATH VALIDATION HELPERS (Security)
+// ============================================
+const ALLOWED_UPLOAD_FOLDERS = ['documents', 'avatars', 'delivery-photos', 'vehicles', 'pilots', 'users']
+
+const isValidFilename = (filename: string): boolean => {
+  // Only allow alphanumeric, dash, underscore, and dot
+  // Filename must be at least 10 chars (includes extension)
+  return /^[a-zA-Z0-9._-]{10,}$/.test(filename)
+}
+
+const isValidFolder = (folder: string): boolean => {
+  return ALLOWED_UPLOAD_FOLDERS.includes(folder)
+}
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -331,10 +347,38 @@ export const deleteUploadedFile = async (
       throw new ValidationError('Folder and filename are required')
     }
 
-    const filePath = `/uploads/${folder}/${filename}`
-    deleteFile(filePath)
+    // ============================================
+    // SECURITY: Path Traversal Prevention
+    // ============================================
 
-    logger.info(`Admin deleted file: ${filePath}`)
+    // Validate folder is in allowed list
+    if (!isValidFolder(folder)) {
+      throw new ValidationError('Invalid upload folder')
+    }
+
+    // Validate filename format (prevent path traversal)
+    if (!isValidFilename(filename)) {
+      throw new ValidationError('Invalid filename format')
+    }
+
+    // Ensure no path traversal attempts
+    if (filename.includes('..') || filename.includes('/') || filename.includes('\\')) {
+      throw new ValidationError('Invalid filename')
+    }
+
+    // Build and validate the full path
+    const uploadsDir = path.join(process.cwd(), 'uploads')
+    const filePath = path.join(uploadsDir, folder, filename)
+
+    // Verify the resolved path is still within uploads directory
+    const resolvedPath = path.resolve(filePath)
+    if (!resolvedPath.startsWith(uploadsDir)) {
+      throw new ValidationError('Invalid file path')
+    }
+
+    deleteFile(`/uploads/${folder}/${filename}`)
+
+    logger.info(`Admin deleted file: /uploads/${folder}/${filename}`)
 
     res.status(200).json({
       success: true,

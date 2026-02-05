@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart' hide FormData, MultipartFile;
 
 import '../models/pilot_model.dart';
@@ -18,9 +19,15 @@ class AuthRepository {
 
   /// Get current pilot from storage
   PilotModel? get currentPilot {
-    final pilotJson = _storage.pilot;
-    if (pilotJson != null) {
-      return PilotModel.fromJson(pilotJson);
+    try {
+      final pilotJson = _storage.pilot;
+      if (pilotJson != null) {
+        return PilotModel.fromJson(pilotJson);
+      }
+    } catch (e) {
+      debugPrint('⚠️ Error parsing stored pilot data: $e');
+      // Clear invalid data
+      _storage.pilot = null;
     }
     return null;
   }
@@ -93,11 +100,19 @@ class AuthRepository {
       if (response.statusCode == 200 && response.data['success'] == true) {
         final data = response.data['data'];
         
+        // Debug: Print what we're saving
+        debugPrint('📦 Saving auth data...');
+        debugPrint('📦 Token from API: ${data['token']?.toString().substring(0, 20)}...');
+        
         // Save token
         _storage.token = data['token'];
         if (data['refreshToken'] != null) {
           _storage.refreshToken = data['refreshToken'];
         }
+        
+        // Verify token was saved
+        debugPrint('📦 Token saved, verifying: ${_storage.token?.toString().substring(0, 20)}...');
+        debugPrint('📦 isLoggedIn after save: ${_storage.isLoggedIn}');
         
         // Save phone number for registration
         _storage.phone = '$countryCode$phone';
@@ -109,10 +124,12 @@ class AuthRepository {
           // Save pilot data
           _storage.pilot = data['pilot'];
           
+          final pilot = PilotModel.fromJson(data['pilot']);
+          
           return {
             'success': true,
             'is_new_user': false,
-            'pilot': PilotModel.fromJson(data['pilot']),
+            'pilot': pilot,
           };
         }
 

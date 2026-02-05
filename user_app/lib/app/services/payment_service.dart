@@ -1,6 +1,11 @@
+import 'dart:async';
+
 import 'package:get/get.dart';
 import '../core/constants/app_constants.dart';
 import '../data/repositories/wallet_repository.dart';
+import '../data/repositories/payment_repository.dart';
+import '../data/providers/api_exceptions.dart';
+import 'razorpay_service.dart';
 
 /// Result model for payment operations
 class PaymentResult {
@@ -9,6 +14,8 @@ class PaymentResult {
   final String? errorMessage;
   final PaymentMethod method;
   final double amount;
+  final String? razorpayOrderId;
+  final String? razorpayPaymentId;
 
   PaymentResult({
     required this.success,
@@ -16,18 +23,24 @@ class PaymentResult {
     this.errorMessage,
     required this.method,
     required this.amount,
+    this.razorpayOrderId,
+    this.razorpayPaymentId,
   });
 
   factory PaymentResult.success({
     required PaymentMethod method,
     required double amount,
     String? transactionId,
+    String? razorpayOrderId,
+    String? razorpayPaymentId,
   }) {
     return PaymentResult(
       success: true,
       transactionId: transactionId,
       method: method,
       amount: amount,
+      razorpayOrderId: razorpayOrderId,
+      razorpayPaymentId: razorpayPaymentId,
     );
   }
 
@@ -48,12 +61,37 @@ class PaymentResult {
 /// Service for handling all payment operations
 class PaymentService extends GetxService {
   final WalletRepository _walletRepository = WalletRepository();
+  final PaymentRepository _paymentRepository = PaymentRepository();
+  late final RazorpayService _razorpayService;
 
   /// Observable for tracking payment processing state
   final RxBool isProcessing = false.obs;
 
   /// Currently selected payment method
   final Rx<PaymentMethod> selectedMethod = PaymentMethod.wallet.obs;
+
+  /// Current user info for Razorpay prefill
+  String _userPhone = '';
+  String _userEmail = '';
+  String _userName = '';
+
+  @override
+  void onInit() {
+    super.onInit();
+    // RazorpayService should be initialized before PaymentService
+    _razorpayService = Get.find<RazorpayService>();
+  }
+
+  /// Set user info for Razorpay checkout prefill
+  void setUserInfo({
+    required String phone,
+    required String email,
+    required String name,
+  }) {
+    _userPhone = phone;
+    _userEmail = email;
+    _userName = name;
+  }
 
   /// Get current wallet balance
   /// Returns the balance as double, or 0.0 on error
@@ -133,7 +171,7 @@ class PaymentService extends GetxService {
           method: PaymentMethod.wallet,
           amount: amount,
           errorMessage:
-              'Insufficient wallet balance. Please add Rs. ${shortfall.toStringAsFixed(2)} to continue.',
+              'Insufficient wallet balance. Please add ₹${shortfall.toStringAsFixed(2)} to continue.',
         );
       }
 
@@ -185,27 +223,196 @@ class PaymentService extends GetxService {
     }
   }
 
-  /// Initiate Razorpay/UPI payment
-  /// Currently returns placeholder error - to be implemented with Razorpay SDK
-  Future<PaymentResult> initiateRazorpay({
+  /// Initiate Razorpay payment for booking
+  /// Returns a Future that completes when payment is done
+  Future<PaymentResult> initiateRazorpayPayment({
     required double amount,
     required String bookingId,
     String? description,
+    PaymentMethod method = PaymentMethod.upi,
   }) async {
     try {
       isProcessing.value = true;
 
-      // TODO: Integrate Razorpay SDK for actual UPI/Card payments
-      // This is a placeholder that will be replaced with actual Razorpay integration
-
-      return PaymentResult.failure(
-        method: PaymentMethod.upi,
+      // Step 1: Create Razorpay order on backend
+      final orderResponse = await _paymentRepository.createOrder(
+        bookingId: bookingId,
         amount: amount,
-        errorMessage: 'UPI payment coming soon!',
+      );
+
+      if (!orderResponse.success || orderResponse.data == null) {
+        return PaymentResult.failure(
+          method: method,
+          amount: amount,
+          errorMessage: orderResponse.message ?? 'Failed to create payment order',
+        );
+      }
+
+      final orderId = orderResponse.data!['orderId'] as String;
+      final amountInPaise = orderResponse.data!['amount'] as int;
+
+      // Step 2: Open Razorpay checkout
+      final paymentResponse = await _openRazorpayCheckout(
+        orderId: orderId,
+        amountInPaise: amountInPaise,
+        description: description ?? 'Booking #$bookingId',
+      );
+
+      if (!paymentResponse.success) {
+        return PaymentResult.failure(
+          method: method,
+          amount: amount,
+          errorMessage: paymentResponse.errorMessage ?? 'Payment failed',
+        );
+      }
+
+      // Step 3: Verify payment with backend
+      final verifyResponse = await _paymentRepository.verifyPayment(
+        orderId: orderId,
+        paymentId: paymentResponse.paymentId!,
+        signature: paymentResponse.signature!,
+      );
+
+      if (!verifyResponse.success ||
+          verifyResponse.data == null ||
+          !(verifyResponse.data!['verified'] as bool)) {
+        return PaymentResult.failure(
+          method: method,
+          amount: amount,
+          errorMessage: 'Payment verification failed. Please contact support.',
+        );
+      }
+
+      return PaymentResult.success(
+        method: method,
+        amount: amount,
+        transactionId: paymentResponse.paymentId,
+        razorpayOrderId: orderId,
+        razorpayPaymentId: paymentResponse.paymentId,
+      );
+    } on ApiException catch (e) {
+      return PaymentResult.failure(
+        method: method,
+        amount: amount,
+        errorMessage: e.message,
+      );
+    } on NetworkException {
+      return PaymentResult.failure(
+        method: method,
+        amount: amount,
+        errorMessage: 'No internet connection',
+      );
+    } catch (e) {
+      return PaymentResult.failure(
+        method: method,
+        amount: amount,
+        errorMessage: 'Payment failed: ${e.toString()}',
       );
     } finally {
       isProcessing.value = false;
     }
+  }
+
+  /// Add money to wallet via Razorpay
+  /// Returns updated wallet balance on success
+  Future<Map<String, dynamic>> addMoneyViaRazorpay({
+    required double amount,
+  }) async {
+    try {
+      isProcessing.value = true;
+
+      // Step 1: Create Razorpay order for wallet topup
+      final orderResponse = await _paymentRepository.createWalletOrder(
+        amount: amount,
+      );
+
+      if (!orderResponse.success || orderResponse.data == null) {
+        return {
+          'success': false,
+          'error': orderResponse.message ?? 'Failed to create order',
+        };
+      }
+
+      final orderId = orderResponse.data!['orderId'] as String;
+      final amountInPaise = orderResponse.data!['amount'] as int;
+
+      // Step 2: Open Razorpay checkout
+      final paymentResponse = await _openRazorpayCheckout(
+        orderId: orderId,
+        amountInPaise: amountInPaise,
+        description: 'Wallet Top-up',
+      );
+
+      if (!paymentResponse.success) {
+        return {
+          'success': false,
+          'error': paymentResponse.errorMessage ?? 'Payment failed',
+        };
+      }
+
+      // Step 3: Verify payment with backend
+      final verifyResponse = await _paymentRepository.verifyWalletPayment(
+        orderId: orderId,
+        paymentId: paymentResponse.paymentId!,
+        signature: paymentResponse.signature!,
+      );
+
+      if (!verifyResponse.success ||
+          verifyResponse.data == null ||
+          !(verifyResponse.data!['verified'] as bool)) {
+        return {
+          'success': false,
+          'error': 'Payment verification failed. Please contact support.',
+        };
+      }
+
+      return {
+        'success': true,
+        'balance': verifyResponse.data!['balance'] as double,
+        'amountAdded': verifyResponse.data!['amountAdded'] as double,
+        'paymentId': paymentResponse.paymentId,
+      };
+    } on ApiException catch (e) {
+      return {
+        'success': false,
+        'error': e.message,
+      };
+    } on NetworkException {
+      return {
+        'success': false,
+        'error': 'No internet connection',
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'error': 'Payment failed: ${e.toString()}',
+      };
+    } finally {
+      isProcessing.value = false;
+    }
+  }
+
+  /// Open Razorpay checkout and wait for result
+  Future<RazorpayPaymentResponse> _openRazorpayCheckout({
+    required String orderId,
+    required int amountInPaise,
+    required String description,
+  }) async {
+    final completer = Completer<RazorpayPaymentResponse>();
+
+    _razorpayService.openCheckout(
+      orderId: orderId,
+      amountInPaise: amountInPaise,
+      description: description,
+      userPhone: _userPhone.isNotEmpty ? _userPhone : '9999999999',
+      userEmail: _userEmail.isNotEmpty ? _userEmail : 'user@sendit.app',
+      userName: _userName.isNotEmpty ? _userName : 'SendIt User',
+      onComplete: (response) {
+        completer.complete(response);
+      },
+    );
+
+    return completer.future;
   }
 
   /// Unified payment processing method
@@ -226,10 +433,11 @@ class PaymentService extends GetxService {
       case PaymentMethod.upi:
       case PaymentMethod.card:
       case PaymentMethod.netbanking:
-        return initiateRazorpay(
+        return initiateRazorpayPayment(
           amount: amount,
           bookingId: bookingId,
           description: description,
+          method: method,
         );
     }
   }
@@ -264,7 +472,7 @@ class PaymentService extends GetxService {
       case PaymentMethod.upi:
       case PaymentMethod.card:
       case PaymentMethod.netbanking:
-        return false; // Coming soon
+        return true; // Now available with Razorpay!
     }
   }
 }

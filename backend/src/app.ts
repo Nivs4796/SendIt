@@ -24,15 +24,21 @@ const allowedOrigins = [
   'http://localhost:3003',
 ]
 
+const isProduction = config.nodeEnv === 'production';
+
 app.use(cors({
   origin: (origin, callback) => {
     // Allow requests with no origin (mobile apps, Postman, etc.)
     if (!origin) return callback(null, true)
 
+    // In development, allow all origins
+    if (!isProduction) return callback(null, true)
+
+    // In production, check against allowed origins
     if (allowedOrigins.includes(origin)) {
       callback(null, true)
     } else {
-      callback(null, true) // Allow all origins in development
+      callback(new Error('Not allowed by CORS'))
     }
   },
   credentials: true,

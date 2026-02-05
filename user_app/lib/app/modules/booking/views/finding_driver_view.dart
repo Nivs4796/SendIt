@@ -36,9 +36,21 @@ class _FindingDriverViewState extends State<FindingDriverView>
   Timer? _searchTimer;
   int _searchDuration = 0; // in seconds
 
-  // Socket service and subscription
+  // Socket service and subscriptions
   late SocketService _socketService;
   StreamSubscription<DriverAssignedData>? _driverAssignedSubscription;
+  StreamSubscription<SearchStartedData>? _searchStartedSubscription;
+  StreamSubscription<OfferSentData>? _offerSentSubscription;
+  StreamSubscription<NoPilotsData>? _noPilotsSubscription;
+  StreamSubscription<SearchTimeoutData>? _searchTimeoutSubscription;
+
+  // Assignment progress state
+  String _statusMessage = 'Searching for drivers...';
+  int _currentPilotNumber = 0;
+  bool _showRetryOptions = false;
+  bool _canRetry = false;
+  bool _canCancel = true;
+  String? _failureMessage;
 
   // Booking controller
   late BookingController _bookingController;
@@ -67,8 +79,8 @@ class _FindingDriverViewState extends State<FindingDriverView>
     // Start search timer
     _startSearchTimer();
 
-    // Setup socket listener
-    _listenForDriverAssigned();
+    // Setup socket listeners for assignment flow
+    _setupSocketListeners();
 
     // Join booking room if we have a booking
     _joinBookingRoom();
@@ -79,6 +91,10 @@ class _FindingDriverViewState extends State<FindingDriverView>
     _animationController.dispose();
     _searchTimer?.cancel();
     _driverAssignedSubscription?.cancel();
+    _searchStartedSubscription?.cancel();
+    _offerSentSubscription?.cancel();
+    _noPilotsSubscription?.cancel();
+    _searchTimeoutSubscription?.cancel();
     _leaveBookingRoom();
     super.dispose();
   }
@@ -94,18 +110,95 @@ class _FindingDriverViewState extends State<FindingDriverView>
     });
   }
 
-  /// Sets up socket listener for driver assignment event.
-  void _listenForDriverAssigned() {
+  /// Sets up all socket listeners for assignment flow events.
+  void _setupSocketListeners() {
+    final currentBookingId = _bookingController.currentBooking.value?.id;
+
+    // Listen for driver assigned
     _driverAssignedSubscription = _socketService.driverAssignedStream.listen(
       (data) {
-        // Verify this is for our booking
-        final currentBookingId = _bookingController.currentBooking.value?.id;
         if (currentBookingId != null && data.bookingId == currentBookingId) {
           _navigateToTracking();
         }
       },
       onError: (error) {
-        debugPrint('[FindingDriverView] Socket error: $error');
+        debugPrint('[FindingDriverView] Driver assigned error: $error');
+      },
+    );
+
+    // Listen for search started
+    _searchStartedSubscription = _socketService.searchStartedStream.listen(
+      (data) {
+        if (currentBookingId != null && data.bookingId == currentBookingId) {
+          if (mounted) {
+            setState(() {
+              _statusMessage = data.message;
+              _currentPilotNumber = 0;
+              _showRetryOptions = false;
+            });
+          }
+        }
+      },
+      onError: (error) {
+        debugPrint('[FindingDriverView] Search started error: $error');
+      },
+    );
+
+    // Listen for offer sent to pilot
+    _offerSentSubscription = _socketService.offerSentStream.listen(
+      (data) {
+        if (currentBookingId != null && data.bookingId == currentBookingId) {
+          if (mounted) {
+            setState(() {
+              _statusMessage = data.message;
+              _currentPilotNumber = data.pilotNumber;
+              _showRetryOptions = false;
+            });
+          }
+        }
+      },
+      onError: (error) {
+        debugPrint('[FindingDriverView] Offer sent error: $error');
+      },
+    );
+
+    // Listen for no pilots available
+    _noPilotsSubscription = _socketService.noPilotsStream.listen(
+      (data) {
+        if (currentBookingId != null && data.bookingId == currentBookingId) {
+          if (mounted) {
+            setState(() {
+              _showRetryOptions = true;
+              _canRetry = data.canRetry;
+              _canCancel = data.canCancel;
+              _failureMessage = data.message;
+              _searchTimer?.cancel();
+            });
+          }
+        }
+      },
+      onError: (error) {
+        debugPrint('[FindingDriverView] No pilots error: $error');
+      },
+    );
+
+    // Listen for search timeout
+    _searchTimeoutSubscription = _socketService.searchTimeoutStream.listen(
+      (data) {
+        if (currentBookingId != null && data.bookingId == currentBookingId) {
+          if (mounted) {
+            setState(() {
+              _showRetryOptions = true;
+              _canRetry = data.canRetry;
+              _canCancel = data.canCancel;
+              _failureMessage = data.message;
+              _searchTimer?.cancel();
+            });
+          }
+        }
+      },
+      onError: (error) {
+        debugPrint('[FindingDriverView] Search timeout error: $error');
       },
     );
   }
@@ -181,7 +274,9 @@ class _FindingDriverViewState extends State<FindingDriverView>
             child: Text(
               'Yes, Cancel',
               style: AppTextStyles.labelLarge.copyWith(
-                color: AppColors.error,
+                color: theme.brightness == Brightness.dark
+                    ? const Color(0xFFF87171)
+                    : AppColors.error,
               ),
             ),
           ),
@@ -198,6 +293,21 @@ class _FindingDriverViewState extends State<FindingDriverView>
   Future<void> _cancelBooking() async {
     await _bookingController.cancelBooking(reason: 'User cancelled while finding driver');
     Get.offAllNamed(Routes.main);
+  }
+
+  /// Retries the driver search.
+  Future<void> _retrySearch() async {
+    setState(() {
+      _showRetryOptions = false;
+      _failureMessage = null;
+      _statusMessage = 'Retrying search...';
+      _currentPilotNumber = 0;
+      _searchDuration = 0;
+    });
+    _startSearchTimer();
+
+    // Call the retry endpoint
+    await _bookingController.retryDriverSearch();
   }
 
   @override
@@ -230,25 +340,42 @@ class _FindingDriverViewState extends State<FindingDriverView>
 
                         // Title
                         Text(
-                          'Finding a Driver',
+                          _showRetryOptions ? 'No Drivers Found' : 'Finding a Driver',
                           style: AppTextStyles.h2.copyWith(
-                            color: theme.colorScheme.onSurface,
+                            color: _showRetryOptions
+                                ? (theme.brightness == Brightness.dark
+                                    ? const Color(0xFFF87171)
+                                    : AppColors.error)
+                                : theme.colorScheme.onSurface,
                           ),
                         ),
                         const SizedBox(height: 12),
 
-                        // Subtitle
+                        // Subtitle / Status message
                         Text(
-                          'Please wait while we connect you\nwith a nearby driver',
+                          _showRetryOptions
+                              ? (_failureMessage ?? 'All drivers are busy at the moment')
+                              : _statusMessage,
                           textAlign: TextAlign.center,
                           style: AppTextStyles.bodyMedium.copyWith(
                             color: theme.colorScheme.onSurfaceVariant,
                           ),
                         ),
+
+                        // Pilot progress indicator
+                        if (_currentPilotNumber > 0 && !_showRetryOptions) ...[
+                          const SizedBox(height: 16),
+                          _buildPilotProgress(theme),
+                        ],
+
                         const SizedBox(height: 24),
 
-                        // Timer
-                        _buildTimer(theme),
+                        // Timer (only when searching)
+                        if (!_showRetryOptions) _buildTimer(theme),
+
+                        // Retry options
+                        if (_showRetryOptions) _buildRetryOptions(theme),
+
                         const SizedBox(height: 32),
 
                         // Booking details card
@@ -262,13 +389,19 @@ class _FindingDriverViewState extends State<FindingDriverView>
               // Bottom cancel button
               Padding(
                 padding: const EdgeInsets.all(24),
-                child: AppButton.outline(
-                  text: 'Cancel Booking',
-                  onPressed: _showCancelDialog,
-                  borderColor: AppColors.error,
-                  textColor: AppColors.error,
-                  icon: Icons.close_rounded,
-                ),
+                child: Builder(builder: (context) {
+                  final theme = Theme.of(context);
+                  final errorColor = theme.brightness == Brightness.dark
+                      ? const Color(0xFFF87171)
+                      : AppColors.error;
+                  return AppButton.outline(
+                    text: 'Cancel Booking',
+                    onPressed: _showCancelDialog,
+                    borderColor: errorColor,
+                    textColor: errorColor,
+                    icon: Icons.close_rounded,
+                  );
+                }),
               ),
             ],
           ),
@@ -405,23 +538,33 @@ class _FindingDriverViewState extends State<FindingDriverView>
             ],
 
             // Pickup location
-            _buildLocationRow(
-              theme: theme,
-              icon: Icons.circle,
-              iconColor: AppColors.success,
-              label: 'Pickup',
-              address: pickup.isNotEmpty ? pickup : 'Loading...',
-            ),
+            Builder(builder: (context) {
+              final successColor = theme.brightness == Brightness.dark
+                  ? const Color(0xFF34D399)
+                  : AppColors.success;
+              return _buildLocationRow(
+                theme: theme,
+                icon: Icons.circle,
+                iconColor: successColor,
+                label: 'Pickup',
+                address: pickup.isNotEmpty ? pickup : 'Loading...',
+              );
+            }),
             const SizedBox(height: 12),
 
             // Drop location
-            _buildLocationRow(
-              theme: theme,
-              icon: Icons.location_on_rounded,
-              iconColor: AppColors.error,
-              label: 'Drop',
-              address: drop.isNotEmpty ? drop : 'Loading...',
-            ),
+            Builder(builder: (context) {
+              final errorColor = theme.brightness == Brightness.dark
+                  ? const Color(0xFFF87171)
+                  : AppColors.error;
+              return _buildLocationRow(
+                theme: theme,
+                icon: Icons.location_on_rounded,
+                iconColor: errorColor,
+                label: 'Drop',
+                address: drop.isNotEmpty ? drop : 'Loading...',
+              );
+            }),
 
             const SizedBox(height: 16),
             Divider(color: theme.dividerColor, height: 1),
@@ -539,6 +682,95 @@ class _FindingDriverViewState extends State<FindingDriverView>
               ),
             ],
           ),
+        ),
+      ],
+    );
+  }
+
+  /// Builds the pilot progress indicator showing which driver is being contacted.
+  Widget _buildPilotProgress(ThemeData theme) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.primary.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: 0.2),
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            width: 16,
+            height: 16,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              valueColor: AlwaysStoppedAnimation<Color>(
+                theme.colorScheme.primary,
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Text(
+            'Contacting driver #$_currentPilotNumber',
+            style: AppTextStyles.labelMedium.copyWith(
+              color: theme.colorScheme.primary,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Builds the retry/cancel options when no drivers are found.
+  Widget _buildRetryOptions(ThemeData theme) {
+    final errorColor = theme.brightness == Brightness.dark
+        ? const Color(0xFFF87171)
+        : AppColors.error;
+
+    return Column(
+      children: [
+        // Warning icon
+        Container(
+          width: 64,
+          height: 64,
+          decoration: BoxDecoration(
+            color: errorColor.withValues(alpha: 0.1),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(
+            Icons.warning_amber_rounded,
+            size: 32,
+            color: errorColor,
+          ),
+        ),
+        const SizedBox(height: 24),
+
+        // Action buttons
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (_canRetry)
+              Expanded(
+                child: AppButton(
+                  text: 'Retry Search',
+                  onPressed: _retrySearch,
+                  icon: Icons.refresh_rounded,
+                ),
+              ),
+            if (_canRetry && _canCancel) const SizedBox(width: 12),
+            if (_canCancel)
+              Expanded(
+                child: AppButton.outline(
+                  text: 'Cancel',
+                  onPressed: _cancelBooking,
+                  borderColor: errorColor,
+                  textColor: errorColor,
+                ),
+              ),
+          ],
         ),
       ],
     );
