@@ -118,17 +118,18 @@ export const adminListBookingsSchema = z.object({
   query: paginationSchema.extend({
     status: z.enum([
       'PENDING',
-      'SEARCHING',
-      'CONFIRMED',
-      'PILOT_ARRIVED',
+      'ACCEPTED',
+      'ARRIVED_PICKUP',
       'PICKED_UP',
       'IN_TRANSIT',
+      'ARRIVED_DROP',
       'DELIVERED',
       'CANCELLED',
     ]).optional(),
     search: z.string().max(100).optional(),
     dateFrom: z.string().datetime().optional(),
     dateTo: z.string().datetime().optional(),
+    pilotId: z.string().optional(),
   }),
 })
 
@@ -156,6 +157,16 @@ export const adminCancelBookingSchema = z.object({
       .string()
       .min(10, 'Cancellation reason must be at least 10 characters')
       .max(500, 'Cancellation reason must be at most 500 characters'),
+  }),
+})
+
+export const adminUpdateBookingStatusSchema = z.object({
+  params: z.object({
+    bookingId: uuidSchema,
+  }),
+  body: z.object({
+    status: z.enum(['ACCEPTED', 'ARRIVED_PICKUP', 'PICKED_UP', 'IN_TRANSIT', 'ARRIVED_DROP', 'DELIVERED']),
+    note: z.string().max(500).nullish().transform(v => v || undefined),
   }),
 })
 

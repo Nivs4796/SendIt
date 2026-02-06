@@ -114,7 +114,7 @@ const options: swaggerJsdoc.Options = {
             bookingNumber: { type: 'string', example: 'BK-123456' },
             status: {
               type: 'string',
-              enum: ['PENDING', 'SEARCHING', 'CONFIRMED', 'PILOT_ARRIVED', 'PICKED_UP', 'IN_TRANSIT', 'DELIVERED', 'CANCELLED'],
+              enum: ['PENDING', 'ACCEPTED', 'ARRIVED_PICKUP', 'PICKED_UP', 'IN_TRANSIT', 'ARRIVED_DROP', 'DELIVERED', 'CANCELLED'],
             },
             totalAmount: { type: 'number' },
             distance: { type: 'number', description: 'Distance in kilometers' },

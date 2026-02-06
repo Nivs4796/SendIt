@@ -314,7 +314,7 @@ export default function CouponsPage() {
                       )}
                     </TableCell>
                     <TableCell>
-                      <Badge variant="secondary">{getDiscountDisplay(coupon)}</Badge>
+                      <Badge variant="outline">{getDiscountDisplay(coupon)}</Badge>
                       {coupon.maxDiscount && coupon.discountType === 'PERCENTAGE' && (
                         <span className="text-xs text-muted-foreground ml-1">
                           (max ₹{coupon.maxDiscount})
@@ -339,7 +339,7 @@ export default function CouponsPage() {
                       ) : coupon.isActive ? (
                         <Badge variant="default">Active</Badge>
                       ) : (
-                        <Badge variant="secondary">Inactive</Badge>
+                        <Badge variant="outline">Inactive</Badge>
                       )}
                     </TableCell>
                     <TableCell className="text-right">

@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Search, MoreHorizontal, Eye, UserPlus, XCircle } from 'lucide-react'
+import { Search, MoreHorizontal, Eye, UserPlus, XCircle, RefreshCw } from 'lucide-react'
 import { AdminLayout } from '@/components/layout/admin-layout'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -22,6 +22,9 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import {
@@ -39,15 +42,38 @@ import { format } from 'date-fns'
 import { toast } from 'sonner'
 
 const statusColors: Record<BookingStatus, 'default' | 'secondary' | 'destructive' | 'outline'> = {
-  PENDING: 'secondary',
-  SEARCHING: 'outline',
+  PENDING: 'outline',
   ACCEPTED: 'default',
-  CONFIRMED: 'default',
-  PILOT_ARRIVED: 'default',
+  ARRIVED_PICKUP: 'default',
   PICKED_UP: 'default',
   IN_TRANSIT: 'default',
+  ARRIVED_DROP: 'default',
   DELIVERED: 'default',
   CANCELLED: 'destructive',
+}
+
+const statusClassNames: Partial<Record<BookingStatus, string>> = {
+  PENDING: 'border-yellow-500/50 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400',
+}
+
+const statusLabels: Record<string, string> = {
+  PENDING: 'Pending',
+  ACCEPTED: 'Accepted',
+  ARRIVED_PICKUP: 'Arrived at Pickup',
+  PICKED_UP: 'Picked Up',
+  IN_TRANSIT: 'In Transit',
+  ARRIVED_DROP: 'Arrived at Drop',
+  DELIVERED: 'Delivered',
+  CANCELLED: 'Cancelled',
+}
+
+const STATUS_ORDER = ['PENDING', 'ACCEPTED', 'ARRIVED_PICKUP', 'PICKED_UP', 'IN_TRANSIT', 'ARRIVED_DROP', 'DELIVERED'] as const
+
+const getNextStatuses = (current: BookingStatus): string[] => {
+  if (current === 'CANCELLED' || current === 'DELIVERED') return []
+  const idx = STATUS_ORDER.indexOf(current as typeof STATUS_ORDER[number])
+  if (idx === -1) return []
+  return STATUS_ORDER.slice(idx + 1) as unknown as string[]
 }
 
 // Helper to format address object to string
@@ -69,6 +95,9 @@ export default function BookingsPage() {
   const [isAssignOpen, setIsAssignOpen] = useState(false)
   const [cancelReason, setCancelReason] = useState('')
   const [selectedPilotId, setSelectedPilotId] = useState('')
+  const [isStatusUpdateOpen, setIsStatusUpdateOpen] = useState(false)
+  const [statusUpdateTarget, setStatusUpdateTarget] = useState<{ bookingId: string; status: string } | null>(null)
+  const [statusNote, setStatusNote] = useState('')
 
   const { data, isLoading } = useQuery({
     queryKey: ['bookings', page, search, statusFilter],
@@ -119,6 +148,21 @@ export default function BookingsPage() {
     },
   })
 
+  const statusUpdateMutation = useMutation({
+    mutationFn: ({ bookingId, status, note }: { bookingId: string; status: string; note?: string }) =>
+      adminApi.updateBookingStatus(bookingId, status as BookingStatus, note),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['bookings'] })
+      setIsStatusUpdateOpen(false)
+      setStatusUpdateTarget(null)
+      setStatusNote('')
+      toast.success('Booking status updated')
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Failed to update status')
+    },
+  })
+
   const handleView = (bookingId: string) => {
     router.push(`/bookings/${bookingId}`)
   }
@@ -133,11 +177,17 @@ export default function BookingsPage() {
     setIsAssignOpen(true)
   }
 
+  const openStatusUpdate = (bookingId: string, status: string) => {
+    setStatusUpdateTarget({ bookingId, status })
+    setStatusNote('')
+    setIsStatusUpdateOpen(true)
+  }
+
   const canCancel = (status: BookingStatus) =>
-    ['PENDING', 'SEARCHING', 'ACCEPTED', 'CONFIRMED'].includes(status)
+    ['PENDING', 'ACCEPTED', 'ARRIVED_PICKUP'].includes(status)
 
   const canAssign = (status: BookingStatus) =>
-    ['PENDING', 'SEARCHING'].includes(status)
+    ['PENDING'].includes(status)
 
   return (
     <AdminLayout>
@@ -165,8 +215,8 @@ export default function BookingsPage() {
             <TabsList className="inline-flex">
               <TabsTrigger value="all">All</TabsTrigger>
               <TabsTrigger value="PENDING">Pending</TabsTrigger>
-              <TabsTrigger value="SEARCHING">Searching</TabsTrigger>
-              <TabsTrigger value="CONFIRMED">Confirmed</TabsTrigger>
+              <TabsTrigger value="ACCEPTED">Accepted</TabsTrigger>
+              <TabsTrigger value="PICKED_UP">Picked Up</TabsTrigger>
               <TabsTrigger value="IN_TRANSIT">In Transit</TabsTrigger>
               <TabsTrigger value="DELIVERED">Delivered</TabsTrigger>
               <TabsTrigger value="CANCELLED">Cancelled</TabsTrigger>
@@ -213,14 +263,14 @@ export default function BookingsPage() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <div className="max-w-[200px] truncate" title={formatAddress(booking.dropoffAddress)}>
-                        {formatAddress(booking.dropoffAddress)}
+                      <div className="max-w-[200px] truncate" title={formatAddress(booking.dropAddress)}>
+                        {formatAddress(booking.dropAddress)}
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant={statusColors[booking.status]}>{booking.status}</Badge>
+                      <Badge variant={statusColors[booking.status]} className={statusClassNames[booking.status] || ''}>{statusLabels[booking.status] || booking.status}</Badge>
                     </TableCell>
-                    <TableCell>₹{booking.finalPrice || booking.estimatedPrice}</TableCell>
+                    <TableCell>₹{booking.totalAmount || booking.estimatedPrice || 0}</TableCell>
                     <TableCell>{format(new Date(booking.createdAt), 'MMM d, HH:mm')}</TableCell>
                     <TableCell>
                       <DropdownMenu>
@@ -234,6 +284,24 @@ export default function BookingsPage() {
                             <Eye className="mr-2 h-4 w-4" />
                             View Details
                           </DropdownMenuItem>
+                          {getNextStatuses(booking.status).length > 0 && (
+                            <DropdownMenuSub>
+                              <DropdownMenuSubTrigger className="data-[state=open]:bg-muted">
+                                <RefreshCw className="mr-2 h-4 w-4" />
+                                Update Status
+                              </DropdownMenuSubTrigger>
+                              <DropdownMenuSubContent>
+                                {getNextStatuses(booking.status).map((nextStatus) => (
+                                  <DropdownMenuItem
+                                    key={nextStatus}
+                                    onClick={() => openStatusUpdate(booking.id, nextStatus)}
+                                  >
+                                    {statusLabels[nextStatus] || nextStatus}
+                                  </DropdownMenuItem>
+                                ))}
+                              </DropdownMenuSubContent>
+                            </DropdownMenuSub>
+                          )}
                           {canAssign(booking.status) && (
                             <DropdownMenuItem onClick={() => openAssignDialog(booking)}>
                               <UserPlus className="mr-2 h-4 w-4" />
@@ -372,6 +440,47 @@ export default function BookingsPage() {
                 disabled={!selectedPilotId || assignMutation.isPending}
               >
                 {assignMutation.isPending ? 'Assigning...' : 'Assign Pilot'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Status Update Confirmation Dialog */}
+        <Dialog open={isStatusUpdateOpen} onOpenChange={setIsStatusUpdateOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Update Booking Status</DialogTitle>
+              <DialogDescription>
+                Change status to <strong>{statusLabels[statusUpdateTarget?.status || ''] || statusUpdateTarget?.status}</strong>. Optionally add a note.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-2">
+              <Label htmlFor="statusNote">Note (optional)</Label>
+              <textarea
+                id="statusNote"
+                className="w-full min-h-[80px] rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                placeholder="Add a note about this status change..."
+                value={statusNote}
+                onChange={(e) => setStatusNote(e.target.value)}
+              />
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsStatusUpdateOpen(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  if (statusUpdateTarget) {
+                    statusUpdateMutation.mutate({
+                      bookingId: statusUpdateTarget.bookingId,
+                      status: statusUpdateTarget.status,
+                      note: statusNote || undefined,
+                    })
+                  }
+                }}
+                disabled={statusUpdateMutation.isPending}
+              >
+                {statusUpdateMutation.isPending ? 'Updating...' : 'Confirm Update'}
               </Button>
             </DialogFooter>
           </DialogContent>

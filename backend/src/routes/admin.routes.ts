@@ -16,6 +16,7 @@ import {
   getBookingDetailsSchema,
   assignPilotSchema,
   adminCancelBookingSchema,
+  adminUpdateBookingStatusSchema,
   updateSettingSchema,
   updateSettingsBulkSchema,
   analyticsQuerySchema,
@@ -449,11 +450,16 @@ router.put('/documents/:documentId/verify', validate(verifyDocumentSchema), admi
  *         name: status
  *         schema:
  *           type: string
- *           enum: [PENDING, SEARCHING, CONFIRMED, PILOT_ARRIVED, PICKED_UP, IN_TRANSIT, DELIVERED, CANCELLED]
+ *           enum: [PENDING, ACCEPTED, ARRIVED_PICKUP, PICKED_UP, IN_TRANSIT, ARRIVED_DROP, DELIVERED, CANCELLED]
  *       - in: query
  *         name: search
  *         schema:
  *           type: string
+ *       - in: query
+ *         name: pilotId
+ *         schema:
+ *           type: string
+ *         description: Filter by pilot ID
  *       - in: query
  *         name: dateFrom
  *         schema:
@@ -569,6 +575,50 @@ router.post('/bookings/:bookingId/assign', validate(assignPilotSchema), adminCon
  *         description: Booking not found
  */
 router.post('/bookings/:bookingId/cancel', validate(adminCancelBookingSchema), adminController.cancelBooking)
+
+/**
+ * @swagger
+ * /admin/bookings/{bookingId}/status:
+ *   put:
+ *     summary: Update booking status
+ *     description: Update the status of a booking (admin override).
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: bookingId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - status
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [ACCEPTED, ARRIVED_PICKUP, PICKED_UP, IN_TRANSIT, ARRIVED_DROP, DELIVERED]
+ *               note:
+ *                 type: string
+ *                 maxLength: 500
+ *                 description: Optional note for the status change
+ *           example:
+ *             status: "PICKED_UP"
+ *             note: "Manually advancing status"
+ *     responses:
+ *       200:
+ *         description: Booking status updated
+ *       400:
+ *         description: Cannot update completed or cancelled booking
+ *       404:
+ *         description: Booking not found
+ */
+router.put('/bookings/:bookingId/status', validate(adminUpdateBookingStatusSchema), adminController.updateBookingStatus)
 
 // ============================================
 // SETTINGS

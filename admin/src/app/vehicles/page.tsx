@@ -144,6 +144,7 @@ export default function VehiclesPage() {
                 <TableHead>Year</TableHead>
                 <TableHead>Type</TableHead>
                 <TableHead>Pilot</TableHead>
+                <TableHead>Pilot Phone</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="w-[80px]">Actions</TableHead>
               </TableRow>
@@ -151,13 +152,13 @@ export default function VehiclesPage() {
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8">
+                  <TableCell colSpan={9} className="text-center py-8">
                     Loading...
                   </TableCell>
                 </TableRow>
               ) : vehicles.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8">
+                  <TableCell colSpan={9} className="text-center py-8">
                     No vehicles found
                   </TableCell>
                 </TableRow>
@@ -172,9 +173,13 @@ export default function VehiclesPage() {
                     <TableCell>{vehicle.year}</TableCell>
                     <TableCell>{vehicle.vehicleType?.name || '-'}</TableCell>
                     <TableCell>{vehicle.pilot?.name || '-'}</TableCell>
+                    <TableCell className="text-muted-foreground">{vehicle.pilot?.phone || '-'}</TableCell>
                     <TableCell>
                       <div className="flex gap-2">
-                        <Badge variant={vehicle.isVerified ? 'default' : 'secondary'}>
+                        <Badge
+                          variant={vehicle.isVerified ? 'default' : 'outline'}
+                          className={!vehicle.isVerified ? 'border-yellow-500/50 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400' : ''}
+                        >
                           {vehicle.isVerified ? 'Verified' : 'Pending'}
                         </Badge>
                         {!vehicle.isActive && (
@@ -285,7 +290,10 @@ export default function VehiclesPage() {
                   <div>
                     <Label className="text-muted-foreground">Verification</Label>
                     <p>
-                      <Badge variant={selectedVehicle.isVerified ? 'default' : 'secondary'}>
+                      <Badge
+                        variant={selectedVehicle.isVerified ? 'default' : 'outline'}
+                        className={!selectedVehicle.isVerified ? 'border-yellow-500/50 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400' : ''}
+                      >
                         {selectedVehicle.isVerified ? 'Verified' : 'Pending'}
                       </Badge>
                     </p>
@@ -303,10 +311,25 @@ export default function VehiclesPage() {
                 {selectedVehicle.pilot && (
                   <div>
                     <Label className="text-muted-foreground mb-2 block">Owner (Pilot)</Label>
-                    <div className="p-3 bg-muted rounded-lg">
-                      <p className="font-medium">{selectedVehicle.pilot.name}</p>
+                    <div className="p-3 bg-muted rounded-lg space-y-2">
+                      <div className="flex items-center justify-between">
+                        <p className="font-medium">{selectedVehicle.pilot.name}</p>
+                        <Badge
+                          variant={
+                            selectedVehicle.pilot.status === 'APPROVED' ? 'default' :
+                            selectedVehicle.pilot.status === 'PENDING' ? 'outline' :
+                            'destructive'
+                          }
+                          className={selectedVehicle.pilot.status === 'PENDING' ? 'border-yellow-500/50 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400' : ''}
+                        >
+                          {selectedVehicle.pilot.status || 'Unknown'}
+                        </Badge>
+                      </div>
                       <p className="text-sm text-muted-foreground">{selectedVehicle.pilot.phone}</p>
                       <p className="text-sm text-muted-foreground">{selectedVehicle.pilot.email}</p>
+                      {selectedVehicle.pilot.rating !== undefined && (
+                        <p className="text-sm">{selectedVehicle.pilot.rating.toFixed(1)} ⭐</p>
+                      )}
                     </div>
                   </div>
                 )}

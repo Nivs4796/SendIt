@@ -72,7 +72,7 @@ export interface Pilot {
 export interface PilotDocument {
   id: string
   type: string
-  documentUrl: string
+  url: string
   status: 'PENDING' | 'APPROVED' | 'REJECTED'
   rejectedReason?: string
   expiryDate?: string
@@ -106,12 +106,11 @@ export interface Vehicle {
 // Booking Types
 export type BookingStatus =
   | 'PENDING'
-  | 'SEARCHING'
   | 'ACCEPTED'
-  | 'CONFIRMED'
-  | 'PILOT_ARRIVED'
+  | 'ARRIVED_PICKUP'
   | 'PICKED_UP'
   | 'IN_TRANSIT'
+  | 'ARRIVED_DROP'
   | 'DELIVERED'
   | 'CANCELLED'
 
@@ -132,15 +131,18 @@ export interface Booking {
   pilotId?: string
   vehicleTypeId: string
   status: BookingStatus
-  pickupAddress: string | BookingAddress | null
-  pickupLat: number
-  pickupLng: number
-  dropoffAddress: string | BookingAddress | null
-  dropoffLat: number
-  dropoffLng: number
+  pickupAddress: BookingAddress | null
+  pickupLat?: number
+  pickupLng?: number
+  dropAddress: BookingAddress | null
+  dropoffLat?: number
+  dropoffLng?: number
   distance: number
-  duration: number
-  estimatedPrice: number
+  duration?: number
+  estimatedPrice?: number
+  baseFare?: number
+  distanceFare?: number
+  totalAmount?: number
   finalPrice?: number
   paymentMethod: 'CASH' | 'WALLET' | 'CARD'
   paymentStatus: 'PENDING' | 'COMPLETED' | 'FAILED' | 'REFUNDED'

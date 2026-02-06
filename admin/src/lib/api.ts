@@ -116,13 +116,15 @@ export const adminApi = {
     api.put(`/admin/documents/${documentId}/verify`, { status, rejectedReason }),
 
   // Bookings
-  listBookings: (params?: { page?: number; limit?: number; status?: string; search?: string; dateFrom?: string; dateTo?: string }) =>
+  listBookings: (params?: { page?: number; limit?: number; status?: string; search?: string; dateFrom?: string; dateTo?: string; pilotId?: string }) =>
     api.get('/admin/bookings', params),
   getBookingDetails: (bookingId: string) => api.get(`/admin/bookings/${bookingId}`),
   assignPilot: (bookingId: string, pilotId: string) =>
     api.post(`/admin/bookings/${bookingId}/assign`, { pilotId }),
   cancelBooking: (bookingId: string, reason: string) =>
     api.post(`/admin/bookings/${bookingId}/cancel`, { reason }),
+  updateBookingStatus: (bookingId: string, status: string, note?: string) =>
+    api.put(`/admin/bookings/${bookingId}/status`, { status, note }),
 
   // Vehicles
   listVehicles: (params?: { page?: number; limit?: number; search?: string; verified?: boolean; vehicleTypeId?: string }) =>

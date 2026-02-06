@@ -421,12 +421,14 @@ export const listBookings = async (
   status?: BookingStatus,
   search?: string,
   dateFrom?: Date,
-  dateTo?: Date
+  dateTo?: Date,
+  pilotId?: string
 ) => {
   const { skip, take } = getPaginationParams(page, limit)
 
   const where = {
     ...(status && { status }),
+    ...(pilotId && { pilotId }),
     ...(search && {
       OR: [
         { bookingNumber: { contains: search, mode: 'insensitive' as const } },
@@ -567,6 +569,55 @@ export const cancelBookingByAdmin = async (bookingId: string, reason: string) =>
   })
 
   logger.info(`Booking ${bookingId} cancelled by admin: ${reason}`)
+  return updatedBooking
+}
+
+export const updateBookingStatusByAdmin = async (
+  bookingId: string,
+  status: BookingStatus,
+  note?: string
+) => {
+  const booking = await prisma.booking.findUnique({ where: { id: bookingId } })
+
+  if (!booking) {
+    throw new AppError('Booking not found', 404)
+  }
+
+  if (['DELIVERED', 'CANCELLED'].includes(booking.status)) {
+    throw new AppError('Cannot update status of completed or cancelled booking', 400)
+  }
+
+  // Build timestamp updates based on status
+  // Note: Prisma Booking model only has acceptedAt, pickedUpAt, deliveredAt, cancelledAt
+  const timestampUpdates: Record<string, Date> = {}
+  if (status === 'ACCEPTED') timestampUpdates.acceptedAt = new Date()
+  if (status === 'PICKED_UP') timestampUpdates.pickedUpAt = new Date()
+  if (status === 'DELIVERED') timestampUpdates.deliveredAt = new Date()
+
+  const updatedBooking = await prisma.booking.update({
+    where: { id: bookingId },
+    data: {
+      status,
+      ...timestampUpdates,
+    },
+    include: {
+      user: { select: { name: true, phone: true } },
+      pilot: { select: { name: true, phone: true } },
+      pickupAddress: true,
+      dropAddress: true,
+    },
+  })
+
+  // Create tracking history entry
+  await prisma.trackingHistory.create({
+    data: {
+      bookingId,
+      status,
+      note: note ? `Admin override: ${note}` : 'Status updated by admin',
+    },
+  })
+
+  logger.info(`Booking ${bookingId} status updated to ${status} by admin`)
   return updatedBooking
 }
 

@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Search, MoreHorizontal, CheckCircle, XCircle, Ban, Edit, Eye, FileText } from 'lucide-react'
+import { Search, MoreHorizontal, CheckCircle, XCircle, Ban, Edit, Eye } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { AdminLayout } from '@/components/layout/admin-layout'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -38,19 +39,23 @@ import { format } from 'date-fns'
 import { toast } from 'sonner'
 
 const statusColors: Record<PilotStatus, 'default' | 'secondary' | 'destructive' | 'outline'> = {
-  PENDING: 'secondary',
+  PENDING: 'outline',
   APPROVED: 'default',
   REJECTED: 'destructive',
   SUSPENDED: 'outline',
 }
 
+const pilotStatusClassName: Partial<Record<PilotStatus, string>> = {
+  PENDING: 'border-yellow-500/50 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400',
+}
+
 export default function PilotsPage() {
   const queryClient = useQueryClient()
+  const router = useRouter()
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [selectedPilot, setSelectedPilot] = useState<Pilot | null>(null)
-  const [isViewOpen, setIsViewOpen] = useState(false)
   const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false)
   const [statusAction, setStatusAction] = useState<{ status: PilotStatus; reason: string }>({
     status: 'APPROVED',
@@ -98,18 +103,6 @@ export default function PilotsPage() {
       toast.error(error.message || 'Failed to update pilot')
     },
   })
-
-  const handleView = async (pilotId: string) => {
-    try {
-      const response = await adminApi.getPilotDetails(pilotId)
-      // API returns { pilot: {...}, bookingStats: [...], totalEarnings: ... }
-      const pilotData = (response.data as { pilot: Pilot }).pilot
-      setSelectedPilot(pilotData)
-      setIsViewOpen(true)
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Failed to load pilot details')
-    }
-  }
 
   const openStatusDialog = (pilot: Pilot, status: PilotStatus) => {
     setSelectedPilot(pilot)
@@ -220,7 +213,7 @@ export default function PilotsPage() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant={statusColors[pilot.status]}>{pilot.status}</Badge>
+                      <Badge variant={statusColors[pilot.status]} className={pilotStatusClassName[pilot.status] || ''}>{pilot.status}</Badge>
                     </TableCell>
                     <TableCell>
                       <Badge variant={pilot.isOnline ? 'default' : 'outline'}>
@@ -238,7 +231,7 @@ export default function PilotsPage() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleView(pilot.id)}>
+                          <DropdownMenuItem onClick={() => router.push(`/pilots/${pilot.id}`)}>
                             <Eye className="mr-2 h-4 w-4" />
                             View Details
                           </DropdownMenuItem>
@@ -349,105 +342,6 @@ export default function PilotsPage() {
                 {updateStatusMutation.isPending ? 'Processing...' : 'Confirm'}
               </Button>
             </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
-        {/* View Dialog */}
-        <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>
-          <DialogContent className="max-w-3xl max-h-[85vh] flex flex-col">
-            <DialogHeader>
-              <DialogTitle>Pilot Details</DialogTitle>
-              <DialogDescription>View pilot information, documents, and vehicles</DialogDescription>
-            </DialogHeader>
-            {selectedPilot && (
-              <div className="space-y-6 overflow-y-auto flex-1 pr-2">
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  <div className="min-w-0">
-                    <Label className="text-muted-foreground">Name</Label>
-                    <p className="font-medium truncate">{selectedPilot.name}</p>
-                  </div>
-                  <div className="min-w-0">
-                    <Label className="text-muted-foreground">Email</Label>
-                    <p className="font-medium truncate" title={selectedPilot.email || ''}>
-                      {selectedPilot.email || 'N/A'}
-                    </p>
-                  </div>
-                  <div className="min-w-0">
-                    <Label className="text-muted-foreground">Phone</Label>
-                    <p className="font-medium truncate">{selectedPilot.phone}</p>
-                  </div>
-                  <div>
-                    <Label className="text-muted-foreground">Status</Label>
-                    <p>
-                      <Badge variant={statusColors[selectedPilot.status]}>{selectedPilot.status}</Badge>
-                    </p>
-                  </div>
-                  <div>
-                    <Label className="text-muted-foreground">Rating</Label>
-                    <p className="font-medium">{selectedPilot.rating.toFixed(1)} ⭐</p>
-                  </div>
-                  <div>
-                    <Label className="text-muted-foreground">Total Deliveries</Label>
-                    <p className="font-medium">{selectedPilot.totalDeliveries ?? selectedPilot.totalRides ?? 0}</p>
-                  </div>
-                </div>
-
-                {selectedPilot.documents && selectedPilot.documents.length > 0 && (
-                  <div>
-                    <Label className="text-muted-foreground mb-2 block">Documents ({selectedPilot.documents.length})</Label>
-                    <div className="space-y-2">
-                      {selectedPilot.documents.map((doc) => (
-                        <div key={doc.id} className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                          <div className="flex items-center gap-3">
-                            <FileText className="h-5 w-5" />
-                            <div>
-                              <p className="font-medium">{doc.type}</p>
-                              {doc.expiryDate && (
-                                <p className="text-xs text-muted-foreground">
-                                  Expires: {format(new Date(doc.expiryDate), 'MMM d, yyyy')}
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                          <Badge
-                            variant={
-                              doc.status === 'APPROVED'
-                                ? 'default'
-                                : doc.status === 'REJECTED'
-                                ? 'destructive'
-                                : 'secondary'
-                            }
-                          >
-                            {doc.status}
-                          </Badge>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {selectedPilot.vehicles && selectedPilot.vehicles.length > 0 && (
-                  <div>
-                    <Label className="text-muted-foreground mb-2 block">Vehicles ({selectedPilot.vehicles.length})</Label>
-                    <div className="space-y-2">
-                      {selectedPilot.vehicles.map((vehicle) => (
-                        <div key={vehicle.id} className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                          <div>
-                            <p className="font-medium">
-                              {vehicle.model} ({vehicle.color})
-                            </p>
-                            <p className="text-sm text-muted-foreground">{vehicle.plateNumber}</p>
-                          </div>
-                          <Badge variant={vehicle.isVerified ? 'default' : 'secondary'}>
-                            {vehicle.isVerified ? 'Verified' : 'Pending'}
-                          </Badge>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
           </DialogContent>
         </Dialog>
 

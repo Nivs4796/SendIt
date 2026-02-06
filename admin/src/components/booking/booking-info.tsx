@@ -7,25 +7,27 @@ import type { Booking, BookingStatus } from '@/types'
 import { format } from 'date-fns'
 
 const statusColors: Record<BookingStatus, 'default' | 'secondary' | 'destructive' | 'outline'> = {
-  PENDING: 'secondary',
-  SEARCHING: 'outline',
+  PENDING: 'outline',
   ACCEPTED: 'default',
-  CONFIRMED: 'default',
-  PILOT_ARRIVED: 'default',
+  ARRIVED_PICKUP: 'default',
   PICKED_UP: 'default',
   IN_TRANSIT: 'default',
+  ARRIVED_DROP: 'default',
   DELIVERED: 'default',
   CANCELLED: 'destructive',
 }
 
+const statusClassNames: Partial<Record<BookingStatus, string>> = {
+  PENDING: 'border-yellow-500/50 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400',
+}
+
 const statusLabels: Record<BookingStatus, string> = {
   PENDING: 'Pending',
-  SEARCHING: 'Searching for Pilot',
-  ACCEPTED: 'Pilot Accepted',
-  CONFIRMED: 'Confirmed',
-  PILOT_ARRIVED: 'Pilot Arrived',
+  ACCEPTED: 'Accepted',
+  ARRIVED_PICKUP: 'Arrived at Pickup',
   PICKED_UP: 'Picked Up',
   IN_TRANSIT: 'In Transit',
+  ARRIVED_DROP: 'Arrived at Drop',
   DELIVERED: 'Delivered',
   CANCELLED: 'Cancelled',
 }
@@ -48,7 +50,7 @@ export function BookingStatusCard({ booking }: BookingInfoProps) {
       <CardHeader className="pb-3">
         <CardTitle className="text-lg flex items-center justify-between">
           <span>Status</span>
-          <Badge variant={statusColors[booking.status]} className="text-sm">
+          <Badge variant={statusColors[booking.status]} className={`text-sm ${statusClassNames[booking.status] || ''}`}>
             {statusLabels[booking.status]}
           </Badge>
         </CardTitle>
@@ -92,7 +94,7 @@ export function BookingAddressCard({ booking }: BookingInfoProps) {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-xs text-muted-foreground uppercase tracking-wide">Dropoff</p>
-            <p className="font-medium text-sm mt-0.5">{formatAddress(booking.dropoffAddress)}</p>
+            <p className="font-medium text-sm mt-0.5">{formatAddress(booking.dropAddress)}</p>
           </div>
         </div>
 
@@ -105,7 +107,7 @@ export function BookingAddressCard({ booking }: BookingInfoProps) {
           <div className="flex items-center gap-2 text-sm">
             <Clock className="h-4 w-4 text-muted-foreground" />
             <span className="text-muted-foreground">Duration:</span>
-            <span className="font-medium">{booking.duration} min</span>
+            <span className="font-medium">{booking.duration ? `${booking.duration} min` : 'N/A'}</span>
           </div>
         </div>
       </CardContent>
@@ -120,11 +122,31 @@ export function BookingPricingCard({ booking }: BookingInfoProps) {
         <CardTitle className="text-lg">Pricing & Payment</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
-        <div className="flex items-center justify-between text-sm">
-          <span className="text-muted-foreground">Estimated Price</span>
-          <span className="font-medium">₹{booking.estimatedPrice}</span>
-        </div>
-        {booking.finalPrice && (
+        {booking.estimatedPrice != null && (
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground">Estimated Price</span>
+            <span className="font-medium">₹{booking.estimatedPrice}</span>
+          </div>
+        )}
+        {booking.baseFare != null && (
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground">Base Fare</span>
+            <span className="font-medium">₹{booking.baseFare}</span>
+          </div>
+        )}
+        {booking.distanceFare != null && (
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground">Distance Fare</span>
+            <span className="font-medium">₹{booking.distanceFare}</span>
+          </div>
+        )}
+        {booking.totalAmount != null && (
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground">Total Amount</span>
+            <span className="font-semibold text-primary">₹{booking.totalAmount}</span>
+          </div>
+        )}
+        {booking.finalPrice != null && (
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">Final Price</span>
             <span className="font-semibold text-primary">₹{booking.finalPrice}</span>
@@ -140,7 +162,16 @@ export function BookingPricingCard({ booking }: BookingInfoProps) {
         </div>
         <div className="flex items-center justify-between text-sm">
           <span className="text-muted-foreground">Payment Status</span>
-          <Badge variant={booking.paymentStatus === 'COMPLETED' ? 'default' : 'secondary'}>
+          <Badge
+            variant={booking.paymentStatus === 'COMPLETED' ? 'default' : 'outline'}
+            className={
+              booking.paymentStatus === 'PENDING'
+                ? 'border-yellow-500/50 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400'
+                : booking.paymentStatus === 'FAILED'
+                  ? 'border-red-500/50 bg-red-500/10 text-red-600 dark:text-red-400'
+                  : ''
+            }
+          >
             {booking.paymentStatus}
           </Badge>
         </div>

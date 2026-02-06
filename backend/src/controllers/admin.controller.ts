@@ -190,7 +190,7 @@ export const listBookings = async (
   next: NextFunction
 ) => {
   try {
-    const { page = '1', limit = '10', status, search, dateFrom, dateTo } = req.query
+    const { page = '1', limit = '10', status, search, dateFrom, dateTo, pilotId } = req.query
 
     const result = await adminService.listBookings(
       parseInt(page as string),
@@ -198,7 +198,8 @@ export const listBookings = async (
       status as any,
       search as string | undefined,
       dateFrom ? new Date(dateFrom as string) : undefined,
-      dateTo ? new Date(dateTo as string) : undefined
+      dateTo ? new Date(dateTo as string) : undefined,
+      pilotId as string | undefined
     )
 
     res.json(formatResponse(true, 'Bookings retrieved', { bookings: result.bookings }, result.meta))
@@ -248,6 +249,22 @@ export const cancelBooking = async (
 
     const booking = await adminService.cancelBookingByAdmin(bookingId, reason)
     res.json(formatResponse(true, 'Booking cancelled', { booking }))
+  } catch (error) {
+    next(error)
+  }
+}
+
+export const updateBookingStatus = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const bookingId = req.params.bookingId as string
+    const { status, note } = req.body
+
+    const booking = await adminService.updateBookingStatusByAdmin(bookingId, status, note)
+    res.json(formatResponse(true, `Booking status updated to ${status}`, { booking }))
   } catch (error) {
     next(error)
   }
