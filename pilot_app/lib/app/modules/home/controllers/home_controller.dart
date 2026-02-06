@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../data/models/pilot_model.dart';
@@ -7,7 +6,6 @@ import '../../../data/models/earnings_model.dart';
 import '../../../data/models/job_model.dart';
 import '../../../data/repositories/pilot_repository.dart';
 import '../../../data/repositories/auth_repository.dart';
-import '../../../services/storage_service.dart';
 import '../../../services/socket_service.dart';
 import '../../../services/location_service.dart';
 import '../../jobs/controllers/jobs_controller.dart';
@@ -15,7 +13,6 @@ import '../../jobs/controllers/jobs_controller.dart';
 class HomeController extends GetxController {
   late PilotRepository _pilotRepository;
   late AuthRepository _authRepository;
-  late StorageService _storage;
   late SocketService _socketService;
   late LocationService _locationService;
   late JobsController _jobsController;
@@ -30,13 +27,14 @@ class HomeController extends GetxController {
   // Earnings
   final Rx<EarningsModel?> todayEarnings = Rx<EarningsModel?>(null);
   final Rx<EarningsModel?> weekEarnings = Rx<EarningsModel?>(null);
-  final missedOrderValue = 0.0.obs;
-
   // Active vehicle
   final Rx<VehicleModel?> activeVehicle = Rx<VehicleModel?>(null);
 
   // Selected stats tab (0 = Today, 1 = This Week)
   final selectedStatsTab = 0.obs;
+
+  // Bottom navigation index (0=Home, 1=Profile)
+  final selectedNavIndex = 0.obs;
 
   // Error state
   final errorMessage = ''.obs;
@@ -46,7 +44,6 @@ class HomeController extends GetxController {
     super.onInit();
     _pilotRepository = PilotRepository();
     _authRepository = AuthRepository();
-    _storage = Get.find<StorageService>();
     _socketService = Get.find<SocketService>();
     _locationService = Get.find<LocationService>();
     _jobsController = Get.find<JobsController>();
@@ -104,31 +101,11 @@ class HomeController extends GetxController {
         weekEarnings.value = weekResponse['earnings'] as EarningsModel?;
       }
 
-      // Calculate missed order value (mock for now)
-      missedOrderValue.value = 1850.0;
     } catch (e) {
-      // Use mock data if API fails
-      _loadMockStats();
+      errorMessage.value = 'Failed to load earnings';
     } finally {
       isLoadingStats.value = false;
     }
-  }
-
-  /// Load mock stats as fallback
-  void _loadMockStats() {
-    todayEarnings.value = EarningsModel(
-      totalEarnings: 980.0,
-      totalHours: 4.5,
-      totalRides: 8,
-      period: 'today',
-    );
-    
-    weekEarnings.value = EarningsModel(
-      totalEarnings: 4500.0,
-      totalHours: 32.0,
-      totalRides: 45,
-      period: 'week',
-    );
   }
 
   /// Toggle online/offline status
@@ -223,5 +200,10 @@ class HomeController extends GetxController {
     if (hour < 12) return 'Good Morning';
     if (hour < 17) return 'Good Afternoon';
     return 'Good Evening';
+  }
+
+  /// Handle bottom navigation tap
+  void onNavTap(int index) {
+    selectedNavIndex.value = index;
   }
 }

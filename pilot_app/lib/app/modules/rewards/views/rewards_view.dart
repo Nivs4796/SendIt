@@ -12,10 +12,10 @@ class RewardsView extends GetView<RewardsController> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final colors = AppColorScheme.of(context);
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: colors.background,
       appBar: AppBar(
         title: const Text('Rewards'),
         centerTitle: true,
@@ -36,19 +36,19 @@ class RewardsView extends GetView<RewardsController> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Points Card
-                _buildPointsCard(theme),
+                _buildPointsCard(colors),
                 const SizedBox(height: 20),
 
                 // Referral Card
-                _buildReferralCard(theme),
+                _buildReferralCard(colors),
                 const SizedBox(height: 24),
 
                 // Rewards Section
-                _buildRewardsSection(theme),
+                _buildRewardsSection(colors),
                 const SizedBox(height: 24),
 
                 // Achievements Section
-                _buildAchievementsSection(theme),
+                _buildAchievementsSection(colors),
               ],
             ),
           ),
@@ -57,20 +57,20 @@ class RewardsView extends GetView<RewardsController> {
     );
   }
 
-  Widget _buildPointsCard(ThemeData theme) {
+  Widget _buildPointsCard(AppColorScheme colors) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [Colors.amber.shade600, Colors.orange.shade700],
+          colors: [colors.accent, colors.warning],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
         boxShadow: [
           BoxShadow(
-            color: Colors.amber.withValues(alpha: 0.3),
+            color: colors.accent.withValues(alpha: 0.3),
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
@@ -116,20 +116,20 @@ class RewardsView extends GetView<RewardsController> {
     );
   }
 
-  Widget _buildReferralCard(ThemeData theme) {
+  Widget _buildReferralCard(AppColorScheme colors) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
+        color: colors.surfaceVariant,
         borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+        border: Border.all(color: colors.primary.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(Icons.people, color: AppColors.primary),
+              Icon(Icons.people, color: colors.primary),
               const SizedBox(width: 8),
               Text(
                 'Refer & Earn',
@@ -141,7 +141,7 @@ class RewardsView extends GetView<RewardsController> {
           Text(
             'Invite other pilots and earn ₹200 for each successful referral!',
             style: AppTextStyles.bodySmall.copyWith(
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+              color: colors.textSecondary,
             ),
           ),
           const SizedBox(height: 16),
@@ -150,9 +150,9 @@ class RewardsView extends GetView<RewardsController> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: theme.scaffoldBackgroundColor,
+              color: colors.background,
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: theme.dividerColor),
+              border: Border.all(color: colors.border),
             ),
             child: Row(
               children: [
@@ -168,12 +168,12 @@ class RewardsView extends GetView<RewardsController> {
                 IconButton(
                   onPressed: controller.copyReferralCode,
                   icon: const Icon(Icons.copy),
-                  color: AppColors.primary,
+                  color: colors.primary,
                 ),
                 IconButton(
                   onPressed: controller.shareReferralCode,
                   icon: const Icon(Icons.share),
-                  color: AppColors.primary,
+                  color: colors.primary,
                 ),
               ],
             ),
@@ -185,21 +185,21 @@ class RewardsView extends GetView<RewardsController> {
             children: [
               Expanded(
                 child: _buildReferralStat(
-                  theme,
+                  colors,
                   'Total Referrals',
                   controller.totalReferrals.value.toString(),
                 ),
               ),
               Expanded(
                 child: _buildReferralStat(
-                  theme,
+                  colors,
                   'Pending',
                   controller.pendingReferrals.value.toString(),
                 ),
               ),
               Expanded(
                 child: _buildReferralStat(
-                  theme,
+                  colors,
                   'Earned',
                   '₹${controller.earnedFromReferrals.value.toInt()}',
                 ),
@@ -211,27 +211,27 @@ class RewardsView extends GetView<RewardsController> {
     );
   }
 
-  Widget _buildReferralStat(ThemeData theme, String label, String value) {
+  Widget _buildReferralStat(AppColorScheme colors, String label, String value) {
     return Column(
       children: [
         Text(
           value,
           style: AppTextStyles.titleMedium.copyWith(
             fontWeight: FontWeight.bold,
-            color: AppColors.primary,
+            color: colors.primary,
           ),
         ),
         Text(
           label,
           style: AppTextStyles.labelSmall.copyWith(
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+            color: colors.textHint,
           ),
         ),
       ],
     );
   }
 
-  Widget _buildRewardsSection(ThemeData theme) {
+  Widget _buildRewardsSection(AppColorScheme colors) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -245,14 +245,14 @@ class RewardsView extends GetView<RewardsController> {
           physics: const NeverScrollableScrollPhysics(),
           itemCount: controller.rewards.length,
           itemBuilder: (context, index) {
-            return _buildRewardItem(theme, controller.rewards[index]);
+            return _buildRewardItem(colors, controller.rewards[index]);
           },
         )),
       ],
     );
   }
 
-  Widget _buildRewardItem(ThemeData theme, RewardItem reward) {
+  Widget _buildRewardItem(AppColorScheme colors, RewardItem reward) {
     final canClaim = !reward.isClaimed && controller.rewardPoints.value >= reward.pointsRequired;
 
     IconData icon;
@@ -260,19 +260,19 @@ class RewardsView extends GetView<RewardsController> {
     switch (reward.iconType) {
       case RewardIconType.wallet:
         icon = Icons.account_balance_wallet;
-        iconColor = Colors.green;
+        iconColor = colors.success;
         break;
       case RewardIconType.priority:
         icon = Icons.star;
-        iconColor = Colors.amber;
+        iconColor = colors.accent;
         break;
       case RewardIconType.fuel:
         icon = Icons.local_gas_station;
-        iconColor = Colors.blue;
+        iconColor = colors.info;
         break;
       case RewardIconType.voucher:
         icon = Icons.card_giftcard;
-        iconColor = Colors.purple;
+        iconColor = colors.primaryDark;
         break;
     }
 
@@ -281,8 +281,8 @@ class RewardsView extends GetView<RewardsController> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: reward.isClaimed
-            ? theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5)
-            : theme.colorScheme.surfaceContainerHighest,
+            ? colors.surfaceVariant.withValues(alpha: 0.5)
+            : colors.surfaceVariant,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -310,7 +310,7 @@ class RewardsView extends GetView<RewardsController> {
                 Text(
                   reward.description,
                   style: AppTextStyles.labelSmall.copyWith(
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                    color: colors.textHint,
                   ),
                 ),
               ],
@@ -321,13 +321,13 @@ class RewardsView extends GetView<RewardsController> {
               ? Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: Colors.green.withValues(alpha: 0.1),
+                    color: colors.success.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
                     'Claimed',
                     style: AppTextStyles.labelSmall.copyWith(
-                      color: Colors.green,
+                      color: colors.success,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -335,8 +335,8 @@ class RewardsView extends GetView<RewardsController> {
               : ElevatedButton(
                   onPressed: canClaim ? () => controller.claimReward(reward.id) : null,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
+                    backgroundColor: colors.primary,
+                    foregroundColor: colors.textOnPrimary,
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
@@ -349,7 +349,7 @@ class RewardsView extends GetView<RewardsController> {
     );
   }
 
-  Widget _buildAchievementsSection(ThemeData theme) {
+  Widget _buildAchievementsSection(AppColorScheme colors) {
     final dateFormat = DateFormat('MMM d, yyyy');
 
     return Column(
@@ -376,11 +376,11 @@ class RewardsView extends GetView<RewardsController> {
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: achievement.isUnlocked
-                    ? AppColors.primary.withValues(alpha: 0.1)
-                    : theme.colorScheme.surfaceContainerHighest,
+                    ? colors.primary.withValues(alpha: 0.1)
+                    : colors.surfaceVariant,
                 borderRadius: BorderRadius.circular(12),
                 border: achievement.isUnlocked
-                    ? Border.all(color: AppColors.primary.withValues(alpha: 0.3))
+                    ? Border.all(color: colors.primary.withValues(alpha: 0.3))
                     : null,
               ),
               child: Column(
@@ -390,7 +390,7 @@ class RewardsView extends GetView<RewardsController> {
                     achievement.iconEmoji,
                     style: TextStyle(
                       fontSize: 32,
-                      color: achievement.isUnlocked ? null : Colors.grey,
+                      color: achievement.isUnlocked ? null : colors.textHint,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -399,8 +399,8 @@ class RewardsView extends GetView<RewardsController> {
                     style: AppTextStyles.labelMedium.copyWith(
                       fontWeight: FontWeight.bold,
                       color: achievement.isUnlocked
-                          ? theme.colorScheme.onSurface
-                          : theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                          ? colors.textPrimary
+                          : colors.textHint,
                     ),
                     textAlign: TextAlign.center,
                     maxLines: 1,
@@ -411,7 +411,7 @@ class RewardsView extends GetView<RewardsController> {
                     Text(
                       dateFormat.format(achievement.unlockedAt!),
                       style: AppTextStyles.labelSmall.copyWith(
-                        color: AppColors.primary,
+                        color: colors.primary,
                       ),
                     )
                   else if (achievement.progress != null)
@@ -420,14 +420,14 @@ class RewardsView extends GetView<RewardsController> {
                         const SizedBox(height: 4),
                         LinearProgressIndicator(
                           value: achievement.progress!,
-                          backgroundColor: theme.colorScheme.outline.withValues(alpha: 0.3),
-                          valueColor: AlwaysStoppedAnimation(AppColors.primary),
+                          backgroundColor: colors.border.withValues(alpha: 0.3),
+                          valueColor: AlwaysStoppedAnimation(colors.primary),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           '${(achievement.progress! * 100).toInt()}%',
                           style: AppTextStyles.labelSmall.copyWith(
-                            color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                            color: colors.textHint,
                           ),
                         ),
                       ],

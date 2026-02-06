@@ -11,11 +11,11 @@ class VerificationPendingView extends GetView<RegistrationController> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final colors = AppColorScheme.of(context);
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: colors.background,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -25,14 +25,14 @@ class VerificationPendingView extends GetView<RegistrationController> {
                 SizedBox(height: size.height * 0.05),
 
                 // Animated Success Illustration
-                _buildSuccessAnimation(theme),
+                _buildSuccessAnimation(colors),
 
                 const SizedBox(height: 40),
 
                 // Title with gradient
                 ShaderMask(
                   shaderCallback: (bounds) => LinearGradient(
-                    colors: [AppColors.primary, AppColors.primary.withValues(alpha: 0.7)],
+                    colors: [colors.primary, colors.primary.withValues(alpha: 0.7)],
                   ).createShader(bounds),
                   child: Text(
                     'You\'re Almost There! 🎉',
@@ -49,7 +49,7 @@ class VerificationPendingView extends GetView<RegistrationController> {
                 Text(
                   'Your application has been submitted successfully.\nOur team is reviewing your documents.',
                   style: AppTextStyles.bodyMedium.copyWith(
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                    color: colors.textSecondary,
                     height: 1.5,
                   ),
                   textAlign: TextAlign.center,
@@ -58,17 +58,17 @@ class VerificationPendingView extends GetView<RegistrationController> {
                 const SizedBox(height: 40),
 
                 // Progress Timeline
-                _buildProgressTimeline(theme),
+                _buildProgressTimeline(colors),
 
                 const SizedBox(height: 32),
 
                 // Estimated Time Card
-                _buildEstimatedTimeCard(theme),
+                _buildEstimatedTimeCard(colors),
 
                 const SizedBox(height: 24),
 
                 // What's Next Section
-                _buildWhatsNextSection(theme),
+                _buildWhatsNextSection(colors),
 
                 const SizedBox(height: 32),
 
@@ -89,12 +89,12 @@ class VerificationPendingView extends GetView<RegistrationController> {
                   icon: Icon(
                     Icons.chat_bubble_outline_rounded,
                     size: 18,
-                    color: AppColors.primary,
+                    color: colors.primary,
                   ),
                   label: Text(
                     'Need Help? Chat with Support',
                     style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.primary,
+                      color: colors.primary,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -109,7 +109,7 @@ class VerificationPendingView extends GetView<RegistrationController> {
     );
   }
 
-  Widget _buildSuccessAnimation(ThemeData theme) {
+  Widget _buildSuccessAnimation(AppColorScheme colors) {
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0.0, end: 1.0),
       duration: const Duration(milliseconds: 800),
@@ -128,8 +128,8 @@ class VerificationPendingView extends GetView<RegistrationController> {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              AppColors.primary.withValues(alpha: 0.15),
-              AppColors.primary.withValues(alpha: 0.05),
+              colors.primary.withValues(alpha: 0.15),
+              colors.primary.withValues(alpha: 0.05),
             ],
           ),
           shape: BoxShape.circle,
@@ -144,7 +144,7 @@ class VerificationPendingView extends GetView<RegistrationController> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: AppColors.primary.withValues(alpha: 0.3),
+                  color: colors.primary.withValues(alpha: 0.3),
                   width: 3,
                 ),
               ),
@@ -158,14 +158,14 @@ class VerificationPendingView extends GetView<RegistrationController> {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    AppColors.primary,
-                    AppColors.primary.withValues(alpha: 0.8),
+                    colors.primary,
+                    colors.primary.withValues(alpha: 0.8),
                   ],
                 ),
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.4),
+                    color: colors.primary.withValues(alpha: 0.4),
                     blurRadius: 20,
                     offset: const Offset(0, 8),
                   ),
@@ -183,20 +183,20 @@ class VerificationPendingView extends GetView<RegistrationController> {
     );
   }
 
-  Widget _buildProgressTimeline(ThemeData theme) {
+  Widget _buildProgressTimeline(AppColorScheme colors) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+        color: colors.surfaceVariant.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: theme.colorScheme.outline.withValues(alpha: 0.1),
+          color: colors.border.withValues(alpha: 0.1),
         ),
       ),
       child: Column(
         children: [
           _buildTimelineStep(
-            theme,
+            colors,
             icon: Icons.check_circle_rounded,
             title: 'Application Received',
             subtitle: 'Just now',
@@ -204,21 +204,21 @@ class VerificationPendingView extends GetView<RegistrationController> {
             isFirst: true,
           ),
           _buildTimelineStep(
-            theme,
+            colors,
             icon: Icons.document_scanner_rounded,
             title: 'Document Verification',
             subtitle: 'In progress...',
             status: TimelineStatus.inProgress,
           ),
           _buildTimelineStep(
-            theme,
+            colors,
             icon: Icons.verified_user_rounded,
             title: 'Background Check',
             subtitle: 'Pending',
             status: TimelineStatus.pending,
           ),
           _buildTimelineStep(
-            theme,
+            colors,
             icon: Icons.celebration_rounded,
             title: 'Account Activated',
             subtitle: 'Almost there!',
@@ -231,7 +231,7 @@ class VerificationPendingView extends GetView<RegistrationController> {
   }
 
   Widget _buildTimelineStep(
-    ThemeData theme, {
+    AppColorScheme colors, {
     required IconData icon,
     required String title,
     required String subtitle,
@@ -241,11 +241,11 @@ class VerificationPendingView extends GetView<RegistrationController> {
   }) {
     final isCompleted = status == TimelineStatus.completed;
     final isInProgress = status == TimelineStatus.inProgress;
-    
+
     Color getColor() {
-      if (isCompleted) return AppColors.success;
-      if (isInProgress) return AppColors.primary;
-      return theme.colorScheme.onSurface.withValues(alpha: 0.3);
+      if (isCompleted) return colors.success;
+      if (isInProgress) return colors.primary;
+      return colors.textHint;
     }
 
     return IntrinsicHeight(
@@ -263,7 +263,7 @@ class VerificationPendingView extends GetView<RegistrationController> {
                     height: 12,
                     color: isCompleted || isInProgress
                         ? getColor()
-                        : theme.colorScheme.outline.withValues(alpha: 0.2),
+                        : colors.border.withValues(alpha: 0.2),
                   ),
                 // Dot
                 Container(
@@ -291,8 +291,8 @@ class VerificationPendingView extends GetView<RegistrationController> {
                     child: Container(
                       width: 2,
                       color: isCompleted
-                          ? AppColors.success
-                          : theme.colorScheme.outline.withValues(alpha: 0.2),
+                          ? colors.success
+                          : colors.border.withValues(alpha: 0.2),
                     ),
                   ),
               ],
@@ -314,8 +314,8 @@ class VerificationPendingView extends GetView<RegistrationController> {
                     style: AppTextStyles.bodyMedium.copyWith(
                       fontWeight: FontWeight.w600,
                       color: isCompleted || isInProgress
-                          ? theme.colorScheme.onSurface
-                          : theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                          ? colors.textPrimary
+                          : colors.textHint,
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -327,7 +327,7 @@ class VerificationPendingView extends GetView<RegistrationController> {
                           height: 12,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation(AppColors.primary),
+                            valueColor: AlwaysStoppedAnimation(colors.primary),
                           ),
                         ),
                         const SizedBox(width: 6),
@@ -336,8 +336,8 @@ class VerificationPendingView extends GetView<RegistrationController> {
                         subtitle,
                         style: AppTextStyles.bodySmall.copyWith(
                           color: isInProgress
-                              ? AppColors.primary
-                              : theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                              ? colors.primary
+                              : colors.textHint,
                           fontWeight: isInProgress ? FontWeight.w500 : FontWeight.normal,
                         ),
                       ),
@@ -352,7 +352,7 @@ class VerificationPendingView extends GetView<RegistrationController> {
     );
   }
 
-  Widget _buildEstimatedTimeCard(ThemeData theme) {
+  Widget _buildEstimatedTimeCard(AppColorScheme colors) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -360,13 +360,13 @@ class VerificationPendingView extends GetView<RegistrationController> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            AppColors.primary.withValues(alpha: 0.1),
-            AppColors.primary.withValues(alpha: 0.05),
+            colors.primary.withValues(alpha: 0.1),
+            colors.primary.withValues(alpha: 0.05),
           ],
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: AppColors.primary.withValues(alpha: 0.2),
+          color: colors.primary.withValues(alpha: 0.2),
         ),
       ),
       child: Row(
@@ -374,12 +374,12 @@ class VerificationPendingView extends GetView<RegistrationController> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.15),
+              color: colors.primary.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
               Icons.schedule_rounded,
-              color: AppColors.primary,
+              color: colors.primary,
               size: 24,
             ),
           ),
@@ -391,7 +391,7 @@ class VerificationPendingView extends GetView<RegistrationController> {
                 Text(
                   'Estimated Wait Time',
                   style: AppTextStyles.bodySmall.copyWith(
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                    color: colors.textSecondary,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -399,7 +399,7 @@ class VerificationPendingView extends GetView<RegistrationController> {
                   '24-48 Hours',
                   style: AppTextStyles.h4.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: AppColors.primary,
+                    color: colors.primary,
                   ),
                 ),
               ],
@@ -410,7 +410,7 @@ class VerificationPendingView extends GetView<RegistrationController> {
     );
   }
 
-  Widget _buildWhatsNextSection(ThemeData theme) {
+  Widget _buildWhatsNextSection(AppColorScheme colors) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -422,14 +422,14 @@ class VerificationPendingView extends GetView<RegistrationController> {
         ),
         const SizedBox(height: 16),
         _buildInfoTile(
-          theme,
+          colors,
           icon: Icons.notifications_active_rounded,
           title: 'Stay Notified',
           subtitle: 'We\'ll send you updates via SMS & app notifications',
         ),
         const SizedBox(height: 12),
         _buildInfoTile(
-          theme,
+          colors,
           icon: Icons.workspace_premium_rounded,
           title: 'Get Ready',
           subtitle: 'Once approved, you can start accepting deliveries',
@@ -439,7 +439,7 @@ class VerificationPendingView extends GetView<RegistrationController> {
   }
 
   Widget _buildInfoTile(
-    ThemeData theme, {
+    AppColorScheme colors, {
     required IconData icon,
     required String title,
     required String subtitle,
@@ -447,14 +447,14 @@ class VerificationPendingView extends GetView<RegistrationController> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+        color: colors.surfaceVariant.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         children: [
           Icon(
             icon,
-            color: AppColors.primary,
+            color: colors.primary,
             size: 24,
           ),
           const SizedBox(width: 12),
@@ -471,7 +471,7 @@ class VerificationPendingView extends GetView<RegistrationController> {
                 Text(
                   subtitle,
                   style: AppTextStyles.bodySmall.copyWith(
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                    color: colors.textSecondary,
                   ),
                 ),
               ],

@@ -13,10 +13,10 @@ class EarningsView extends GetView<EarningsController> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final colors = AppColorScheme.of(context);
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: colors.background,
       appBar: AppBar(
         title: const Text('Earnings'),
         centerTitle: true,
@@ -37,27 +37,27 @@ class EarningsView extends GetView<EarningsController> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Period Selector
-                _buildPeriodSelector(theme),
+                _buildPeriodSelector(colors),
                 const SizedBox(height: 20),
 
                 // Total Earnings Card
-                _buildTotalEarningsCard(theme),
+                _buildTotalEarningsCard(colors),
                 const SizedBox(height: 20),
 
                 // Earnings Breakdown
-                _buildEarningsBreakdown(theme),
+                _buildEarningsBreakdown(colors),
                 const SizedBox(height: 20),
 
                 // Performance Stats
-                _buildPerformanceStats(theme),
+                _buildPerformanceStats(colors),
                 const SizedBox(height: 20),
 
                 // Daily Chart
-                _buildDailyChart(theme),
+                _buildDailyChart(colors),
                 const SizedBox(height: 20),
 
                 // Transactions
-                _buildTransactionsList(theme),
+                _buildTransactionsList(colors),
               ],
             ),
           ),
@@ -66,24 +66,24 @@ class EarningsView extends GetView<EarningsController> {
     );
   }
 
-  Widget _buildPeriodSelector(ThemeData theme) {
+  Widget _buildPeriodSelector(AppColorScheme colors) {
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
+        color: colors.surfaceVariant,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         children: [
-          _buildPeriodTab(theme, 'Today', 'today'),
-          _buildPeriodTab(theme, 'Week', 'week'),
-          _buildPeriodTab(theme, 'Month', 'month'),
+          _buildPeriodTab(colors, 'Today', 'today'),
+          _buildPeriodTab(colors, 'Week', 'week'),
+          _buildPeriodTab(colors, 'Month', 'month'),
         ],
       ),
     );
   }
 
-  Widget _buildPeriodTab(ThemeData theme, String label, String value) {
+  Widget _buildPeriodTab(AppColorScheme colors, String label, String value) {
     final isSelected = controller.selectedPeriod.value == value;
     return Expanded(
       child: GestureDetector(
@@ -91,14 +91,14 @@ class EarningsView extends GetView<EarningsController> {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
-            color: isSelected ? AppColors.primary : Colors.transparent,
+            color: isSelected ? colors.primary : Colors.transparent,
             borderRadius: BorderRadius.circular(10),
           ),
           child: Text(
             label,
             textAlign: TextAlign.center,
             style: AppTextStyles.labelMedium.copyWith(
-              color: isSelected ? Colors.white : theme.colorScheme.onSurface,
+              color: isSelected ? colors.textOnPrimary : colors.textPrimary,
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
             ),
           ),
@@ -107,14 +107,14 @@ class EarningsView extends GetView<EarningsController> {
     );
   }
 
-  Widget _buildTotalEarningsCard(ThemeData theme) {
+  Widget _buildTotalEarningsCard(AppColorScheme colors) {
     final earnings = controller.earnings.value;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [AppColors.primary, AppColors.primary.withValues(alpha: 0.8)],
+          colors: [colors.primary, colors.primary.withValues(alpha: 0.8)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -132,7 +132,7 @@ class EarningsView extends GetView<EarningsController> {
           Text(
             '₹${earnings?.totalEarnings.toStringAsFixed(0) ?? '0'}',
             style: AppTextStyles.displaySmall.copyWith(
-              color: Colors.white,
+              color: colors.textOnPrimary,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -140,11 +140,11 @@ class EarningsView extends GetView<EarningsController> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _buildQuickStat('Rides', '${earnings?.totalRides ?? 0}', Colors.white),
+              _buildQuickStat('Rides', '${earnings?.totalRides ?? 0}', colors.textOnPrimary),
               Container(width: 1, height: 30, color: Colors.white24),
-              _buildQuickStat('Hours', earnings?.hoursDisplay ?? '0h', Colors.white),
+              _buildQuickStat('Hours', earnings?.hoursDisplay ?? '0h', colors.textOnPrimary),
               Container(width: 1, height: 30, color: Colors.white24),
-              _buildQuickStat('Rating', '${earnings?.rating ?? 0}', Colors.white),
+              _buildQuickStat('Rating', '${earnings?.rating ?? 0}', colors.textOnPrimary),
             ],
           ),
         ],
@@ -172,12 +172,12 @@ class EarningsView extends GetView<EarningsController> {
     );
   }
 
-  Widget _buildEarningsBreakdown(ThemeData theme) {
+  Widget _buildEarningsBreakdown(AppColorScheme colors) {
     final earnings = controller.earnings.value;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
+        color: colors.surfaceVariant,
         borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
       ),
       child: Column(
@@ -188,16 +188,16 @@ class EarningsView extends GetView<EarningsController> {
             style: AppTextStyles.titleSmall.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
-          _buildBreakdownRow('Trip Earnings', earnings?.tripEarnings ?? 0, theme),
-          _buildBreakdownRow('Bonuses', earnings?.bonusEarnings ?? 0, theme, isBonus: true),
-          _buildBreakdownRow('Incentives', earnings?.incentiveEarnings ?? 0, theme, isBonus: true),
-          _buildBreakdownRow('Tips', earnings?.tipEarnings ?? 0, theme, isBonus: true),
+          _buildBreakdownRow('Trip Earnings', earnings?.tripEarnings ?? 0, colors),
+          _buildBreakdownRow('Bonuses', earnings?.bonusEarnings ?? 0, colors, isBonus: true),
+          _buildBreakdownRow('Incentives', earnings?.incentiveEarnings ?? 0, colors, isBonus: true),
+          _buildBreakdownRow('Tips', earnings?.tipEarnings ?? 0, colors, isBonus: true),
         ],
       ),
     );
   }
 
-  Widget _buildBreakdownRow(String label, double amount, ThemeData theme, {bool isBonus = false}) {
+  Widget _buildBreakdownRow(String label, double amount, AppColorScheme colors, {bool isBonus = false}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
@@ -208,7 +208,7 @@ class EarningsView extends GetView<EarningsController> {
               Icon(
                 isBonus ? Icons.star : Icons.local_shipping_outlined,
                 size: 16,
-                color: isBonus ? Colors.amber : theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                color: isBonus ? colors.accent : colors.textSecondary,
               ),
               const SizedBox(width: 8),
               Text(label, style: AppTextStyles.bodyMedium),
@@ -218,7 +218,7 @@ class EarningsView extends GetView<EarningsController> {
             '₹${amount.toStringAsFixed(0)}',
             style: AppTextStyles.bodyMedium.copyWith(
               fontWeight: FontWeight.w600,
-              color: isBonus ? Colors.green : null,
+              color: isBonus ? colors.success : null,
             ),
           ),
         ],
@@ -226,7 +226,7 @@ class EarningsView extends GetView<EarningsController> {
     );
   }
 
-  Widget _buildPerformanceStats(ThemeData theme) {
+  Widget _buildPerformanceStats(AppColorScheme colors) {
     final earnings = controller.earnings.value;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -240,21 +240,21 @@ class EarningsView extends GetView<EarningsController> {
           children: [
             Expanded(
               child: _buildPerformanceCard(
-                theme,
+                colors,
                 'Acceptance',
                 '${earnings?.acceptanceRate.toStringAsFixed(0) ?? 0}%',
                 Icons.check_circle_outline,
-                Colors.blue,
+                colors.info,
               ),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: _buildPerformanceCard(
-                theme,
+                colors,
                 'Completion',
                 '${earnings?.completionRate.toStringAsFixed(0) ?? 0}%',
                 Icons.verified_outlined,
-                Colors.green,
+                colors.success,
               ),
             ),
           ],
@@ -264,7 +264,7 @@ class EarningsView extends GetView<EarningsController> {
   }
 
   Widget _buildPerformanceCard(
-    ThemeData theme,
+    AppColorScheme colors,
     String label,
     String value,
     IconData icon,
@@ -273,7 +273,7 @@ class EarningsView extends GetView<EarningsController> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
+        color: colors.surfaceVariant,
         borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
       ),
       child: Row(
@@ -297,7 +297,7 @@ class EarningsView extends GetView<EarningsController> {
               Text(
                 label,
                 style: AppTextStyles.labelSmall.copyWith(
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                  color: colors.textSecondary,
                 ),
               ),
             ],
@@ -307,11 +307,11 @@ class EarningsView extends GetView<EarningsController> {
     );
   }
 
-  Widget _buildDailyChart(ThemeData theme) {
+  Widget _buildDailyChart(AppColorScheme colors) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
+        color: colors.surfaceVariant,
         borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
       ),
       child: Column(
@@ -332,7 +332,7 @@ class EarningsView extends GetView<EarningsController> {
               return Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 crossAxisAlignment: CrossAxisAlignment.end,
-                children: data.map((d) => _buildChartBar(theme, d)).toList(),
+                children: data.map((d) => _buildChartBar(colors, d)).toList(),
               );
             }),
           ),
@@ -341,7 +341,7 @@ class EarningsView extends GetView<EarningsController> {
     );
   }
 
-  Widget _buildChartBar(ThemeData theme, DailyEarnings data) {
+  Widget _buildChartBar(AppColorScheme colors, DailyEarnings data) {
     final maxHeight = 80.0;
     final barHeight = controller.maxDailyEarning > 0
         ? (data.earnings / controller.maxDailyEarning) * maxHeight
@@ -360,7 +360,7 @@ class EarningsView extends GetView<EarningsController> {
           width: 32,
           height: barHeight.clamp(8, maxHeight),
           decoration: BoxDecoration(
-            color: AppColors.primary,
+            color: colors.primary,
             borderRadius: BorderRadius.circular(4),
           ),
         ),
@@ -368,14 +368,14 @@ class EarningsView extends GetView<EarningsController> {
         Text(
           dayFormat.format(data.date),
           style: AppTextStyles.labelSmall.copyWith(
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+            color: colors.textSecondary,
           ),
         ),
       ],
     );
   }
 
-  Widget _buildTransactionsList(ThemeData theme) {
+  Widget _buildTransactionsList(AppColorScheme colors) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -390,14 +390,14 @@ class EarningsView extends GetView<EarningsController> {
             return Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerHighest,
+                color: colors.surfaceVariant,
                 borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
               ),
               child: Center(
                 child: Text(
                   'No transactions yet',
                   style: AppTextStyles.bodyMedium.copyWith(
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                    color: colors.textSecondary,
                   ),
                 ),
               ),
@@ -409,7 +409,7 @@ class EarningsView extends GetView<EarningsController> {
             itemCount: transactions.length,
             separatorBuilder: (_, __) => const SizedBox(height: 8),
             itemBuilder: (context, index) {
-              return _buildTransactionItem(theme, transactions[index]);
+              return _buildTransactionItem(colors, transactions[index]);
             },
           );
         }),
@@ -417,12 +417,12 @@ class EarningsView extends GetView<EarningsController> {
     );
   }
 
-  Widget _buildTransactionItem(ThemeData theme, EarningTransaction transaction) {
+  Widget _buildTransactionItem(AppColorScheme colors, EarningTransaction transaction) {
     final timeFormat = DateFormat('h:mm a');
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
+        color: colors.surfaceVariant,
         borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
@@ -431,13 +431,13 @@ class EarningsView extends GetView<EarningsController> {
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: transaction.isPositive
-                  ? Colors.green.withValues(alpha: 0.1)
-                  : Colors.red.withValues(alpha: 0.1),
+                  ? colors.success.withValues(alpha: 0.1)
+                  : colors.error.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(
               transaction.isPositive ? Icons.arrow_downward : Icons.arrow_upward,
-              color: transaction.isPositive ? Colors.green : Colors.red,
+              color: transaction.isPositive ? colors.success : colors.error,
               size: 16,
             ),
           ),
@@ -453,7 +453,7 @@ class EarningsView extends GetView<EarningsController> {
                 Text(
                   '${transaction.typeLabel} • ${timeFormat.format(transaction.timestamp)}',
                   style: AppTextStyles.labelSmall.copyWith(
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                    color: colors.textSecondary,
                   ),
                 ),
               ],
@@ -463,7 +463,7 @@ class EarningsView extends GetView<EarningsController> {
             '${transaction.isPositive ? '+' : '-'}₹${transaction.amount.toStringAsFixed(0)}',
             style: AppTextStyles.bodyMedium.copyWith(
               fontWeight: FontWeight.bold,
-              color: transaction.isPositive ? Colors.green : Colors.red,
+              color: transaction.isPositive ? colors.success : colors.error,
             ),
           ),
         ],

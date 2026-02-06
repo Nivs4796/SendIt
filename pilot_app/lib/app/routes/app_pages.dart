@@ -23,7 +23,7 @@ import '../modules/wallet/views/withdraw_view.dart';
 import '../modules/vehicles/bindings/vehicles_binding.dart';
 import '../modules/vehicles/views/vehicles_view.dart';
 import '../modules/profile/bindings/profile_binding.dart';
-import '../modules/profile/views/profile_view.dart';
+import '../modules/profile/views/edit_profile_view.dart';
 import '../modules/notifications/bindings/notifications_binding.dart';
 import '../modules/notifications/views/notifications_view.dart';
 import '../modules/rewards/bindings/rewards_binding.dart';
@@ -108,10 +108,10 @@ class AppPages {
       binding: VehiclesBinding(),
     ),
 
-    // Profile
+    // Edit Profile
     GetPage(
-      name: Routes.profile,
-      page: () => const ProfileView(),
+      name: Routes.editProfile,
+      page: () => const EditProfileView(),
       binding: ProfileBinding(),
     ),
 

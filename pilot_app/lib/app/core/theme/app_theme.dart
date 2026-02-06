@@ -221,17 +221,18 @@ class AppTheme {
   }
 
   static ThemeData get darkTheme {
-    const darkBackground = Color(0xFF0F172A);
-    const darkSurface = Color(0xFF1E293B);
-    const darkSurfaceVariant = Color(0xFF334155);
-    const darkPrimary = Color(0xFF34D399);
-    const darkPrimaryContainer = Color(0xFF064E3B);
-    const darkAccent = Color(0xFFFBBF24);
+    // Minimal Dark Design Palette
+    const darkBackground = Color(0xFF0F172A); // Deep Slate
+    const darkSurface = Color(0xFF1E293B); // Slate 800
+    const darkSurfaceVariant = Color(0xFF334155); // Slate 700
+    const darkPrimary = Color(0xFF10B981); // Emerald 500 - single accent
+    const darkPrimaryContainer = Color(0xFF064E3B); // Emerald 900
+    const darkAccent = Color(0xFFFBBF24); // Amber (warnings only)
     const darkAccentContainer = Color(0xFF78350F);
-    const darkTextPrimary = Color(0xFFF8FAFC);
-    const darkTextSecondary = Color(0xFF94A3B8);
-    const darkTextHint = Color(0xFF64748B);
-    const darkBorder = Color(0xFF334155);
+    const darkTextPrimary = Color(0xFFF8FAFC); // White
+    const darkTextSecondary = Color(0xFF94A3B8); // Slate 400
+    const darkTextHint = Color(0xFF64748B); // Slate 500
+    const darkBorder = Color(0xFF334155); // Slate 700 - subtle borders
     const darkError = Color(0xFFF87171);
 
     return ThemeData(
@@ -249,44 +250,44 @@ class AppTheme {
         surface: darkSurface,
         surfaceContainerHighest: darkSurfaceVariant,
         error: darkError,
-        onPrimary: Color(0xFF0F172A),
+        onPrimary: Color(0xFFFFFFFF), // White text on emerald
         onSecondary: Color(0xFF0F172A),
         onSurface: darkTextPrimary,
-        onError: Color(0xFF0F172A),
+        onError: Color(0xFFFFFFFF),
         outline: darkBorder,
       ),
 
       appBarTheme: AppBarTheme(
         elevation: 0,
-        centerTitle: true,
+        centerTitle: false, // Left-aligned title for minimal design
         backgroundColor: Colors.transparent,
         foregroundColor: darkTextPrimary,
         surfaceTintColor: Colors.transparent,
-        iconTheme: const IconThemeData(color: darkTextPrimary, size: 20),
-        titleTextStyle: AppTextStyles.h4.copyWith(color: darkTextPrimary),
-        toolbarHeight: 48,
+        iconTheme: const IconThemeData(color: darkTextPrimary, size: 24),
+        titleTextStyle: AppTextStyles.h3.copyWith(color: darkTextPrimary),
+        toolbarHeight: 56,
       ),
 
       cardTheme: CardThemeData(
         elevation: 0,
-        color: darkSurface.withValues(alpha: 0.8),
+        color: darkSurface, // Solid color, no transparency
         surfaceTintColor: Colors.transparent,
-        margin: const EdgeInsets.all(spacingSm),
+        margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(radiusLarge),
-          side: BorderSide(color: darkPrimary.withValues(alpha: 0.2)),
+          borderRadius: BorderRadius.circular(radiusXLarge), // 16px rounded
+          side: const BorderSide(color: darkBorder, width: 1), // Subtle border
         ),
       ),
 
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: darkPrimary,
-          foregroundColor: const Color(0xFF0F172A),
+          foregroundColor: const Color(0xFFFFFFFF), // White text
           elevation: 0,
-          minimumSize: const Size(double.infinity, 44),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          minimumSize: const Size(double.infinity, 48),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(radiusMedium),
+            borderRadius: BorderRadius.circular(radiusLarge), // 12px
           ),
           textStyle: AppTextStyles.button,
         ),
@@ -295,11 +296,12 @@ class AppTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: darkPrimary,
-          side: BorderSide(color: darkPrimary.withValues(alpha: 0.3)),
-          minimumSize: const Size(double.infinity, 44),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          backgroundColor: Colors.transparent,
+          side: const BorderSide(color: darkPrimary, width: 1),
+          minimumSize: const Size(double.infinity, 48),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(radiusMedium),
+            borderRadius: BorderRadius.circular(radiusLarge),
           ),
           textStyle: AppTextStyles.button.copyWith(color: darkPrimary),
         ),
@@ -308,7 +310,7 @@ class AppTheme {
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: darkPrimary,
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           textStyle: AppTextStyles.labelLarge,
         ),
       ),
@@ -342,14 +344,19 @@ class AppTheme {
         errorStyle: AppTextStyles.caption.copyWith(color: darkError),
       ),
 
-      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: darkSurface,
         selectedItemColor: darkPrimary,
         unselectedItemColor: darkTextSecondary,
         type: BottomNavigationBarType.fixed,
         elevation: 0,
-        selectedLabelStyle: TextStyle(fontSize: 10),
-        unselectedLabelStyle: TextStyle(fontSize: 10),
+        selectedLabelStyle: AppTextStyles.labelSmall.copyWith(
+          color: darkPrimary,
+          fontWeight: FontWeight.w600,
+        ),
+        unselectedLabelStyle: AppTextStyles.labelSmall.copyWith(
+          color: darkTextSecondary,
+        ),
       ),
 
       chipTheme: ChipThemeData(

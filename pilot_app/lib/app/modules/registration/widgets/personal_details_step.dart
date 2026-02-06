@@ -14,7 +14,7 @@ class PersonalDetailsStep extends GetView<RegistrationController> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final colors = AppColorScheme.of(context);
 
     return SingleChildScrollView(
       padding: EdgeInsets.symmetric(
@@ -27,7 +27,7 @@ class PersonalDetailsStep extends GetView<RegistrationController> {
           // Header + Profile Photo
           Row(
             children: [
-              Obx(() => _buildProfilePhoto(theme)),
+              Obx(() => _buildProfilePhoto(colors)),
               SizedBox(width: AppTheme.spacingMd),
               Expanded(
                 child: Column(
@@ -140,7 +140,7 @@ class PersonalDetailsStep extends GetView<RegistrationController> {
     );
   }
 
-  Widget _buildProfilePhoto(ThemeData theme) {
+  Widget _buildProfilePhoto(AppColorScheme colors) {
     return GestureDetector(
       onTap: () => _showImagePicker(Get.context!),
       child: Stack(
@@ -149,10 +149,10 @@ class PersonalDetailsStep extends GetView<RegistrationController> {
             width: 52,
             height: 52,
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.1),
+              color: colors.primary.withValues(alpha: 0.1),
               shape: BoxShape.circle,
               border: Border.all(
-                color: AppColors.primary.withValues(alpha: 0.3),
+                color: colors.primary.withValues(alpha: 0.3),
                 width: 2,
               ),
               image: controller.profilePhoto.value != null
@@ -166,7 +166,7 @@ class PersonalDetailsStep extends GetView<RegistrationController> {
                 ? Icon(
                     Icons.person_rounded,
                     size: 24,
-                    color: AppColors.primary.withValues(alpha: 0.5),
+                    color: colors.primary.withValues(alpha: 0.5),
                   )
                 : null,
           ),
@@ -176,7 +176,7 @@ class PersonalDetailsStep extends GetView<RegistrationController> {
             child: Container(
               padding: const EdgeInsets.all(2),
               decoration: BoxDecoration(
-                color: AppColors.primary,
+                color: colors.primary,
                 shape: BoxShape.circle,
               ),
               child: const Icon(Icons.camera_alt, size: 10, color: Colors.white),
@@ -188,14 +188,14 @@ class PersonalDetailsStep extends GetView<RegistrationController> {
   }
 
   void _showImagePicker(BuildContext context) {
-    final theme = Theme.of(context);
+    final colors = AppColorScheme.of(context);
 
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
         decoration: BoxDecoration(
-          color: theme.colorScheme.surface,
+          color: colors.surface,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
         ),
         padding: EdgeInsets.all(AppTheme.spacingLg),
@@ -206,7 +206,7 @@ class PersonalDetailsStep extends GetView<RegistrationController> {
               width: 32,
               height: 3,
               decoration: BoxDecoration(
-                color: theme.colorScheme.outline.withValues(alpha: 0.3),
+                color: colors.border.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -217,6 +217,7 @@ class PersonalDetailsStep extends GetView<RegistrationController> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 _buildPickerOption(
+                  colors: colors,
                   icon: Icons.camera_alt_rounded,
                   label: 'Camera',
                   onTap: () {
@@ -225,6 +226,7 @@ class PersonalDetailsStep extends GetView<RegistrationController> {
                   },
                 ),
                 _buildPickerOption(
+                  colors: colors,
                   icon: Icons.photo_library_rounded,
                   label: 'Gallery',
                   onTap: () {
@@ -242,6 +244,7 @@ class PersonalDetailsStep extends GetView<RegistrationController> {
   }
 
   Widget _buildPickerOption({
+    required AppColorScheme colors,
     required IconData icon,
     required String label,
     required VoidCallback onTap,
@@ -254,10 +257,10 @@ class PersonalDetailsStep extends GetView<RegistrationController> {
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.1),
+              color: colors.primary.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, size: 20, color: AppColors.primary),
+            child: Icon(icon, size: 20, color: colors.primary),
           ),
           SizedBox(height: AppTheme.spacingXs),
           Text(label, style: AppTextStyles.labelMedium),

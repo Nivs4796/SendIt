@@ -12,12 +12,11 @@ class SplashView extends GetView<SplashController> {
   Widget build(BuildContext context) {
     // Access controller to ensure it's instantiated
     final _ = controller;
-    
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+
+    final colors = AppColorScheme.of(context);
 
     return Scaffold(
-      backgroundColor: isDark ? AppColors.secondaryDark : AppColors.primary,
+      backgroundColor: colors.primary,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -40,7 +39,7 @@ class SplashView extends GetView<SplashController> {
               child: Icon(
                 Icons.local_shipping_rounded,
                 size: 60,
-                color: AppColors.primary,
+                color: colors.primary,
               ),
             ),
             const SizedBox(height: 24),

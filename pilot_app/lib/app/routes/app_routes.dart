@@ -21,6 +21,7 @@ abstract class Routes {
 
   // Jobs
   static const activeJob = '/job/active';
+  static const history = '/history';
   static const jobDetails = '/job/:id';
   static const jobHistory = '/jobs/history';
   static const multipleJobs = '/jobs/multiple';

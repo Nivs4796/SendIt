@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../core/theme/app_colors.dart';
 import '../../../data/models/pilot_model.dart';
 import '../../../data/repositories/pilot_repository.dart';
 import '../../../data/repositories/auth_repository.dart';
@@ -55,14 +56,18 @@ class ProfileController extends GetxController {
     String? name,
     String? email,
     String? emergencyContact,
+    String? dateOfBirth,
+    String? gender,
   }) async {
     try {
       isProcessing.value = true;
-      
+
       final updates = <String, dynamic>{};
       if (name != null) updates['name'] = name;
       if (email != null) updates['email'] = email;
       if (emergencyContact != null) updates['emergencyContact'] = emergencyContact;
+      if (dateOfBirth != null) updates['dateOfBirth'] = dateOfBirth;
+      if (gender != null) updates['gender'] = gender;
 
       final response = await _pilotRepository.updateProfile(updates);
       if (response['success'] == true) {
@@ -70,8 +75,8 @@ class ProfileController extends GetxController {
         Get.snackbar(
           'Profile Updated',
           'Your profile has been updated successfully',
-          backgroundColor: Colors.green.shade100,
-          colorText: Colors.green.shade900,
+          backgroundColor: AppColorScheme.of(Get.context!).success.withValues(alpha: 0.2),
+          colorText: AppColorScheme.of(Get.context!).success,
         );
         return true;
       }
@@ -80,8 +85,8 @@ class ProfileController extends GetxController {
       Get.snackbar(
         'Error',
         e.toString().replaceAll('Exception: ', ''),
-        backgroundColor: Colors.red.shade100,
-        colorText: Colors.red.shade900,
+        backgroundColor: AppColorScheme.of(Get.context!).error.withValues(alpha: 0.2),
+        colorText: AppColorScheme.of(Get.context!).error,
       );
       return false;
     } finally {
@@ -110,8 +115,8 @@ class ProfileController extends GetxController {
         Get.snackbar(
           'Photo Updated',
           'Your profile photo has been updated',
-          backgroundColor: Colors.green.shade100,
-          colorText: Colors.green.shade900,
+          backgroundColor: AppColorScheme.of(Get.context!).success.withValues(alpha: 0.2),
+          colorText: AppColorScheme.of(Get.context!).success,
         );
         return true;
       }
@@ -120,8 +125,8 @@ class ProfileController extends GetxController {
       Get.snackbar(
         'Error',
         e.toString().replaceAll('Exception: ', ''),
-        backgroundColor: Colors.red.shade100,
-        colorText: Colors.red.shade900,
+        backgroundColor: AppColorScheme.of(Get.context!).error.withValues(alpha: 0.2),
+        colorText: AppColorScheme.of(Get.context!).error,
       );
       return false;
     } finally {
@@ -145,8 +150,8 @@ class ProfileController extends GetxController {
               Get.back();
               await _performLogout();
             },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Logout', style: TextStyle(color: Colors.white)),
+            style: ElevatedButton.styleFrom(backgroundColor: AppColorScheme.of(Get.context!).error),
+            child: Text('Logout', style: TextStyle(color: AppColorScheme.of(Get.context!).textOnPrimary)),
           ),
         ],
       ),
@@ -188,8 +193,8 @@ class ProfileController extends GetxController {
               Get.back();
               await _performDeleteAccount();
             },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Delete', style: TextStyle(color: Colors.white)),
+            style: ElevatedButton.styleFrom(backgroundColor: AppColorScheme.of(Get.context!).error),
+            child: Text('Delete', style: TextStyle(color: AppColorScheme.of(Get.context!).textOnPrimary)),
           ),
         ],
       ),

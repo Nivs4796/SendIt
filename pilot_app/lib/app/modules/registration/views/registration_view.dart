@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
-import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/app_button.dart';
 import '../controllers/registration_controller.dart';
 import '../widgets/personal_details_step.dart';
@@ -23,15 +22,15 @@ class RegistrationView extends GetView<RegistrationController> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final colors = AppColorScheme.of(context);
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: colors.background,
       body: SafeArea(
         child: Column(
           children: [
             // Custom App Bar with Progress
-            _buildHeader(theme),
+            _buildHeader(colors),
 
             // Step Content
             Expanded(
@@ -54,17 +53,17 @@ class RegistrationView extends GetView<RegistrationController> {
             ),
 
             // Error Message
-            _buildErrorMessage(theme),
+            _buildErrorMessage(colors),
 
             // Navigation Buttons
-            _buildNavigationButtons(theme),
+            _buildNavigationButtons(colors),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildHeader(ThemeData theme) {
+  Widget _buildHeader(AppColorScheme colors) {
     return Container(
       padding: const EdgeInsets.fromLTRB(8, 8, 24, 0),
       child: Column(
@@ -82,14 +81,14 @@ class RegistrationView extends GetView<RegistrationController> {
                 },
                 icon: Icon(
                   Icons.arrow_back_rounded,
-                  color: theme.colorScheme.onSurface,
+                  color: colors.textPrimary,
                 ),
               ),
               const Spacer(),
               Obx(() => Text(
                 'Step ${controller.currentStep.value + 1} of 4',
                 style: AppTextStyles.bodySmall.copyWith(
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                  color: colors.textSecondary,
                   fontWeight: FontWeight.w500,
                 ),
               )),
@@ -101,7 +100,7 @@ class RegistrationView extends GetView<RegistrationController> {
           // Step Indicator
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: _buildStepIndicator(theme),
+            child: _buildStepIndicator(colors),
           ),
 
           const SizedBox(height: 8),
@@ -110,7 +109,7 @@ class RegistrationView extends GetView<RegistrationController> {
     );
   }
 
-  Widget _buildStepIndicator(ThemeData theme) {
+  Widget _buildStepIndicator(AppColorScheme colors) {
     return Obx(() => Row(
       children: List.generate(_steps.length * 2 - 1, (index) {
         if (index.isOdd) {
@@ -123,8 +122,8 @@ class RegistrationView extends GetView<RegistrationController> {
               margin: const EdgeInsets.symmetric(horizontal: 4),
               decoration: BoxDecoration(
                 color: isCompleted
-                    ? AppColors.primary
-                    : theme.colorScheme.outline.withValues(alpha: 0.15),
+                    ? colors.primary
+                    : colors.border.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -150,19 +149,19 @@ class RegistrationView extends GetView<RegistrationController> {
                   height: 44,
                   decoration: BoxDecoration(
                     color: isActive
-                        ? AppColors.primary.withValues(alpha: isCurrent ? 1 : 0.15)
-                        : theme.colorScheme.surfaceContainerHighest,
+                        ? colors.primary.withValues(alpha: isCurrent ? 1 : 0.15)
+                        : colors.surfaceVariant,
                     shape: BoxShape.circle,
                     border: Border.all(
                       color: isActive
-                          ? AppColors.primary
-                          : theme.colorScheme.outline.withValues(alpha: 0.2),
+                          ? colors.primary
+                          : colors.border.withValues(alpha: 0.2),
                       width: isCurrent ? 2 : 1,
                     ),
                     boxShadow: isCurrent
                         ? [
                             BoxShadow(
-                              color: AppColors.primary.withValues(alpha: 0.3),
+                              color: colors.primary.withValues(alpha: 0.3),
                               blurRadius: 12,
                               offset: const Offset(0, 4),
                             ),
@@ -175,8 +174,8 @@ class RegistrationView extends GetView<RegistrationController> {
                     color: isCurrent
                         ? Colors.white
                         : isActive
-                            ? AppColors.primary
-                            : theme.colorScheme.onSurface.withValues(alpha: 0.4),
+                            ? colors.primary
+                            : colors.textHint,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -184,8 +183,8 @@ class RegistrationView extends GetView<RegistrationController> {
                   step.label,
                   style: AppTextStyles.labelSmall.copyWith(
                     color: isActive
-                        ? AppColors.primary
-                        : theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                        ? colors.primary
+                        : colors.textHint,
                     fontWeight: isCurrent ? FontWeight.w600 : FontWeight.normal,
                   ),
                 ),
@@ -212,7 +211,7 @@ class RegistrationView extends GetView<RegistrationController> {
     }
   }
 
-  Widget _buildErrorMessage(ThemeData theme) {
+  Widget _buildErrorMessage(AppColorScheme colors) {
     return Obx(() {
       if (controller.errorMessage.value.isEmpty) {
         return const SizedBox.shrink();
@@ -221,17 +220,17 @@ class RegistrationView extends GetView<RegistrationController> {
         margin: const EdgeInsets.symmetric(horizontal: 24),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: theme.colorScheme.error.withValues(alpha: 0.1),
+          color: colors.error.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: theme.colorScheme.error.withValues(alpha: 0.3),
+            color: colors.error.withValues(alpha: 0.3),
           ),
         ),
         child: Row(
           children: [
             Icon(
               Icons.error_outline_rounded,
-              color: theme.colorScheme.error,
+              color: colors.error,
               size: 20,
             ),
             const SizedBox(width: 12),
@@ -239,7 +238,7 @@ class RegistrationView extends GetView<RegistrationController> {
               child: Text(
                 controller.errorMessage.value,
                 style: AppTextStyles.bodySmall.copyWith(
-                  color: theme.colorScheme.error,
+                  color: colors.error,
                 ),
               ),
             ),
@@ -247,7 +246,7 @@ class RegistrationView extends GetView<RegistrationController> {
               onTap: () => controller.errorMessage.value = '',
               child: Icon(
                 Icons.close_rounded,
-                color: theme.colorScheme.error,
+                color: colors.error,
                 size: 18,
               ),
             ),
@@ -257,11 +256,11 @@ class RegistrationView extends GetView<RegistrationController> {
     });
   }
 
-  Widget _buildNavigationButtons(ThemeData theme) {
+  Widget _buildNavigationButtons(AppColorScheme colors) {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: theme.scaffoldBackgroundColor,
+        color: colors.background,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),

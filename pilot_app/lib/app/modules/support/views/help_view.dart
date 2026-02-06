@@ -12,10 +12,10 @@ class HelpView extends GetView<SupportController> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final colors = AppColorScheme.of(context);
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: colors.background,
       appBar: AppBar(
         title: const Text('Help & Support'),
         centerTitle: true,
@@ -36,13 +36,13 @@ class HelpView extends GetView<SupportController> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Search Bar
-                _buildSearchBar(theme),
+                _buildSearchBar(colors),
                 const SizedBox(height: 20),
 
                 // Search Results or Main Content
                 Obx(() => controller.searchQuery.isNotEmpty
-                    ? _buildSearchResults(theme)
-                    : _buildMainContent(theme)),
+                    ? _buildSearchResults(colors)
+                    : _buildMainContent(colors)),
               ],
             ),
           ),
@@ -51,10 +51,10 @@ class HelpView extends GetView<SupportController> {
     );
   }
 
-  Widget _buildSearchBar(ThemeData theme) {
+  Widget _buildSearchBar(AppColorScheme colors) {
     return Container(
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
+        color: colors.surfaceVariant,
         borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
       ),
       child: TextField(
@@ -63,7 +63,7 @@ class HelpView extends GetView<SupportController> {
           hintText: 'Search for help...',
           prefixIcon: Icon(
             Icons.search,
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+            color: colors.textHint,
           ),
           suffixIcon: Obx(() => controller.searchQuery.isNotEmpty
               ? IconButton(
@@ -83,14 +83,14 @@ class HelpView extends GetView<SupportController> {
     );
   }
 
-  Widget _buildSearchResults(ThemeData theme) {
+  Widget _buildSearchResults(AppColorScheme colors) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Obx(() => Text(
               '${controller.searchResults.length} results found',
               style: AppTextStyles.labelSmall.copyWith(
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                color: colors.textHint,
               ),
             )),
         const SizedBox(height: 12),
@@ -100,19 +100,19 @@ class HelpView extends GetView<SupportController> {
               itemCount: controller.searchResults.length,
               itemBuilder: (context, index) {
                 final faq = controller.searchResults[index];
-                return _buildFaqCard(theme, faq);
+                return _buildFaqCard(colors, faq);
               },
             )),
       ],
     );
   }
 
-  Widget _buildMainContent(ThemeData theme) {
+  Widget _buildMainContent(AppColorScheme colors) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Quick Contact Card
-        _buildContactCard(theme),
+        _buildContactCard(colors),
         const SizedBox(height: 24),
 
         // FAQs Section
@@ -121,17 +121,17 @@ class HelpView extends GetView<SupportController> {
           style: AppTextStyles.titleSmall.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 12),
-        _buildFaqCategories(theme),
+        _buildFaqCategories(colors),
         const SizedBox(height: 24),
 
         // Create Ticket Button
-        _buildCreateTicketButton(theme),
+        _buildCreateTicketButton(colors),
         const SizedBox(height: 24),
       ],
     );
   }
 
-  Widget _buildContactCard(ThemeData theme) {
+  Widget _buildContactCard(AppColorScheme colors) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -192,7 +192,7 @@ class HelpView extends GetView<SupportController> {
             children: [
               Expanded(
                 child: _buildContactOption(
-                  theme,
+                  colors,
                   icon: Icons.phone,
                   label: 'Call',
                   onTap: controller.callSupport,
@@ -201,7 +201,7 @@ class HelpView extends GetView<SupportController> {
               const SizedBox(width: 12),
               Expanded(
                 child: _buildContactOption(
-                  theme,
+                  colors,
                   icon: Icons.email,
                   label: 'Email',
                   onTap: controller.emailSupport,
@@ -210,10 +210,10 @@ class HelpView extends GetView<SupportController> {
               const SizedBox(width: 12),
               Expanded(
                 child: _buildContactOption(
-                  theme,
+                  colors,
                   icon: Icons.chat,
                   label: 'WhatsApp',
-                  color: Colors.green,
+                  color: colors.success,
                   onTap: controller.whatsappSupport,
                 ),
               ),
@@ -225,7 +225,7 @@ class HelpView extends GetView<SupportController> {
   }
 
   Widget _buildContactOption(
-    ThemeData theme, {
+    AppColorScheme colors, {
     required IconData icon,
     required String label,
     required VoidCallback onTap,
@@ -256,23 +256,23 @@ class HelpView extends GetView<SupportController> {
     );
   }
 
-  Widget _buildFaqCategories(ThemeData theme) {
+  Widget _buildFaqCategories(AppColorScheme colors) {
     return Obx(() => ListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           itemCount: controller.faqCategories.length,
           itemBuilder: (context, index) {
             final category = controller.faqCategories[index];
-            return _buildFaqCategoryCard(theme, category);
+            return _buildFaqCategoryCard(colors, category);
           },
         ));
   }
 
-  Widget _buildFaqCategoryCard(ThemeData theme, FaqCategory category) {
+  Widget _buildFaqCategoryCard(AppColorScheme colors, FaqCategory category) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
+        color: colors.surfaceVariant,
         borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
       ),
       child: ExpansionTile(
@@ -280,7 +280,7 @@ class HelpView extends GetView<SupportController> {
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: AppColors.primary.withValues(alpha: 0.1),
+            color: colors.primary.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Center(
@@ -299,7 +299,7 @@ class HelpView extends GetView<SupportController> {
         subtitle: Text(
           '${category.faqs.length} questions',
           style: AppTextStyles.labelSmall.copyWith(
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+            color: colors.textHint,
           ),
         ),
         childrenPadding: const EdgeInsets.only(
@@ -307,18 +307,18 @@ class HelpView extends GetView<SupportController> {
           right: 16,
           bottom: 16,
         ),
-        children: category.faqs.map((faq) => _buildFaqItem(theme, faq)).toList(),
+        children: category.faqs.map((faq) => _buildFaqItem(colors, faq)).toList(),
       ),
     );
   }
 
-  Widget _buildFaqItem(ThemeData theme, FaqItem faq) {
+  Widget _buildFaqItem(AppColorScheme colors, FaqItem faq) {
     return Obx(() {
       final isExpanded = controller.expandedFaqId.value == faq.id;
       return Container(
         margin: const EdgeInsets.only(top: 8),
         decoration: BoxDecoration(
-          color: theme.colorScheme.surface,
+          color: colors.surface,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Column(
@@ -344,7 +344,7 @@ class HelpView extends GetView<SupportController> {
                         isExpanded
                             ? Icons.keyboard_arrow_up
                             : Icons.keyboard_arrow_down,
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                        color: colors.textHint,
                         size: 20,
                       ),
                     ],
@@ -358,7 +358,7 @@ class HelpView extends GetView<SupportController> {
                 child: Text(
                   faq.answer,
                   style: AppTextStyles.bodySmall.copyWith(
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                    color: colors.textSecondary,
                     height: 1.5,
                   ),
                 ),
@@ -369,13 +369,13 @@ class HelpView extends GetView<SupportController> {
     });
   }
 
-  Widget _buildFaqCard(ThemeData theme, FaqItem faq) {
+  Widget _buildFaqCard(AppColorScheme colors, FaqItem faq) {
     return Obx(() {
       final isExpanded = controller.expandedFaqId.value == faq.id;
       return Container(
         margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainerHighest,
+          color: colors.surfaceVariant,
           borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
         ),
         child: Column(
@@ -401,7 +401,7 @@ class HelpView extends GetView<SupportController> {
                         isExpanded
                             ? Icons.keyboard_arrow_up
                             : Icons.keyboard_arrow_down,
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                        color: colors.textHint,
                       ),
                     ],
                   ),
@@ -414,7 +414,7 @@ class HelpView extends GetView<SupportController> {
                 child: Text(
                   faq.answer,
                   style: AppTextStyles.bodySmall.copyWith(
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                    color: colors.textSecondary,
                     height: 1.5,
                   ),
                 ),
@@ -425,14 +425,14 @@ class HelpView extends GetView<SupportController> {
     });
   }
 
-  Widget _buildCreateTicketButton(ThemeData theme) {
+  Widget _buildCreateTicketButton(AppColorScheme colors) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
+        color: colors.surfaceVariant,
         borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
         border: Border.all(
-          color: AppColors.primary.withValues(alpha: 0.3),
+          color: colors.primary.withValues(alpha: 0.3),
         ),
       ),
       child: Column(
@@ -443,12 +443,12 @@ class HelpView extends GetView<SupportController> {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
+                  color: colors.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(
                   Icons.support_agent,
-                  color: AppColors.primary,
+                  color: colors.primary,
                   size: 24,
                 ),
               ),
@@ -466,7 +466,7 @@ class HelpView extends GetView<SupportController> {
                     Text(
                       'Create a support ticket and we\'ll get back to you',
                       style: AppTextStyles.labelSmall.copyWith(
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                        color: colors.textHint,
                       ),
                     ),
                   ],
@@ -478,12 +478,12 @@ class HelpView extends GetView<SupportController> {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(
-              onPressed: () => _showCreateTicketSheet(theme),
+              onPressed: () => _showCreateTicketSheet(colors),
               icon: const Icon(Icons.add),
               label: const Text('Create Ticket'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
+                backgroundColor: colors.primary,
+                foregroundColor: colors.textOnPrimary,
                 padding: const EdgeInsets.symmetric(vertical: 12),
               ),
             ),
@@ -493,7 +493,7 @@ class HelpView extends GetView<SupportController> {
     );
   }
 
-  void _showCreateTicketSheet(ThemeData theme) {
+  void _showCreateTicketSheet(AppColorScheme colors) {
     // Reset form
     controller.subjectController.clear();
     controller.descriptionController.clear();
@@ -506,7 +506,7 @@ class HelpView extends GetView<SupportController> {
           maxHeight: Get.height * 0.85,
         ),
         decoration: BoxDecoration(
-          color: theme.scaffoldBackgroundColor,
+          color: colors.background,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: Form(
@@ -522,7 +522,7 @@ class HelpView extends GetView<SupportController> {
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: theme.dividerColor,
+                      color: colors.border,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -547,7 +547,7 @@ class HelpView extends GetView<SupportController> {
                 const SizedBox(height: 8),
                 Obx(() => Container(
                       decoration: BoxDecoration(
-                        border: Border.all(color: theme.dividerColor),
+                        border: Border.all(color: colors.border),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: DropdownButtonHideUnderline(
@@ -615,8 +615,8 @@ class HelpView extends GetView<SupportController> {
                             ? null
                             : controller.submitTicket,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: Colors.white,
+                          backgroundColor: colors.primary,
+                          foregroundColor: colors.textOnPrimary,
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),

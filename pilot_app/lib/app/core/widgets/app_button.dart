@@ -144,87 +144,95 @@ class AppButton extends StatelessWidget {
     this.isFullWidth = true,
     this.icon,
     this.suffixIcon,
+    this.backgroundColor,
+    this.textColor,
     this.borderColor,
     this.borderRadius,
     this.padding,
   })  : variant = AppButtonVariant.primary,
-        backgroundColor = AppColors.error,
-        textColor = AppColors.white,
         isDanger = true;
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColorScheme.of(context);
     final bool disabled = isDisabled || isLoading;
 
     switch (variant) {
       case AppButtonVariant.primary:
-        return _buildElevatedButton(disabled);
+        return _buildElevatedButton(colors, disabled);
       case AppButtonVariant.secondary:
-        return _buildSecondaryButton(disabled);
+        return _buildSecondaryButton(colors, disabled);
       case AppButtonVariant.outline:
-        return _buildOutlineButton(disabled);
+        return _buildOutlineButton(colors, disabled);
       case AppButtonVariant.text:
-        return _buildTextButton(disabled);
+        return _buildTextButton(colors, disabled);
       case AppButtonVariant.icon:
-        return _buildIconButton(disabled);
+        return _buildIconButton(colors, disabled);
     }
   }
 
-  Widget _buildElevatedButton(bool disabled) {
+  Widget _buildElevatedButton(AppColorScheme colors, bool disabled) {
+    final bg = isDanger
+        ? (backgroundColor ?? colors.error)
+        : (backgroundColor ?? colors.primary);
+    final fg = isDanger
+        ? (textColor ?? colors.textOnPrimary)
+        : (textColor ?? colors.textOnPrimary);
+
     return SizedBox(
       width: isFullWidth ? double.infinity : null,
       height: _getHeight(),
       child: ElevatedButton(
         onPressed: disabled ? null : onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: backgroundColor ?? AppColors.primary,
-          foregroundColor: textColor ?? AppColors.white,
-          disabledBackgroundColor: AppColors.grey300,
-          disabledForegroundColor: AppColors.grey500,
+          backgroundColor: bg,
+          foregroundColor: fg,
+          disabledBackgroundColor: colors.border,
+          disabledForegroundColor: colors.textHint,
           elevation: 0,
           padding: padding ?? _getPadding(),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(borderRadius ?? AppTheme.radiusMedium),
           ),
         ),
-        child: _buildButtonContent(textColor ?? AppColors.white),
+        child: _buildButtonContent(fg),
       ),
     );
   }
 
-  Widget _buildSecondaryButton(bool disabled) {
+  Widget _buildSecondaryButton(AppColorScheme colors, bool disabled) {
     return SizedBox(
       width: isFullWidth ? double.infinity : null,
       height: _getHeight(),
       child: ElevatedButton(
         onPressed: disabled ? null : onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: backgroundColor ?? AppColors.primaryContainer,
-          foregroundColor: textColor ?? AppColors.primary,
-          disabledBackgroundColor: AppColors.grey200,
-          disabledForegroundColor: AppColors.grey500,
+          backgroundColor: backgroundColor ?? colors.primaryContainer,
+          foregroundColor: textColor ?? colors.primary,
+          disabledBackgroundColor: colors.surfaceVariant,
+          disabledForegroundColor: colors.textHint,
           elevation: 0,
           padding: padding ?? _getPadding(),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(borderRadius ?? AppTheme.radiusMedium),
           ),
         ),
-        child: _buildButtonContent(textColor ?? AppColors.primary),
+        child: _buildButtonContent(textColor ?? colors.primary),
       ),
     );
   }
 
-  Widget _buildOutlineButton(bool disabled) {
+  Widget _buildOutlineButton(AppColorScheme colors, bool disabled) {
     return SizedBox(
       width: isFullWidth ? double.infinity : null,
       height: _getHeight(),
       child: OutlinedButton(
         onPressed: disabled ? null : onPressed,
         style: OutlinedButton.styleFrom(
-          foregroundColor: textColor ?? AppColors.primary,
-          disabledForegroundColor: AppColors.grey500,
+          foregroundColor: textColor ?? colors.primary,
+          disabledForegroundColor: colors.textHint,
           side: BorderSide(
-            color: disabled ? AppColors.grey300 : (borderColor ?? AppColors.primary),
+            color: disabled ? colors.border : (borderColor ?? colors.primary),
             width: 1.5,
           ),
           padding: padding ?? _getPadding(),
@@ -232,37 +240,37 @@ class AppButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(borderRadius ?? AppTheme.radiusMedium),
           ),
         ),
-        child: _buildButtonContent(textColor ?? AppColors.primary),
+        child: _buildButtonContent(textColor ?? colors.primary),
       ),
     );
   }
 
-  Widget _buildTextButton(bool disabled) {
+  Widget _buildTextButton(AppColorScheme colors, bool disabled) {
     return SizedBox(
       width: isFullWidth ? double.infinity : null,
       height: _getHeight(),
       child: TextButton(
         onPressed: disabled ? null : onPressed,
         style: TextButton.styleFrom(
-          foregroundColor: textColor ?? AppColors.primary,
-          disabledForegroundColor: AppColors.grey500,
+          foregroundColor: textColor ?? colors.primary,
+          disabledForegroundColor: colors.textHint,
           padding: padding ?? _getPadding(),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(borderRadius ?? AppTheme.radiusMedium),
           ),
         ),
-        child: _buildButtonContent(textColor ?? AppColors.primary),
+        child: _buildButtonContent(textColor ?? colors.primary),
       ),
     );
   }
 
-  Widget _buildIconButton(bool disabled) {
+  Widget _buildIconButton(AppColorScheme colors, bool disabled) {
     final double iconSize = _getIconSize();
     return Container(
       width: _getHeight(),
       height: _getHeight(),
       decoration: BoxDecoration(
-        color: backgroundColor ?? AppColors.primaryContainer,
+        color: backgroundColor ?? colors.primaryContainer,
         borderRadius: BorderRadius.circular(borderRadius ?? AppTheme.radiusMedium),
       ),
       child: IconButton(
@@ -273,13 +281,13 @@ class AppButton extends StatelessWidget {
                 height: iconSize * 0.8,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  color: textColor ?? AppColors.primary,
+                  color: textColor ?? colors.primary,
                 ),
               )
             : Icon(
                 icon,
                 size: iconSize,
-                color: disabled ? AppColors.grey500 : (textColor ?? AppColors.primary),
+                color: disabled ? colors.textHint : (textColor ?? colors.primary),
               ),
       ),
     );

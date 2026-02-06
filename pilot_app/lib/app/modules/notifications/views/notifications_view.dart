@@ -12,12 +12,12 @@ class NotificationsView extends GetView<NotificationsController> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final colors = AppColorScheme.of(context);
 
     return DefaultTabController(
       length: 2,
       child: Scaffold(
-        backgroundColor: theme.scaffoldBackgroundColor,
+        backgroundColor: colors.background,
         appBar: AppBar(
           title: const Text('Notifications'),
           centerTitle: true,
@@ -39,29 +39,29 @@ class NotificationsView extends GetView<NotificationsController> {
               Tab(text: 'All'),
               Tab(text: 'Settings'),
             ],
-            labelColor: AppColors.primary,
-            unselectedLabelColor: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-            indicatorColor: AppColors.primary,
+            labelColor: colors.primary,
+            unselectedLabelColor: colors.textHint,
+            indicatorColor: colors.primary,
           ),
         ),
         body: TabBarView(
           children: [
-            _buildNotificationsList(theme),
-            _buildSettings(theme),
+            _buildNotificationsList(colors),
+            _buildSettings(colors),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildNotificationsList(ThemeData theme) {
+  Widget _buildNotificationsList(AppColorScheme colors) {
     return Obx(() {
       if (controller.isLoading.value) {
         return const Center(child: CircularProgressIndicator());
       }
 
       if (controller.notifications.isEmpty) {
-        return _buildEmptyState(theme);
+        return _buildEmptyState(colors);
       }
 
       return RefreshIndicator(
@@ -70,14 +70,14 @@ class NotificationsView extends GetView<NotificationsController> {
           padding: const EdgeInsets.all(16),
           itemCount: controller.notifications.length,
           itemBuilder: (context, index) {
-            return _buildNotificationItem(theme, controller.notifications[index]);
+            return _buildNotificationItem(colors, controller.notifications[index]);
           },
         ),
       );
     });
   }
 
-  Widget _buildEmptyState(ThemeData theme) {
+  Widget _buildEmptyState(AppColorScheme colors) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -85,7 +85,7 @@ class NotificationsView extends GetView<NotificationsController> {
           Icon(
             Icons.notifications_none,
             size: 80,
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
+            color: colors.textDisabled,
           ),
           const SizedBox(height: 16),
           Text(
@@ -96,7 +96,7 @@ class NotificationsView extends GetView<NotificationsController> {
           Text(
             "You're all caught up!",
             style: AppTextStyles.bodyMedium.copyWith(
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+              color: colors.textHint,
             ),
           ),
         ],
@@ -104,7 +104,7 @@ class NotificationsView extends GetView<NotificationsController> {
     );
   }
 
-  Widget _buildNotificationItem(ThemeData theme, NotificationItem notification) {
+  Widget _buildNotificationItem(AppColorScheme colors, NotificationItem notification) {
     final timeFormat = DateFormat('h:mm a');
     final dateFormat = DateFormat('MMM d');
     final isToday = DateTime.now().difference(notification.timestamp).inDays == 0;
@@ -114,23 +114,23 @@ class NotificationsView extends GetView<NotificationsController> {
     switch (notification.type) {
       case NotificationType.job:
         icon = Icons.local_shipping;
-        iconColor = Colors.blue;
+        iconColor = colors.info;
         break;
       case NotificationType.earning:
         icon = Icons.account_balance_wallet;
-        iconColor = Colors.green;
+        iconColor = colors.success;
         break;
       case NotificationType.bonus:
         icon = Icons.star;
-        iconColor = Colors.amber;
+        iconColor = colors.accent;
         break;
       case NotificationType.promo:
         icon = Icons.local_offer;
-        iconColor = Colors.purple;
+        iconColor = colors.primaryDark;
         break;
       case NotificationType.system:
         icon = Icons.info;
-        iconColor = Colors.grey;
+        iconColor = colors.textHint;
         break;
     }
 
@@ -142,10 +142,10 @@ class NotificationsView extends GetView<NotificationsController> {
         padding: const EdgeInsets.only(right: 20),
         margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
-          color: Colors.red,
+          color: colors.error,
           borderRadius: BorderRadius.circular(12),
         ),
-        child: const Icon(Icons.delete, color: Colors.white),
+        child: Icon(Icons.delete, color: colors.textOnPrimary),
       ),
       onDismissed: (_) => controller.deleteNotification(notification.id),
       child: GestureDetector(
@@ -155,12 +155,12 @@ class NotificationsView extends GetView<NotificationsController> {
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: notification.isRead
-                ? theme.colorScheme.surfaceContainerHighest
-                : AppColors.primary.withValues(alpha: 0.05),
+                ? colors.surfaceVariant
+                : colors.primary.withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(12),
             border: notification.isRead
                 ? null
-                : Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
+                : Border.all(color: colors.primary.withValues(alpha: 0.2)),
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -193,7 +193,7 @@ class NotificationsView extends GetView<NotificationsController> {
                             width: 8,
                             height: 8,
                             decoration: BoxDecoration(
-                              color: AppColors.primary,
+                              color: colors.primary,
                               shape: BoxShape.circle,
                             ),
                           ),
@@ -203,7 +203,7 @@ class NotificationsView extends GetView<NotificationsController> {
                     Text(
                       notification.message,
                       style: AppTextStyles.bodySmall.copyWith(
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                        color: colors.textSecondary,
                       ),
                     ),
                     const SizedBox(height: 6),
@@ -212,7 +212,7 @@ class NotificationsView extends GetView<NotificationsController> {
                           ? timeFormat.format(notification.timestamp)
                           : dateFormat.format(notification.timestamp),
                       style: AppTextStyles.labelSmall.copyWith(
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                        color: colors.textHint,
                       ),
                     ),
                   ],
@@ -225,7 +225,7 @@ class NotificationsView extends GetView<NotificationsController> {
     );
   }
 
-  Widget _buildSettings(ThemeData theme) {
+  Widget _buildSettings(AppColorScheme colors) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -238,7 +238,7 @@ class NotificationsView extends GetView<NotificationsController> {
           const SizedBox(height: 16),
           Container(
             decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest,
+              color: colors.surfaceVariant,
               borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
             ),
             child: Column(
@@ -248,31 +248,31 @@ class NotificationsView extends GetView<NotificationsController> {
                   subtitle: const Text('Receive push notifications'),
                   value: controller.pushEnabled.value,
                   onChanged: (v) => controller.updateSettings(pushEnabled: v),
-                  activeColor: AppColors.primary,
+                  activeColor: colors.primary,
                 )),
-                Divider(height: 1, indent: 16, endIndent: 16, color: theme.dividerColor),
+                Divider(height: 1, indent: 16, endIndent: 16, color: colors.border),
                 Obx(() => SwitchListTile(
                   title: const Text('Job Alerts'),
                   subtitle: const Text('New delivery opportunities'),
                   value: controller.jobAlertsEnabled.value,
                   onChanged: (v) => controller.updateSettings(jobAlerts: v),
-                  activeColor: AppColors.primary,
+                  activeColor: colors.primary,
                 )),
-                Divider(height: 1, indent: 16, endIndent: 16, color: theme.dividerColor),
+                Divider(height: 1, indent: 16, endIndent: 16, color: colors.border),
                 Obx(() => SwitchListTile(
                   title: const Text('Earnings Updates'),
                   subtitle: const Text('Payment and wallet updates'),
                   value: controller.earningsAlertsEnabled.value,
                   onChanged: (v) => controller.updateSettings(earningsAlerts: v),
-                  activeColor: AppColors.primary,
+                  activeColor: colors.primary,
                 )),
-                Divider(height: 1, indent: 16, endIndent: 16, color: theme.dividerColor),
+                Divider(height: 1, indent: 16, endIndent: 16, color: colors.border),
                 Obx(() => SwitchListTile(
                   title: const Text('Promotions'),
                   subtitle: const Text('Special offers and bonuses'),
                   value: controller.promoAlertsEnabled.value,
                   onChanged: (v) => controller.updateSettings(promoAlerts: v),
-                  activeColor: AppColors.primary,
+                  activeColor: colors.primary,
                 )),
               ],
             ),
@@ -281,7 +281,7 @@ class NotificationsView extends GetView<NotificationsController> {
           Text(
             'Note: You will always receive critical notifications about your active deliveries and account security.',
             style: AppTextStyles.labelSmall.copyWith(
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+              color: colors.textHint,
             ),
           ),
         ],

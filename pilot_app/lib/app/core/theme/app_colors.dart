@@ -13,6 +13,7 @@ class AppColorScheme {
   final Color primaryLight;
   final Color primaryDark;
   final Color primaryContainer;
+  final Color primaryGlow; // For online toggle glow effect
 
   // Accent (Amber)
   final Color accent;
@@ -24,6 +25,7 @@ class AppColorScheme {
   final Color textSecondary;
   final Color textHint;
   final Color textDisabled;
+  final Color textOnPrimary;
 
   // Borders
   final Color border;
@@ -44,6 +46,7 @@ class AppColorScheme {
     required this.primaryLight,
     required this.primaryDark,
     required this.primaryContainer,
+    required this.primaryGlow,
     required this.accent,
     required this.accentLight,
     required this.accentDark,
@@ -51,6 +54,7 @@ class AppColorScheme {
     required this.textSecondary,
     required this.textHint,
     required this.textDisabled,
+    required this.textOnPrimary,
     required this.border,
     required this.borderPrimary,
     required this.success,
@@ -59,40 +63,42 @@ class AppColorScheme {
     required this.info,
   });
 
-  /// Dark theme color scheme (default)
+  /// Dark theme color scheme (default) - Minimal Dark Design
   static const dark = AppColorScheme(
-    // Backgrounds
+    // Backgrounds - Deep Slate
     background: Color(0xFF0F172A),
     backgroundGradientEnd: Color(0xFF1E293B),
-    surface: Color(0xCC1E293B), // 0.8 opacity
-    surfaceVariant: Color(0xFF334155),
+    surface: Color(0xFF1E293B), // Solid Slate 800
+    surfaceVariant: Color(0xFF334155), // Slate 700
 
-    // Primary (Emerald - brighter for dark mode)
-    primary: Color(0xFF34D399),
-    primaryLight: Color(0xFF6EE7B7),
-    primaryDark: Color(0xFF10B981),
-    primaryContainer: Color(0xFF064E3B),
+    // Primary (Emerald) - Single accent color
+    primary: Color(0xFF10B981), // Emerald 500 - main accent
+    primaryLight: Color(0xFF34D399), // Emerald 400
+    primaryDark: Color(0xFF059669), // Emerald 600
+    primaryContainer: Color(0xFF064E3B), // Emerald 900
+    primaryGlow: Color(0x3310B981), // 20% opacity for glow effect
 
-    // Accent (Amber - brighter for dark mode)
+    // Accent (Amber - for warnings only, not UI accents)
     accent: Color(0xFFFBBF24),
     accentLight: Color(0xFFFCD34D),
     accentDark: Color(0xFFF59E0B),
 
     // Text
-    textPrimary: Color(0xFFF8FAFC),
-    textSecondary: Color(0xFF94A3B8),
-    textHint: Color(0xFF64748B),
-    textDisabled: Color(0xFF475569),
+    textPrimary: Color(0xFFF8FAFC), // Slate 50 - White
+    textSecondary: Color(0xFF94A3B8), // Slate 400
+    textHint: Color(0xFF64748B), // Slate 500
+    textDisabled: Color(0xFF475569), // Slate 600
+    textOnPrimary: Color(0xFFFFFFFF), // Pure white on emerald
 
-    // Borders
-    border: Color(0xFF334155),
-    borderPrimary: Color(0x3334D399), // 0.2 opacity
+    // Borders - Subtle 1px borders
+    border: Color(0xFF334155), // Slate 700
+    borderPrimary: Color(0x3310B981), // Emerald 20% opacity
 
     // Semantic
-    success: Color(0xFF34D399),
-    warning: Color(0xFFFBBF24),
-    error: Color(0xFFF87171),
-    info: Color(0xFF60A5FA),
+    success: Color(0xFF10B981), // Emerald
+    warning: Color(0xFFFBBF24), // Amber
+    error: Color(0xFFF87171), // Red 400
+    info: Color(0xFF60A5FA), // Blue 400
   );
 
   /// Light theme color scheme
@@ -100,7 +106,7 @@ class AppColorScheme {
     // Backgrounds
     background: Color(0xFFECFDF5),
     backgroundGradientEnd: Color(0xFFF0FDF4),
-    surface: Color(0xF2FFFFFF), // 0.95 opacity
+    surface: Color(0xFFFFFFFF),
     surfaceVariant: Color(0xFFF8FAFC),
 
     // Primary (Emerald - standard)
@@ -108,6 +114,7 @@ class AppColorScheme {
     primaryLight: Color(0xFF34D399),
     primaryDark: Color(0xFF059669),
     primaryContainer: Color(0xFFD1FAE5),
+    primaryGlow: Color(0x4010B981), // 25% opacity for glow effect
 
     // Accent (Amber)
     accent: Color(0xFFF59E0B),
@@ -119,6 +126,7 @@ class AppColorScheme {
     textSecondary: Color(0xFF64748B),
     textHint: Color(0xFF94A3B8),
     textDisabled: Color(0xFFCBD5E1),
+    textOnPrimary: Color(0xFFFFFFFF), // Pure white on emerald
 
     // Borders
     border: Color(0xFFE2E8F0),

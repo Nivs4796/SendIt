@@ -12,7 +12,7 @@ class DocumentsStep extends GetView<RegistrationController> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final colors = AppColorScheme.of(context);
 
     return SingleChildScrollView(
       padding: EdgeInsets.symmetric(
@@ -28,10 +28,10 @@ class DocumentsStep extends GetView<RegistrationController> {
               Container(
                 padding: EdgeInsets.all(AppTheme.spacingSm),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
+                  color: colors.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
                 ),
-                child: Icon(Icons.description_rounded, color: AppColors.primary, size: 18),
+                child: Icon(Icons.description_rounded, color: colors.primary, size: 18),
               ),
               SizedBox(width: AppTheme.spacingSm),
               Expanded(
@@ -49,7 +49,7 @@ class DocumentsStep extends GetView<RegistrationController> {
           SizedBox(height: AppTheme.spacingMd),
 
           // Progress
-          _buildProgress(theme),
+          _buildProgress(colors),
 
           SizedBox(height: AppTheme.spacingMd),
 
@@ -114,7 +114,7 @@ class DocumentsStep extends GetView<RegistrationController> {
           }),
 
           // Info
-          _buildInfoCard(theme),
+          _buildInfoCard(colors),
 
           SizedBox(height: AppTheme.spacingMd),
         ],
@@ -122,7 +122,7 @@ class DocumentsStep extends GetView<RegistrationController> {
     );
   }
 
-  Widget _buildProgress(ThemeData theme) {
+  Widget _buildProgress(AppColorScheme colors) {
     return Obx(() {
       int uploaded = 0;
       int total = 1;
@@ -145,9 +145,9 @@ class DocumentsStep extends GetView<RegistrationController> {
       return Container(
         padding: EdgeInsets.all(AppTheme.spacingSm),
         decoration: BoxDecoration(
-          color: AppColors.primary.withValues(alpha: 0.05),
+          color: colors.primary.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-          border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
+          border: Border.all(color: colors.primary.withValues(alpha: 0.2)),
         ),
         child: Column(
           children: [
@@ -158,13 +158,13 @@ class DocumentsStep extends GetView<RegistrationController> {
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: AppTheme.spacingSm, vertical: 2),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.15),
+                    color: colors.primary.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
                   ),
                   child: Text(
                     '$uploaded / $total',
                     style: AppTextStyles.labelSmall.copyWith(
-                      color: AppColors.primary,
+                      color: colors.primary,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -176,8 +176,8 @@ class DocumentsStep extends GetView<RegistrationController> {
               borderRadius: BorderRadius.circular(2),
               child: LinearProgressIndicator(
                 value: progress,
-                backgroundColor: theme.colorScheme.outline.withValues(alpha: 0.2),
-                valueColor: AlwaysStoppedAnimation(AppColors.primary),
+                backgroundColor: colors.border.withValues(alpha: 0.2),
+                valueColor: AlwaysStoppedAnimation(colors.primary),
                 minHeight: 4,
               ),
             ),
@@ -195,7 +195,7 @@ class DocumentsStep extends GetView<RegistrationController> {
     required Rx<dynamic> file,
     required String type,
   }) {
-    final theme = Theme.of(context);
+    final colors = AppColorScheme.of(context);
 
     return Obx(() {
       final isUploaded = file.value != null;
@@ -206,13 +206,13 @@ class DocumentsStep extends GetView<RegistrationController> {
           padding: EdgeInsets.all(AppTheme.spacingSm),
           decoration: BoxDecoration(
             color: isUploaded
-                ? AppColors.success.withValues(alpha: 0.05)
-                : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                ? colors.success.withValues(alpha: 0.05)
+                : colors.surfaceVariant.withValues(alpha: 0.5),
             borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
             border: Border.all(
               color: isUploaded
-                  ? AppColors.success.withValues(alpha: 0.5)
-                  : theme.colorScheme.outline.withValues(alpha: 0.2),
+                  ? colors.success.withValues(alpha: 0.5)
+                  : colors.border.withValues(alpha: 0.2),
             ),
           ),
           child: Row(
@@ -222,13 +222,13 @@ class DocumentsStep extends GetView<RegistrationController> {
                 height: 36,
                 decoration: BoxDecoration(
                   color: isUploaded
-                      ? AppColors.success.withValues(alpha: 0.15)
-                      : AppColors.primary.withValues(alpha: 0.1),
+                      ? colors.success.withValues(alpha: 0.15)
+                      : colors.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
                 ),
                 child: Icon(
                   isUploaded ? Icons.check_circle_rounded : icon,
-                  color: isUploaded ? AppColors.success : AppColors.primary,
+                  color: isUploaded ? colors.success : colors.primary,
                   size: 18,
                 ),
               ),
@@ -241,7 +241,7 @@ class DocumentsStep extends GetView<RegistrationController> {
                     Text(
                       isUploaded ? '✓ Uploaded' : subtitle,
                       style: AppTextStyles.caption.copyWith(
-                        color: isUploaded ? AppColors.success : null,
+                        color: isUploaded ? colors.success : null,
                       ),
                     ),
                   ],
@@ -249,7 +249,7 @@ class DocumentsStep extends GetView<RegistrationController> {
               ),
               Icon(
                 isUploaded ? Icons.edit_rounded : Icons.add_rounded,
-                color: isUploaded ? AppColors.success : AppColors.primary,
+                color: isUploaded ? colors.success : colors.primary,
                 size: 18,
               ),
             ],
@@ -259,22 +259,22 @@ class DocumentsStep extends GetView<RegistrationController> {
     });
   }
 
-  Widget _buildInfoCard(ThemeData theme) {
+  Widget _buildInfoCard(AppColorScheme colors) {
     return Container(
       padding: EdgeInsets.all(AppTheme.spacingSm),
       decoration: BoxDecoration(
-        color: Colors.blue.withValues(alpha: 0.05),
+        color: colors.info.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
-        border: Border.all(color: Colors.blue.withValues(alpha: 0.2)),
+        border: Border.all(color: colors.info.withValues(alpha: 0.2)),
       ),
       child: Row(
         children: [
-          Icon(Icons.info_outline, color: Colors.blue.shade600, size: 16),
+          Icon(Icons.info_outline, color: colors.info, size: 16),
           SizedBox(width: AppTheme.spacingSm),
           Expanded(
             child: Text(
               'Clear photos • Verification: 24-48h',
-              style: AppTextStyles.caption.copyWith(color: Colors.blue.shade600),
+              style: AppTextStyles.caption.copyWith(color: colors.info),
             ),
           ),
         ],
@@ -283,14 +283,14 @@ class DocumentsStep extends GetView<RegistrationController> {
   }
 
   void _showPicker(BuildContext context, String type) {
-    final theme = Theme.of(context);
+    final colors = AppColorScheme.of(context);
 
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
         decoration: BoxDecoration(
-          color: theme.colorScheme.surface,
+          color: colors.surface,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
         ),
         padding: EdgeInsets.all(AppTheme.spacingLg),
@@ -301,7 +301,7 @@ class DocumentsStep extends GetView<RegistrationController> {
               width: 32,
               height: 3,
               decoration: BoxDecoration(
-                color: theme.colorScheme.outline.withValues(alpha: 0.3),
+                color: colors.border.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -312,6 +312,7 @@ class DocumentsStep extends GetView<RegistrationController> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 _buildPickerOption(
+                  colors: colors,
                   icon: Icons.camera_alt_rounded,
                   label: 'Camera',
                   onTap: () {
@@ -320,6 +321,7 @@ class DocumentsStep extends GetView<RegistrationController> {
                   },
                 ),
                 _buildPickerOption(
+                  colors: colors,
                   icon: Icons.photo_library_rounded,
                   label: 'Gallery',
                   onTap: () {
@@ -337,6 +339,7 @@ class DocumentsStep extends GetView<RegistrationController> {
   }
 
   Widget _buildPickerOption({
+    required AppColorScheme colors,
     required IconData icon,
     required String label,
     required VoidCallback onTap,
@@ -349,10 +352,10 @@ class DocumentsStep extends GetView<RegistrationController> {
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.1),
+              color: colors.primary.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, size: 20, color: AppColors.primary),
+            child: Icon(icon, size: 20, color: colors.primary),
           ),
           SizedBox(height: AppTheme.spacingXs),
           Text(label, style: AppTextStyles.labelMedium),

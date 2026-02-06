@@ -13,7 +13,7 @@ class BankDetailsStep extends GetView<RegistrationController> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final colors = AppColorScheme.of(context);
 
     return SingleChildScrollView(
       padding: EdgeInsets.symmetric(
@@ -29,10 +29,10 @@ class BankDetailsStep extends GetView<RegistrationController> {
               Container(
                 padding: EdgeInsets.all(AppTheme.spacingSm),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
+                  color: colors.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
                 ),
-                child: Icon(Icons.account_balance_rounded, color: AppColors.primary, size: 18),
+                child: Icon(Icons.account_balance_rounded, color: colors.primary, size: 18),
               ),
               SizedBox(width: AppTheme.spacingSm),
               Expanded(
@@ -50,7 +50,7 @@ class BankDetailsStep extends GetView<RegistrationController> {
           SizedBox(height: AppTheme.spacingMd),
 
           // Earnings Info
-          _buildEarningsInfo(theme),
+          _buildEarningsInfo(colors),
 
           SizedBox(height: AppTheme.spacingMd),
 
@@ -110,17 +110,17 @@ class BankDetailsStep extends GetView<RegistrationController> {
           Text('Optional Document', style: AppTextStyles.labelLarge),
           SizedBox(height: AppTheme.spacingSm),
 
-          _buildDocUpload(context, theme),
+          _buildDocUpload(context, colors),
 
           SizedBox(height: AppTheme.spacingMd),
 
           // Security Note
-          _buildSecurityNote(theme),
+          _buildSecurityNote(colors),
 
           SizedBox(height: AppTheme.spacingSm),
 
           // Final Note
-          _buildFinalNote(theme),
+          _buildFinalNote(colors),
 
           SizedBox(height: AppTheme.spacingMd),
         ],
@@ -128,17 +128,17 @@ class BankDetailsStep extends GetView<RegistrationController> {
     );
   }
 
-  Widget _buildEarningsInfo(ThemeData theme) {
+  Widget _buildEarningsInfo(AppColorScheme colors) {
     return Container(
       padding: EdgeInsets.all(AppTheme.spacingSm),
       decoration: BoxDecoration(
-        color: AppColors.success.withValues(alpha: 0.1),
+        color: colors.success.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-        border: Border.all(color: AppColors.success.withValues(alpha: 0.2)),
+        border: Border.all(color: colors.success.withValues(alpha: 0.2)),
       ),
       child: Row(
         children: [
-          Icon(Icons.monetization_on_rounded, color: AppColors.success, size: 20),
+          Icon(Icons.monetization_on_rounded, color: colors.success, size: 20),
           SizedBox(width: AppTheme.spacingSm),
           Expanded(
             child: Column(
@@ -146,7 +146,7 @@ class BankDetailsStep extends GetView<RegistrationController> {
               children: [
                 Text(
                   'Weekly Payouts',
-                  style: AppTextStyles.labelLarge.copyWith(color: AppColors.success),
+                  style: AppTextStyles.labelLarge.copyWith(color: colors.success),
                 ),
                 Text(
                   'Earnings transferred every week',
@@ -160,7 +160,7 @@ class BankDetailsStep extends GetView<RegistrationController> {
     );
   }
 
-  Widget _buildDocUpload(BuildContext context, ThemeData theme) {
+  Widget _buildDocUpload(BuildContext context, AppColorScheme colors) {
     return Obx(() {
       final isUploaded = controller.cancelledChequeFile.value != null;
 
@@ -170,13 +170,13 @@ class BankDetailsStep extends GetView<RegistrationController> {
           padding: EdgeInsets.all(AppTheme.spacingSm),
           decoration: BoxDecoration(
             color: isUploaded
-                ? AppColors.success.withValues(alpha: 0.05)
-                : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                ? colors.success.withValues(alpha: 0.05)
+                : colors.surfaceVariant.withValues(alpha: 0.5),
             borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
             border: Border.all(
               color: isUploaded
-                  ? AppColors.success.withValues(alpha: 0.5)
-                  : theme.colorScheme.outline.withValues(alpha: 0.2),
+                  ? colors.success.withValues(alpha: 0.5)
+                  : colors.border.withValues(alpha: 0.2),
             ),
           ),
           child: Row(
@@ -186,13 +186,13 @@ class BankDetailsStep extends GetView<RegistrationController> {
                 height: 36,
                 decoration: BoxDecoration(
                   color: isUploaded
-                      ? AppColors.success.withValues(alpha: 0.15)
-                      : AppColors.primary.withValues(alpha: 0.1),
+                      ? colors.success.withValues(alpha: 0.15)
+                      : colors.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
                 ),
                 child: Icon(
                   isUploaded ? Icons.check_circle_rounded : Icons.receipt_long_rounded,
-                  color: isUploaded ? AppColors.success : AppColors.primary,
+                  color: isUploaded ? colors.success : colors.primary,
                   size: 18,
                 ),
               ),
@@ -205,7 +205,7 @@ class BankDetailsStep extends GetView<RegistrationController> {
                     Text(
                       isUploaded ? '✓ Uploaded' : 'Helps verify faster',
                       style: AppTextStyles.caption.copyWith(
-                        color: isUploaded ? AppColors.success : null,
+                        color: isUploaded ? colors.success : null,
                       ),
                     ),
                   ],
@@ -213,7 +213,7 @@ class BankDetailsStep extends GetView<RegistrationController> {
               ),
               Icon(
                 isUploaded ? Icons.edit_rounded : Icons.add_rounded,
-                color: isUploaded ? AppColors.success : AppColors.primary,
+                color: isUploaded ? colors.success : colors.primary,
                 size: 18,
               ),
             ],
@@ -223,22 +223,22 @@ class BankDetailsStep extends GetView<RegistrationController> {
     });
   }
 
-  Widget _buildSecurityNote(ThemeData theme) {
+  Widget _buildSecurityNote(AppColorScheme colors) {
     return Container(
       padding: EdgeInsets.all(AppTheme.spacingSm),
       decoration: BoxDecoration(
-        color: Colors.blue.withValues(alpha: 0.05),
+        color: colors.info.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
-        border: Border.all(color: Colors.blue.withValues(alpha: 0.2)),
+        border: Border.all(color: colors.info.withValues(alpha: 0.2)),
       ),
       child: Row(
         children: [
-          Icon(Icons.lock_rounded, color: Colors.blue.shade600, size: 16),
+          Icon(Icons.lock_rounded, color: colors.info, size: 16),
           SizedBox(width: AppTheme.spacingSm),
           Expanded(
             child: Text(
               '256-bit encrypted & stored securely',
-              style: AppTextStyles.caption.copyWith(color: Colors.blue.shade600),
+              style: AppTextStyles.caption.copyWith(color: colors.info),
             ),
           ),
         ],
@@ -246,17 +246,17 @@ class BankDetailsStep extends GetView<RegistrationController> {
     );
   }
 
-  Widget _buildFinalNote(ThemeData theme) {
+  Widget _buildFinalNote(AppColorScheme colors) {
     return Container(
       padding: EdgeInsets.all(AppTheme.spacingSm),
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.05),
+        color: colors.primary.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
+        border: Border.all(color: colors.primary.withValues(alpha: 0.2)),
       ),
       child: Row(
         children: [
-          Icon(Icons.celebration_rounded, color: AppColors.primary, size: 18),
+          Icon(Icons.celebration_rounded, color: colors.primary, size: 18),
           SizedBox(width: AppTheme.spacingSm),
           Expanded(
             child: Column(
@@ -264,7 +264,7 @@ class BankDetailsStep extends GetView<RegistrationController> {
               children: [
                 Text(
                   'Almost Done!',
-                  style: AppTextStyles.labelLarge.copyWith(color: AppColors.primary),
+                  style: AppTextStyles.labelLarge.copyWith(color: colors.primary),
                 ),
                 Text('Review & submit your application', style: AppTextStyles.caption),
               ],
@@ -276,14 +276,14 @@ class BankDetailsStep extends GetView<RegistrationController> {
   }
 
   void _showPicker(BuildContext context) {
-    final theme = Theme.of(context);
+    final colors = AppColorScheme.of(context);
 
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
         decoration: BoxDecoration(
-          color: theme.colorScheme.surface,
+          color: colors.surface,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
         ),
         padding: EdgeInsets.all(AppTheme.spacingLg),
@@ -294,7 +294,7 @@ class BankDetailsStep extends GetView<RegistrationController> {
               width: 32,
               height: 3,
               decoration: BoxDecoration(
-                color: theme.colorScheme.outline.withValues(alpha: 0.3),
+                color: colors.border.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -305,6 +305,7 @@ class BankDetailsStep extends GetView<RegistrationController> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 _buildPickerOption(
+                  colors: colors,
                   icon: Icons.camera_alt_rounded,
                   label: 'Camera',
                   onTap: () {
@@ -313,6 +314,7 @@ class BankDetailsStep extends GetView<RegistrationController> {
                   },
                 ),
                 _buildPickerOption(
+                  colors: colors,
                   icon: Icons.photo_library_rounded,
                   label: 'Gallery',
                   onTap: () {
@@ -330,6 +332,7 @@ class BankDetailsStep extends GetView<RegistrationController> {
   }
 
   Widget _buildPickerOption({
+    required AppColorScheme colors,
     required IconData icon,
     required String label,
     required VoidCallback onTap,
@@ -342,10 +345,10 @@ class BankDetailsStep extends GetView<RegistrationController> {
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.1),
+              color: colors.primary.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, size: 20, color: AppColors.primary),
+            child: Icon(icon, size: 20, color: colors.primary),
           ),
           SizedBox(height: AppTheme.spacingXs),
           Text(label, style: AppTextStyles.labelMedium),

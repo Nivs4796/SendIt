@@ -19,26 +19,26 @@ class ActiveJobView extends GetView<JobsController> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final colors = AppColorScheme.of(context);
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: colors.background,
       body: Obx(() {
         final job = controller.activeJob.value;
-        
+
         if (job == null) {
           return const Center(
             child: Text('No active job'),
           );
         }
-        
+
         return Stack(
           children: [
             // Main Content
             CustomScrollView(
               slivers: [
                 // App Bar
-                _buildAppBar(context, job),
-                
+                _buildAppBar(context, colors, job),
+
                 // Content
                 SliverPadding(
                   padding: const EdgeInsets.all(16),
@@ -46,33 +46,33 @@ class ActiveJobView extends GetView<JobsController> {
                     delegate: SliverChildListDelegate([
                       // Status Stepper
                       JobStatusStepper(status: job.status),
-                      
+
                       const SizedBox(height: 16),
-                      
+
                       // Live Map
-                      _buildLiveMap(job),
-                      
+                      _buildLiveMap(colors, job),
+
                       const SizedBox(height: 16),
-                      
+
                       // Job Info Card
-                      _buildJobInfoCard(context, job),
+                      _buildJobInfoCard(colors, job),
 
                       const SizedBox(height: 16),
 
                       // Customer Card
-                      _buildCustomerCard(context, job),
+                      _buildCustomerCard(colors, job),
 
                       const SizedBox(height: 16),
 
                       // Addresses Card
-                      _buildAddressesCard(context, job),
+                      _buildAddressesCard(colors, job),
 
                       const SizedBox(height: 16),
 
                       // Payment Info
                       if (job.paymentMethod == PaymentMethod.cod)
-                        _buildCodCard(context, job),
-                      
+                        _buildCodCard(colors, job),
+
                       // Space for bottom buttons
                       const SizedBox(height: 120),
                     ]),
@@ -80,13 +80,13 @@ class ActiveJobView extends GetView<JobsController> {
                 ),
               ],
             ),
-            
+
             // Bottom Action Buttons
             Positioned(
               left: 0,
               right: 0,
               bottom: 0,
-              child: _buildBottomActions(context, job),
+              child: _buildBottomActions(colors, job),
             ),
           ],
         );
@@ -94,26 +94,25 @@ class ActiveJobView extends GetView<JobsController> {
     );
   }
 
-  SliverAppBar _buildAppBar(BuildContext context, JobModel job) {
-    final theme = Theme.of(context);
+  SliverAppBar _buildAppBar(BuildContext context, AppColorScheme colors, JobModel job) {
     return SliverAppBar(
       floating: true,
-      backgroundColor: theme.colorScheme.primary,
-      foregroundColor: theme.colorScheme.onPrimary,
+      backgroundColor: colors.primary,
+      foregroundColor: colors.textOnPrimary,
       title: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'Job #${job.bookingId.substring(0, 8).toUpperCase()}',
             style: AppTextStyles.h4.copyWith(
-              color: theme.colorScheme.onPrimary,
+              color: colors.textOnPrimary,
               fontWeight: FontWeight.bold,
             ),
           ),
           Text(
             job.status.displayText,
             style: AppTextStyles.bodySmall.copyWith(
-              color: theme.colorScheme.onPrimary.withValues(alpha: 0.8),
+              color: colors.textOnPrimary.withValues(alpha: 0.8),
             ),
           ),
         ],
@@ -156,9 +155,9 @@ class ActiveJobView extends GetView<JobsController> {
     );
   }
 
-  Widget _buildLiveMap(JobModel job) {
+  Widget _buildLiveMap(AppColorScheme colors, JobModel job) {
     final locationService = Get.find<LocationService>();
-    
+
     return Card(
       clipBehavior: Clip.antiAlias,
       child: Column(
@@ -169,7 +168,7 @@ class ActiveJobView extends GetView<JobsController> {
             if (currentLocation != null) {
               pilotLatLng = LatLng(currentLocation.lat, currentLocation.lng);
             }
-            
+
             return DeliveryMap(
               height: 200,
               pickupLocation: LatLng(job.pickupAddress.lat, job.pickupAddress.lng),
@@ -188,7 +187,7 @@ class ActiveJobView extends GetView<JobsController> {
                   child: _buildMapQuickAction(
                     icon: Icons.navigation,
                     label: 'Navigate',
-                    color: AppColors.primary,
+                    color: colors.primary,
                     onTap: () => _openNavigation(job),
                   ),
                 ),
@@ -197,7 +196,7 @@ class ActiveJobView extends GetView<JobsController> {
                   child: _buildMapQuickAction(
                     icon: Icons.fullscreen,
                     label: 'Full Map',
-                    color: Colors.blue,
+                    color: colors.info,
                     onTap: () => _openFullScreenMap(job),
                   ),
                 ),
@@ -245,12 +244,12 @@ class ActiveJobView extends GetView<JobsController> {
     final locationService = Get.find<LocationService>();
 
     Get.to(() => Builder(builder: (context) {
-      final theme = Theme.of(context);
+      final colors = AppColorScheme.of(context);
       return Scaffold(
         appBar: AppBar(
           title: const Text('Live Tracking'),
-          backgroundColor: theme.colorScheme.primary,
-          foregroundColor: theme.colorScheme.onPrimary,
+          backgroundColor: colors.primary,
+          foregroundColor: colors.textOnPrimary,
         actions: [
           IconButton(
             icon: const Icon(Icons.navigation),
@@ -264,7 +263,7 @@ class ActiveJobView extends GetView<JobsController> {
         if (currentLocation != null) {
           pilotLatLng = LatLng(currentLocation.lat, currentLocation.lng);
         }
-        
+
         return DeliveryMap(
           height: double.infinity,
           pickupLocation: LatLng(job.pickupAddress.lat, job.pickupAddress.lng),
@@ -278,44 +277,35 @@ class ActiveJobView extends GetView<JobsController> {
     }));
   }
 
-  Widget _buildJobInfoCard(BuildContext context, JobModel job) {
-    final theme = Theme.of(context);
-    final primaryColor = theme.colorScheme.primary;
-    final infoColor = theme.brightness == Brightness.dark
-        ? const Color(0xFF60A5FA)
-        : Colors.blue;
-    final warningColor = theme.brightness == Brightness.dark
-        ? const Color(0xFFFBBF24)
-        : Colors.orange;
-
+  Widget _buildJobInfoCard(AppColorScheme colors, JobModel job) {
     return Card(
-      color: theme.cardColor,
+      color: colors.surface,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
             _buildInfoItem(
-              context,
+              colors,
               icon: Icons.currency_rupee,
               label: 'Fare',
               value: job.fareDisplay,
-              color: primaryColor,
+              color: colors.primary,
             ),
-            _buildDivider(context),
+            _buildDivider(colors),
             _buildInfoItem(
-              context,
+              colors,
               icon: Icons.route,
               label: 'Distance',
               value: job.distanceDisplay,
-              color: infoColor,
+              color: colors.info,
             ),
-            _buildDivider(context),
+            _buildDivider(colors),
             _buildInfoItem(
-              context,
+              colors,
               icon: Icons.schedule,
               label: 'ETA',
               value: job.etaDisplay,
-              color: warningColor,
+              color: colors.warning,
             ),
           ],
         ),
@@ -324,13 +314,12 @@ class ActiveJobView extends GetView<JobsController> {
   }
 
   Widget _buildInfoItem(
-    BuildContext context, {
+    AppColorScheme colors, {
     required IconData icon,
     required String label,
     required String value,
     required Color color,
   }) {
-    final theme = Theme.of(context);
     return Expanded(
       child: Column(
         children: [
@@ -340,13 +329,13 @@ class ActiveJobView extends GetView<JobsController> {
             value,
             style: AppTextStyles.h4.copyWith(
               fontWeight: FontWeight.bold,
-              color: theme.colorScheme.onSurface,
+              color: colors.textPrimary,
             ),
           ),
           Text(
             label,
             style: AppTextStyles.bodySmall.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+              color: colors.textSecondary,
             ),
           ),
         ],
@@ -354,26 +343,17 @@ class ActiveJobView extends GetView<JobsController> {
     );
   }
 
-  Widget _buildDivider(BuildContext context) {
-    final theme = Theme.of(context);
+  Widget _buildDivider(AppColorScheme colors) {
     return Container(
       height: 40,
       width: 1,
-      color: theme.dividerColor,
+      color: colors.border,
     );
   }
 
-  Widget _buildCustomerCard(BuildContext context, JobModel job) {
-    final theme = Theme.of(context);
-    final successColor = theme.brightness == Brightness.dark
-        ? const Color(0xFF34D399)
-        : Colors.green.shade700;
-    final infoColor = theme.brightness == Brightness.dark
-        ? const Color(0xFF60A5FA)
-        : Colors.blue.shade700;
-
+  Widget _buildCustomerCard(AppColorScheme colors, JobModel job) {
     return Card(
-      color: theme.cardColor,
+      color: colors.surface,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(
@@ -381,11 +361,11 @@ class ActiveJobView extends GetView<JobsController> {
             // Avatar
             CircleAvatar(
               radius: 24,
-              backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.1),
+              backgroundColor: colors.primary.withValues(alpha: 0.1),
               child: Text(
                 (job.customerName ?? 'C')[0].toUpperCase(),
                 style: AppTextStyles.h4.copyWith(
-                  color: theme.colorScheme.primary,
+                  color: colors.primary,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -402,14 +382,14 @@ class ActiveJobView extends GetView<JobsController> {
                     job.customerName ?? 'Customer',
                     style: AppTextStyles.h4.copyWith(
                       fontWeight: FontWeight.w600,
-                      color: theme.colorScheme.onSurface,
+                      color: colors.textPrimary,
                     ),
                   ),
                   if (job.customerPhone != null)
                     Text(
                       job.customerPhone!,
                       style: AppTextStyles.bodySmall.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
+                        color: colors.textSecondary,
                       ),
                     ),
                 ],
@@ -423,12 +403,12 @@ class ActiveJobView extends GetView<JobsController> {
                 icon: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: successColor.withValues(alpha: 0.15),
+                    color: colors.success.withValues(alpha: 0.15),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
                     Icons.call,
-                    color: successColor,
+                    color: colors.success,
                     size: 20,
                   ),
                 ),
@@ -438,12 +418,12 @@ class ActiveJobView extends GetView<JobsController> {
                 icon: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: infoColor.withValues(alpha: 0.15),
+                    color: colors.info.withValues(alpha: 0.15),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
                     Icons.message,
-                    color: infoColor,
+                    color: colors.info,
                     size: 20,
                   ),
                 ),
@@ -455,27 +435,20 @@ class ActiveJobView extends GetView<JobsController> {
     );
   }
 
-  Widget _buildAddressesCard(BuildContext context, JobModel job) {
-    final theme = Theme.of(context);
+  Widget _buildAddressesCard(AppColorScheme colors, JobModel job) {
     final isPickupPhase = job.status.index <= JobStatus.packageCollected.index;
-    final successColor = theme.brightness == Brightness.dark
-        ? const Color(0xFF34D399)
-        : Colors.green;
-    final errorColor = theme.brightness == Brightness.dark
-        ? const Color(0xFFF87171)
-        : Colors.red;
 
     return Card(
-      color: theme.cardColor,
+      color: colors.surface,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
             // Pickup
             _buildAddressRow(
-              context,
+              colors,
               icon: Icons.radio_button_checked,
-              color: successColor,
+              color: colors.success,
               label: 'Pickup',
               address: job.pickupAddress.address,
               isActive: isPickupPhase,
@@ -489,7 +462,7 @@ class ActiveJobView extends GetView<JobsController> {
                 children: [
                   Container(
                     width: 2,
-                    color: theme.dividerColor,
+                    color: colors.border,
                   ),
                 ],
               ),
@@ -497,9 +470,9 @@ class ActiveJobView extends GetView<JobsController> {
 
             // Drop
             _buildAddressRow(
-              context,
+              colors,
               icon: Icons.location_on,
-              color: errorColor,
+              color: colors.error,
               label: 'Drop',
               address: job.dropAddress.address,
               isActive: !isPickupPhase,
@@ -511,14 +484,13 @@ class ActiveJobView extends GetView<JobsController> {
   }
 
   Widget _buildAddressRow(
-    BuildContext context, {
+    AppColorScheme colors, {
     required IconData icon,
     required Color color,
     required String label,
     required String address,
     required bool isActive,
   }) {
-    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -560,9 +532,7 @@ class ActiveJobView extends GetView<JobsController> {
                         child: Text(
                           'CURRENT',
                           style: AppTextStyles.labelSmall.copyWith(
-                            color: theme.brightness == Brightness.dark
-                                ? Colors.black
-                                : Colors.white,
+                            color: colors.textOnPrimary,
                             fontSize: 9,
                           ),
                         ),
@@ -574,7 +544,7 @@ class ActiveJobView extends GetView<JobsController> {
                 Text(
                   address,
                   style: AppTextStyles.bodyMedium.copyWith(
-                    color: theme.colorScheme.onSurface,
+                    color: colors.textPrimary,
                   ),
                 ),
               ],
@@ -585,18 +555,14 @@ class ActiveJobView extends GetView<JobsController> {
     );
   }
 
-  Widget _buildCodCard(BuildContext context, JobModel job) {
-    final theme = Theme.of(context);
-    final warningColor = theme.brightness == Brightness.dark
-        ? const Color(0xFFFBBF24)
-        : Colors.orange.shade700;
-    final warningBg = warningColor.withValues(alpha: 0.1);
+  Widget _buildCodCard(AppColorScheme colors, JobModel job) {
+    final warningBg = colors.warning.withValues(alpha: 0.1);
 
     return Card(
       color: warningBg,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: warningColor.withValues(alpha: 0.3)),
+        side: BorderSide(color: colors.warning.withValues(alpha: 0.3)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -605,12 +571,12 @@ class ActiveJobView extends GetView<JobsController> {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: warningColor.withValues(alpha: 0.2),
+                color: colors.warning.withValues(alpha: 0.2),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.payments,
-                color: warningColor,
+                color: colors.warning,
                 size: 24,
               ),
             ),
@@ -622,14 +588,14 @@ class ActiveJobView extends GetView<JobsController> {
                   Text(
                     'Cash on Delivery',
                     style: AppTextStyles.bodySmall.copyWith(
-                      color: warningColor,
+                      color: colors.warning,
                     ),
                   ),
                   Text(
-                    '₹${(job.codAmount ?? job.fare).toStringAsFixed(0)}',
+                    '\u20B9${(job.codAmount ?? job.fare).toStringAsFixed(0)}',
                     style: AppTextStyles.h2.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: warningColor,
+                      color: colors.warning,
                     ),
                   ),
                 ],
@@ -638,7 +604,7 @@ class ActiveJobView extends GetView<JobsController> {
             Text(
               'COLLECT',
               style: AppTextStyles.labelMedium.copyWith(
-                color: warningColor,
+                color: colors.warning,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -648,15 +614,14 @@ class ActiveJobView extends GetView<JobsController> {
     );
   }
 
-  Widget _buildBottomActions(BuildContext context, JobModel job) {
-    final theme = Theme.of(context);
+  Widget _buildBottomActions(AppColorScheme colors, JobModel job) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: theme.cardColor,
+        color: colors.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: theme.brightness == Brightness.dark ? 0.3 : 0.1),
+            color: Colors.black.withValues(alpha: 0.2),
             blurRadius: 10,
             offset: const Offset(0, -5),
           ),
@@ -676,8 +641,8 @@ class ActiveJobView extends GetView<JobsController> {
                 label: Text(_getNavigateButtonText(job)),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 14),
-                  side: BorderSide(color: theme.colorScheme.primary),
-                  foregroundColor: theme.colorScheme.primary,
+                  side: BorderSide(color: colors.primary),
+                  foregroundColor: colors.primary,
                 ),
               ),
             ),
@@ -717,12 +682,12 @@ class ActiveJobView extends GetView<JobsController> {
   void _handlePrimaryAction(JobModel job) async {
     final nextStatus = controller.getNextStatus();
     if (nextStatus == null) return;
-    
+
     // Check if photo is required
     if (controller.isPhotoRequired()) {
       await _captureAndUploadPhoto();
     }
-    
+
     // Update status
     await controller.updateStatus(nextStatus);
   }
@@ -733,15 +698,12 @@ class ActiveJobView extends GetView<JobsController> {
     // Show options
     final source = await Get.bottomSheet<ImageSource>(
       Builder(builder: (context) {
-        final theme = Theme.of(context);
-        final infoColor = theme.brightness == Brightness.dark
-            ? const Color(0xFF60A5FA)
-            : Colors.blue;
+        final colors = AppColorScheme.of(context);
 
         return Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: theme.cardColor,
+            color: colors.surface,
             borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(20),
               topRight: Radius.circular(20),
@@ -754,14 +716,14 @@ class ActiveJobView extends GetView<JobsController> {
                 'Delivery Photo Required',
                 style: AppTextStyles.h4.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.onSurface,
+                  color: colors.textPrimary,
                 ),
               ),
               const SizedBox(height: 8),
               Text(
                 'Take a photo as proof of delivery',
                 style: AppTextStyles.bodyMedium.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
+                  color: colors.textSecondary,
                 ),
               ),
               const SizedBox(height: 20),
@@ -769,24 +731,24 @@ class ActiveJobView extends GetView<JobsController> {
                 leading: Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                    color: colors.primary.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(Icons.camera_alt, color: theme.colorScheme.primary),
+                  child: Icon(Icons.camera_alt, color: colors.primary),
                 ),
-                title: Text('Take Photo', style: TextStyle(color: theme.colorScheme.onSurface)),
+                title: Text('Take Photo', style: TextStyle(color: colors.textPrimary)),
                 onTap: () => Get.back(result: ImageSource.camera),
               ),
               ListTile(
                 leading: Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: infoColor.withValues(alpha: 0.1),
+                    color: colors.info.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(Icons.photo_library, color: infoColor),
+                  child: Icon(Icons.photo_library, color: colors.info),
                 ),
-                title: Text('Choose from Gallery', style: TextStyle(color: theme.colorScheme.onSurface)),
+                title: Text('Choose from Gallery', style: TextStyle(color: colors.textPrimary)),
                 onTap: () => Get.back(result: ImageSource.gallery),
               ),
             ],
@@ -794,15 +756,15 @@ class ActiveJobView extends GetView<JobsController> {
         );
       }),
     );
-    
+
     if (source == null) return;
-    
+
     final XFile? image = await picker.pickImage(
       source: source,
       imageQuality: 80,
       maxWidth: 1200,
     );
-    
+
     if (image != null) {
       // Show loading
       Get.dialog(
@@ -823,44 +785,47 @@ class ActiveJobView extends GetView<JobsController> {
         ),
         barrierDismissible: false,
       );
-      
+
       // Upload
       final url = await controller.uploadPhoto(image.path);
-      
+
       // Close loading
       if (Get.isDialogOpen == true) {
         Get.back();
       }
-      
+
       if (url == null) {
         Get.snackbar(
           'Upload Failed',
           'Please try again',
-          backgroundColor: Colors.red.shade100,
+          backgroundColor: colors.error.withValues(alpha: 0.2),
         );
       }
     }
   }
 
+  // Late-bound colors reference for snackbar — grab from the controller's context
+  AppColorScheme get colors => AppColorScheme.of(Get.context!);
+
   void _openNavigation(JobModel job) async {
     final isPickupPhase = job.status.index <= JobStatus.packageCollected.index;
-    final destination = isPickupPhase 
-        ? job.pickupAddress 
+    final destination = isPickupPhase
+        ? job.pickupAddress
         : job.dropAddress;
-    
+
     final lat = destination.lat;
     final lng = destination.lng;
-    
+
     // Try Google Maps first
     final googleMapsUrl = Uri.parse(
       'google.navigation:q=$lat,$lng&mode=d',
     );
-    
+
     if (await canLaunchUrl(googleMapsUrl)) {
       await launchUrl(googleMapsUrl);
       return;
     }
-    
+
     // Fallback to web
     final webUrl = Uri.parse(
       'https://www.google.com/maps/dir/?api=1&destination=$lat,$lng&travelmode=driving',
@@ -895,7 +860,7 @@ class ActiveJobView extends GetView<JobsController> {
 
   void _showCancelDialog(JobModel job) {
     final TextEditingController reasonController = TextEditingController();
-    
+
     Get.dialog(
       AlertDialog(
         title: const Text('Cancel Job?'),

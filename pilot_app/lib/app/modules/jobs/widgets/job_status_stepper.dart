@@ -15,6 +15,8 @@ class JobStatusStepper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColorScheme.of(context);
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -28,14 +30,14 @@ class JobStatusStepper extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            _buildStepper(),
+            _buildStepper(colors),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildStepper() {
+  Widget _buildStepper(AppColorScheme colors) {
     final steps = _getSteps();
     final currentIndex = _getCurrentStepIndex();
 
@@ -50,23 +52,24 @@ class JobStatusStepper extends StatelessWidget {
               // Connector line
               final stepIndex = index ~/ 2;
               final isCompleted = stepIndex < currentIndex;
-              
+
               return Container(
                 width: 24,
                 height: 3,
-                color: isCompleted 
-                    ? AppColors.primary 
-                    : Colors.grey.shade300,
+                color: isCompleted
+                    ? colors.primary
+                    : colors.border,
               );
             }
-            
+
             // Step circle
             final stepIndex = index ~/ 2;
             final step = steps[stepIndex];
             final isCompleted = stepIndex < currentIndex;
             final isCurrent = stepIndex == currentIndex;
-            
+
             return _buildStep(
+              colors,
               icon: step.icon,
               label: step.label,
               isCompleted: isCompleted,
@@ -78,7 +81,8 @@ class JobStatusStepper extends StatelessWidget {
     );
   }
 
-  Widget _buildStep({
+  Widget _buildStep(
+    AppColorScheme colors, {
     required IconData icon,
     required String label,
     required bool isCompleted,
@@ -86,16 +90,16 @@ class JobStatusStepper extends StatelessWidget {
   }) {
     Color backgroundColor;
     Color iconColor;
-    
+
     if (isCompleted) {
-      backgroundColor = AppColors.primary;
-      iconColor = Colors.white;
+      backgroundColor = colors.primary;
+      iconColor = colors.textOnPrimary;
     } else if (isCurrent) {
-      backgroundColor = AppColors.primary.withValues(alpha: 0.2);
-      iconColor = AppColors.primary;
+      backgroundColor = colors.primary.withValues(alpha: 0.2);
+      iconColor = colors.primary;
     } else {
-      backgroundColor = Colors.grey.shade200;
-      iconColor = Colors.grey.shade400;
+      backgroundColor = colors.surfaceVariant;
+      iconColor = colors.textDisabled;
     }
 
     return Column(
@@ -107,12 +111,12 @@ class JobStatusStepper extends StatelessWidget {
           decoration: BoxDecoration(
             color: backgroundColor,
             shape: BoxShape.circle,
-            border: isCurrent 
-                ? Border.all(color: AppColors.primary, width: 2)
+            border: isCurrent
+                ? Border.all(color: colors.primary, width: 2)
                 : null,
             boxShadow: isCurrent ? [
               BoxShadow(
-                color: AppColors.primary.withValues(alpha: 0.3),
+                color: colors.primary.withValues(alpha: 0.3),
                 blurRadius: 8,
                 spreadRadius: 1,
               ),
@@ -130,9 +134,9 @@ class JobStatusStepper extends StatelessWidget {
           child: Text(
             label,
             style: AppTextStyles.caption.copyWith(
-              color: isCurrent 
-                  ? AppColors.primary 
-                  : (isCompleted ? Colors.grey.shade700 : Colors.grey.shade500),
+              color: isCurrent
+                  ? colors.primary
+                  : (isCompleted ? colors.textSecondary : colors.textHint),
               fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal,
               fontSize: 10,
             ),

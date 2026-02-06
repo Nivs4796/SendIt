@@ -13,10 +13,10 @@ class HistoryView extends GetView<HistoryController> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final colors = AppColorScheme.of(context);
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: colors.background,
       appBar: AppBar(
         title: const Text('Job History'),
         centerTitle: true,
@@ -43,7 +43,7 @@ class HistoryView extends GetView<HistoryController> {
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.all(16),
-                  child: _buildStatsCard(theme),
+                  child: _buildStatsCard(colors),
                 ),
               ),
 
@@ -51,7 +51,7 @@ class HistoryView extends GetView<HistoryController> {
               Obx(() {
                 if (controller.startDate.value != null) {
                   return SliverToBoxAdapter(
-                    child: _buildDateFilterChip(theme),
+                    child: _buildDateFilterChip(colors),
                   );
                 }
                 return const SliverToBoxAdapter(child: SizedBox.shrink());
@@ -61,14 +61,14 @@ class HistoryView extends GetView<HistoryController> {
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: _buildFilterChips(theme),
+                  child: _buildFilterChips(colors),
                 ),
               ),
 
               const SliverToBoxAdapter(child: SizedBox(height: 16)),
 
               // Jobs List
-              _buildJobsList(theme),
+              _buildJobsList(colors),
 
               // Loading More Indicator
               Obx(() => controller.isLoadingMore.value
@@ -86,14 +86,14 @@ class HistoryView extends GetView<HistoryController> {
     );
   }
 
-  Widget _buildStatsCard(ThemeData theme) {
+  Widget _buildStatsCard(AppColorScheme colors) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            Colors.teal.shade600,
-            Colors.teal.shade800,
+            colors.primary,
+            colors.primaryDark,
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -108,7 +108,7 @@ class HistoryView extends GetView<HistoryController> {
               Text(
                 'Delivery Summary',
                 style: AppTextStyles.titleMedium.copyWith(
-                  color: Colors.white,
+                  color: colors.textOnPrimary,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -121,7 +121,7 @@ class HistoryView extends GetView<HistoryController> {
                 child: Obx(() => Text(
                       '${controller.totalJobs.value} jobs',
                       style: AppTextStyles.labelSmall.copyWith(
-                        color: Colors.white,
+                        color: colors.textOnPrimary,
                       ),
                     )),
               ),
@@ -145,7 +145,7 @@ class HistoryView extends GetView<HistoryController> {
                   'Completed',
                   controller.completedJobs.value.toString(),
                   Icons.check_circle,
-                  Colors.greenAccent,
+                  colors.success,
                 ),
               ),
               Container(width: 1, height: 50, color: Colors.white.withValues(alpha: 0.3)),
@@ -154,7 +154,7 @@ class HistoryView extends GetView<HistoryController> {
                   'Cancelled',
                   controller.cancelledJobs.value.toString(),
                   Icons.cancel,
-                  Colors.redAccent.shade100,
+                  colors.error,
                 ),
               ),
             ],
@@ -165,28 +165,29 @@ class HistoryView extends GetView<HistoryController> {
   }
 
   Widget _buildStatItem(String label, String value, IconData icon, Color iconColor) {
-    return Obx(() => Column(
-          children: [
-            Icon(icon, color: iconColor, size: 20),
-            const SizedBox(height: 8),
-            Text(
-              value,
-              style: AppTextStyles.titleMedium.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Text(
-              label,
-              style: AppTextStyles.labelSmall.copyWith(
-                color: Colors.white.withValues(alpha: 0.8),
-              ),
-            ),
-          ],
-        ));
+    // No Obx needed - values are pre-computed and parent widget rebuilds on observable changes
+    return Column(
+      children: [
+        Icon(icon, color: iconColor, size: 20),
+        const SizedBox(height: 8),
+        Text(
+          value,
+          style: AppTextStyles.titleMedium.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        Text(
+          label,
+          style: AppTextStyles.labelSmall.copyWith(
+            color: Colors.white.withValues(alpha: 0.8),
+          ),
+        ),
+      ],
+    );
   }
 
-  Widget _buildDateFilterChip(ThemeData theme) {
+  Widget _buildDateFilterChip(AppColorScheme colors) {
     final dateFormat = DateFormat('dd MMM');
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -194,25 +195,25 @@ class HistoryView extends GetView<HistoryController> {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
-          color: AppColors.primary.withValues(alpha: 0.1),
+          color: colors.primary.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+          border: Border.all(color: colors.primary.withValues(alpha: 0.3)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.date_range, size: 16, color: AppColors.primary),
+            Icon(Icons.date_range, size: 16, color: colors.primary),
             const SizedBox(width: 8),
             Obx(() => Text(
                   '${dateFormat.format(controller.startDate.value!)} - ${dateFormat.format(controller.endDate.value!)}',
                   style: AppTextStyles.labelMedium.copyWith(
-                    color: AppColors.primary,
+                    color: colors.primary,
                   ),
                 )),
             const SizedBox(width: 8),
             GestureDetector(
               onTap: controller.clearDateFilter,
-              child: Icon(Icons.close, size: 16, color: AppColors.primary),
+              child: Icon(Icons.close, size: 16, color: colors.primary),
             ),
           ],
         ),
@@ -220,7 +221,7 @@ class HistoryView extends GetView<HistoryController> {
     );
   }
 
-  Widget _buildFilterChips(ThemeData theme) {
+  Widget _buildFilterChips(AppColorScheme colors) {
     final filters = [
       {'key': 'all', 'label': 'All', 'icon': Icons.list},
       {'key': 'completed', 'label': 'Completed', 'icon': Icons.check_circle_outline},
@@ -241,13 +242,13 @@ class HistoryView extends GetView<HistoryController> {
                 avatar: Icon(
                   filter['icon'] as IconData,
                   size: 16,
-                  color: isSelected ? AppColors.primary : theme.colorScheme.onSurface,
+                  color: isSelected ? colors.primary : colors.textPrimary,
                 ),
                 label: Text(filter['label'] as String),
                 onSelected: (_) => controller.applyFilter(filter['key'] as String),
-                selectedColor: AppColors.primary.withValues(alpha: 0.2),
+                selectedColor: colors.primary.withValues(alpha: 0.2),
                 labelStyle: AppTextStyles.labelMedium.copyWith(
-                  color: isSelected ? AppColors.primary : theme.colorScheme.onSurface,
+                  color: isSelected ? colors.primary : colors.textPrimary,
                 ),
               ),
             );
@@ -257,7 +258,7 @@ class HistoryView extends GetView<HistoryController> {
     );
   }
 
-  Widget _buildJobsList(ThemeData theme) {
+  Widget _buildJobsList(AppColorScheme colors) {
     return Obx(() {
       final jobs = controller.jobs;
       if (jobs.isEmpty) {
@@ -270,20 +271,20 @@ class HistoryView extends GetView<HistoryController> {
                 Icon(
                   Icons.local_shipping_outlined,
                   size: 64,
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
+                  color: colors.textDisabled,
                 ),
                 const SizedBox(height: 16),
                 Text(
                   'No jobs found',
                   style: AppTextStyles.titleSmall.copyWith(
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                    color: colors.textSecondary,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   'Your completed deliveries will appear here',
                   style: AppTextStyles.bodySmall.copyWith(
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
+                    color: colors.textHint,
                   ),
                 ),
               ],
@@ -301,7 +302,7 @@ class HistoryView extends GetView<HistoryController> {
             }
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-              child: _buildJobCard(theme, jobs[index]),
+              child: _buildJobCard(colors, jobs[index]),
             );
           },
           childCount: jobs.length,
@@ -310,19 +311,19 @@ class HistoryView extends GetView<HistoryController> {
     });
   }
 
-  Widget _buildJobCard(ThemeData theme, JobHistoryItem job) {
+  Widget _buildJobCard(AppColorScheme colors, JobHistoryItem job) {
     final dateFormat = DateFormat('dd MMM, hh:mm a');
     final statusColor = controller.getStatusColor(job.status);
 
     return Container(
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
+        color: colors.surfaceVariant,
         borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () => _showJobDetails(theme, job),
+          onTap: () => _showJobDetails(colors, job),
           borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -378,8 +379,8 @@ class HistoryView extends GetView<HistoryController> {
                       style: AppTextStyles.titleSmall.copyWith(
                         fontWeight: FontWeight.bold,
                         color: job.status == JobStatus.completed
-                            ? Colors.green
-                            : theme.colorScheme.onSurface,
+                            ? colors.success
+                            : colors.textPrimary,
                       ),
                     ),
                   ],
@@ -395,20 +396,20 @@ class HistoryView extends GetView<HistoryController> {
                           width: 10,
                           height: 10,
                           decoration: BoxDecoration(
-                            color: Colors.green,
+                            color: colors.success,
                             shape: BoxShape.circle,
                           ),
                         ),
                         Container(
                           width: 2,
                           height: 24,
-                          color: theme.dividerColor,
+                          color: colors.border,
                         ),
                         Container(
                           width: 10,
                           height: 10,
                           decoration: BoxDecoration(
-                            color: Colors.red,
+                            color: colors.error,
                             shape: BoxShape.circle,
                           ),
                         ),
@@ -451,7 +452,7 @@ class HistoryView extends GetView<HistoryController> {
                     Text(
                       dateFormat.format(job.createdAt),
                       style: AppTextStyles.caption.copyWith(
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                        color: colors.textHint,
                       ),
                     ),
 
@@ -459,24 +460,24 @@ class HistoryView extends GetView<HistoryController> {
                     Row(
                       children: [
                         _buildMiniStat(
-                          theme,
+                          colors,
                           Icons.straighten,
                           job.distanceDisplay,
                         ),
                         const SizedBox(width: 12),
                         if (job.duration > 0)
                           _buildMiniStat(
-                            theme,
+                            colors,
                             Icons.access_time,
                             job.durationDisplay,
                           ),
                         if (job.rating != null) ...[
                           const SizedBox(width: 12),
                           _buildMiniStat(
-                            theme,
+                            colors,
                             Icons.star,
                             job.rating!.toStringAsFixed(1),
-                            iconColor: Colors.amber,
+                            iconColor: colors.accent,
                           ),
                         ],
                       ],
@@ -491,7 +492,7 @@ class HistoryView extends GetView<HistoryController> {
     );
   }
 
-  Widget _buildMiniStat(ThemeData theme, IconData icon, String value,
+  Widget _buildMiniStat(AppColorScheme colors, IconData icon, String value,
       {Color? iconColor}) {
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -499,20 +500,20 @@ class HistoryView extends GetView<HistoryController> {
         Icon(
           icon,
           size: 12,
-          color: iconColor ?? theme.colorScheme.onSurface.withValues(alpha: 0.5),
+          color: iconColor ?? colors.textHint,
         ),
         const SizedBox(width: 4),
         Text(
           value,
           style: AppTextStyles.caption.copyWith(
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+            color: colors.textSecondary,
           ),
         ),
       ],
     );
   }
 
-  void _showJobDetails(ThemeData theme, JobHistoryItem job) {
+  void _showJobDetails(AppColorScheme colors, JobHistoryItem job) {
     final dateFormat = DateFormat('dd MMM yyyy, hh:mm a');
 
     Get.bottomSheet(
@@ -522,7 +523,7 @@ class HistoryView extends GetView<HistoryController> {
           maxHeight: Get.height * 0.85,
         ),
         decoration: BoxDecoration(
-          color: theme.scaffoldBackgroundColor,
+          color: colors.background,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: SingleChildScrollView(
@@ -536,7 +537,7 @@ class HistoryView extends GetView<HistoryController> {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: theme.dividerColor,
+                    color: colors.border,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -559,7 +560,7 @@ class HistoryView extends GetView<HistoryController> {
                       Text(
                         dateFormat.format(job.createdAt),
                         style: AppTextStyles.labelSmall.copyWith(
-                          color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                          color: colors.textSecondary,
                         ),
                       ),
                     ],
@@ -600,7 +601,7 @@ class HistoryView extends GetView<HistoryController> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.surfaceContainerHighest,
+                  color: colors.surfaceVariant,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Column(
@@ -614,20 +615,20 @@ class HistoryView extends GetView<HistoryController> {
                               width: 12,
                               height: 12,
                               decoration: BoxDecoration(
-                                color: Colors.green,
+                                color: colors.success,
                                 shape: BoxShape.circle,
                               ),
                             ),
                             Container(
                               width: 2,
                               height: 40,
-                              color: theme.dividerColor,
+                              color: colors.border,
                             ),
                             Container(
                               width: 12,
                               height: 12,
                               decoration: BoxDecoration(
-                                color: Colors.red,
+                                color: colors.error,
                                 shape: BoxShape.circle,
                               ),
                             ),
@@ -641,7 +642,7 @@ class HistoryView extends GetView<HistoryController> {
                               Text(
                                 'Pickup',
                                 style: AppTextStyles.labelSmall.copyWith(
-                                  color: Colors.green,
+                                  color: colors.success,
                                 ),
                               ),
                               Text(
@@ -652,7 +653,7 @@ class HistoryView extends GetView<HistoryController> {
                               Text(
                                 'Delivery',
                                 style: AppTextStyles.labelSmall.copyWith(
-                                  color: Colors.red,
+                                  color: colors.error,
                                 ),
                               ),
                               Text(
@@ -674,31 +675,31 @@ class HistoryView extends GetView<HistoryController> {
                 children: [
                   Expanded(
                     child: _buildDetailCard(
-                      theme,
+                      colors,
                       'Distance',
                       job.distanceDisplay,
                       Icons.straighten,
-                      Colors.blue,
+                      colors.info,
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: _buildDetailCard(
-                      theme,
+                      colors,
                       'Duration',
                       job.durationDisplay,
                       Icons.access_time,
-                      Colors.orange,
+                      colors.warning,
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: _buildDetailCard(
-                      theme,
+                      colors,
                       'Package',
                       job.packageType,
                       Icons.inventory_2,
-                      Colors.purple,
+                      colors.primaryDark,
                     ),
                   ),
                 ],
@@ -709,10 +710,10 @@ class HistoryView extends GetView<HistoryController> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.green.withValues(alpha: 0.1),
+                  color: colors.success.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: Colors.green.withValues(alpha: 0.3),
+                    color: colors.success.withValues(alpha: 0.3),
                   ),
                 ),
                 child: Column(
@@ -722,15 +723,16 @@ class HistoryView extends GetView<HistoryController> {
                       'Earnings Breakdown',
                       style: AppTextStyles.labelMedium.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: Colors.green.shade700,
+                        color: colors.success,
                       ),
                     ),
                     const SizedBox(height: 12),
-                    _buildEarningsRow('Base Fare', '₹${job.fare.toStringAsFixed(0)}'),
+                    _buildEarningsRow(colors, 'Base Fare', '₹${job.fare.toStringAsFixed(0)}'),
                     if (job.tip > 0)
-                      _buildEarningsRow('Tip', '₹${job.tip.toStringAsFixed(0)}'),
+                      _buildEarningsRow(colors, 'Tip', '₹${job.tip.toStringAsFixed(0)}'),
                     const Divider(),
                     _buildEarningsRow(
+                      colors,
                       'Total Earnings',
                       '₹${job.earnings.toStringAsFixed(0)}',
                       isBold: true,
@@ -743,7 +745,7 @@ class HistoryView extends GetView<HistoryController> {
                 const SizedBox(height: 16),
                 Row(
                   children: [
-                    Icon(Icons.star, color: Colors.amber, size: 20),
+                    Icon(Icons.star, color: colors.accent, size: 20),
                     const SizedBox(width: 8),
                     Text(
                       'Customer Rating: ${job.rating!.toStringAsFixed(1)}',
@@ -760,10 +762,10 @@ class HistoryView extends GetView<HistoryController> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.red.withValues(alpha: 0.1),
+                    color: colors.error.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: Colors.red.withValues(alpha: 0.3),
+                      color: colors.error.withValues(alpha: 0.3),
                     ),
                   ),
                   child: Row(
@@ -771,14 +773,14 @@ class HistoryView extends GetView<HistoryController> {
                       Icon(
                         Icons.info_outline,
                         size: 16,
-                        color: Colors.red.shade700,
+                        color: colors.error,
                       ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           'Cancellation: ${job.cancellationReason}',
                           style: AppTextStyles.bodySmall.copyWith(
-                            color: Colors.red.shade700,
+                            color: colors.error,
                           ),
                         ),
                       ),
@@ -796,7 +798,7 @@ class HistoryView extends GetView<HistoryController> {
   }
 
   Widget _buildDetailCard(
-    ThemeData theme,
+    AppColorScheme colors,
     String label,
     String value,
     IconData icon,
@@ -805,7 +807,7 @@ class HistoryView extends GetView<HistoryController> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
+        color: colors.surfaceVariant,
         borderRadius: BorderRadius.circular(10),
       ),
       child: Column(
@@ -821,7 +823,7 @@ class HistoryView extends GetView<HistoryController> {
           Text(
             label,
             style: AppTextStyles.caption.copyWith(
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+              color: colors.textSecondary,
             ),
           ),
         ],
@@ -829,7 +831,7 @@ class HistoryView extends GetView<HistoryController> {
     );
   }
 
-  Widget _buildEarningsRow(String label, String value, {bool isBold = false}) {
+  Widget _buildEarningsRow(AppColorScheme colors, String label, String value, {bool isBold = false}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -846,7 +848,7 @@ class HistoryView extends GetView<HistoryController> {
             style: isBold
                 ? AppTextStyles.bodyMedium.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: Colors.green.shade700,
+                    color: colors.success,
                   )
                 : AppTextStyles.bodyMedium,
           ),

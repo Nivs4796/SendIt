@@ -13,12 +13,12 @@ class WithdrawView extends GetView<WalletController> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final colors = AppColorScheme.of(context);
     final amountController = TextEditingController();
     final formKey = GlobalKey<FormState>();
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: colors.background,
       appBar: AppBar(
         title: const Text('Withdraw'),
         centerTitle: true,
@@ -40,7 +40,7 @@ class WithdrawView extends GetView<WalletController> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Available Balance Card
-                _buildBalanceCard(theme, balance),
+                _buildBalanceCard(colors, balance),
                 const SizedBox(height: 24),
 
                 // Amount Input
@@ -51,11 +51,11 @@ class WithdrawView extends GetView<WalletController> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                _buildAmountInput(theme, amountController, balance, formKey),
+                _buildAmountInput(colors, amountController, balance, formKey),
                 const SizedBox(height: 16),
 
                 // Quick Amount Chips
-                _buildQuickAmounts(theme, amountController, balance),
+                _buildQuickAmounts(colors, amountController, balance),
                 const SizedBox(height: 24),
 
                 // Bank Account Selection
@@ -66,15 +66,15 @@ class WithdrawView extends GetView<WalletController> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                _buildBankAccounts(theme),
+                _buildBankAccounts(colors),
                 const SizedBox(height: 24),
 
                 // Withdrawal Info
-                _buildWithdrawalInfo(theme),
+                _buildWithdrawalInfo(colors),
                 const SizedBox(height: 24),
 
                 // Withdraw Button
-                _buildWithdrawButton(theme, amountController, formKey),
+                _buildWithdrawButton(colors, amountController, formKey),
                 const SizedBox(height: 24),
               ],
             ),
@@ -84,14 +84,14 @@ class WithdrawView extends GetView<WalletController> {
     );
   }
 
-  Widget _buildBalanceCard(ThemeData theme, double balance) {
+  Widget _buildBalanceCard(AppColorScheme colors, double balance) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            Colors.green.shade600,
-            Colors.green.shade800,
+            colors.success,
+            colors.primaryDark,
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -140,14 +140,14 @@ class WithdrawView extends GetView<WalletController> {
   }
 
   Widget _buildAmountInput(
-    ThemeData theme,
+    AppColorScheme colors,
     TextEditingController amountController,
     double balance,
     GlobalKey<FormState> formKey,
   ) {
     return Container(
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
+        color: colors.surfaceVariant,
         borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
       ),
       child: TextFormField(
@@ -161,7 +161,7 @@ class WithdrawView extends GetView<WalletController> {
           prefixText: '₹ ',
           prefixStyle: AppTextStyles.displaySmall.copyWith(
             fontWeight: FontWeight.bold,
-            color: AppColors.primary,
+            color: colors.primary,
           ),
           hintText: '0',
           border: OutlineInputBorder(
@@ -169,7 +169,7 @@ class WithdrawView extends GetView<WalletController> {
             borderSide: BorderSide.none,
           ),
           filled: true,
-          fillColor: theme.colorScheme.surfaceContainerHighest,
+          fillColor: colors.surfaceVariant,
           contentPadding: const EdgeInsets.all(20),
         ),
         validator: (value) {
@@ -193,7 +193,7 @@ class WithdrawView extends GetView<WalletController> {
   }
 
   Widget _buildQuickAmounts(
-    ThemeData theme,
+    AppColorScheme colors,
     TextEditingController amountController,
     double balance,
   ) {
@@ -211,21 +211,21 @@ class WithdrawView extends GetView<WalletController> {
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             decoration: BoxDecoration(
               color: isDisabled
-                  ? theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5)
-                  : theme.colorScheme.surfaceContainerHighest,
+                  ? colors.surfaceVariant.withValues(alpha: 0.5)
+                  : colors.surfaceVariant,
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
                 color: isDisabled
                     ? Colors.transparent
-                    : AppColors.primary.withValues(alpha: 0.3),
+                    : colors.primary.withValues(alpha: 0.3),
               ),
             ),
             child: Text(
               '₹$amount',
               style: AppTextStyles.labelMedium.copyWith(
                 color: isDisabled
-                    ? theme.colorScheme.onSurface.withValues(alpha: 0.3)
-                    : AppColors.primary,
+                    ? colors.textHint
+                    : colors.primary,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -235,18 +235,18 @@ class WithdrawView extends GetView<WalletController> {
     );
   }
 
-  Widget _buildBankAccounts(ThemeData theme) {
+  Widget _buildBankAccounts(AppColorScheme colors) {
     return Obx(() {
       final accounts = controller.bankAccounts;
-      
+
       if (accounts.isEmpty) {
         return Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: Colors.orange.withValues(alpha: 0.1),
+            color: colors.warning.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
             border: Border.all(
-              color: Colors.orange.withValues(alpha: 0.3),
+              color: colors.warning.withValues(alpha: 0.3),
             ),
           ),
           child: Column(
@@ -254,21 +254,21 @@ class WithdrawView extends GetView<WalletController> {
               Icon(
                 Icons.account_balance_outlined,
                 size: 40,
-                color: Colors.orange.shade700,
+                color: colors.warning,
               ),
               const SizedBox(height: 12),
               Text(
                 'No Bank Account Added',
                 style: AppTextStyles.bodyMedium.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: Colors.orange.shade700,
+                  color: colors.warning,
                 ),
               ),
               const SizedBox(height: 4),
               Text(
                 'Add a bank account to withdraw your earnings',
                 style: AppTextStyles.labelSmall.copyWith(
-                  color: Colors.orange.shade700,
+                  color: colors.warning,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -278,7 +278,7 @@ class WithdrawView extends GetView<WalletController> {
                 icon: const Icon(Icons.add),
                 label: const Text('Add Bank Account'),
                 style: TextButton.styleFrom(
-                  foregroundColor: Colors.orange.shade700,
+                  foregroundColor: colors.warning,
                 ),
               ),
             ],
@@ -296,12 +296,12 @@ class WithdrawView extends GetView<WalletController> {
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: isSelected
-                    ? AppColors.primary.withValues(alpha: 0.1)
-                    : theme.colorScheme.surfaceContainerHighest,
+                    ? colors.primary.withValues(alpha: 0.1)
+                    : colors.surfaceVariant,
                 borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
                 border: Border.all(
                   color: isSelected
-                      ? AppColors.primary
+                      ? colors.primary
                       : Colors.transparent,
                   width: 2,
                 ),
@@ -312,12 +312,12 @@ class WithdrawView extends GetView<WalletController> {
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
-                      color: Colors.indigo.withValues(alpha: 0.1),
+                      color: colors.info.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.account_balance,
-                      color: Colors.indigo,
+                      color: colors.info,
                     ),
                   ),
                   const SizedBox(width: 14),
@@ -342,13 +342,13 @@ class WithdrawView extends GetView<WalletController> {
                                   vertical: 2,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: AppColors.primary.withValues(alpha: 0.1),
+                                  color: colors.primary.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: Text(
                                   'PRIMARY',
                                   style: AppTextStyles.caption.copyWith(
-                                    color: AppColors.primary,
+                                    color: colors.primary,
                                     fontWeight: FontWeight.bold,
                                     fontSize: 9,
                                   ),
@@ -359,7 +359,7 @@ class WithdrawView extends GetView<WalletController> {
                         Text(
                           account.accountNumber,
                           style: AppTextStyles.labelSmall.copyWith(
-                            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                            color: colors.textSecondary,
                             fontFamily: 'monospace',
                           ),
                         ),
@@ -372,7 +372,7 @@ class WithdrawView extends GetView<WalletController> {
                     onChanged: (value) {
                       controller.selectedBankAccount.value = account;
                     },
-                    activeColor: AppColors.primary,
+                    activeColor: colors.primary,
                   ),
                 ],
               ),
@@ -383,14 +383,14 @@ class WithdrawView extends GetView<WalletController> {
     });
   }
 
-  Widget _buildWithdrawalInfo(ThemeData theme) {
+  Widget _buildWithdrawalInfo(AppColorScheme colors) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.blue.withValues(alpha: 0.05),
+        color: colors.info.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
         border: Border.all(
-          color: Colors.blue.withValues(alpha: 0.2),
+          color: colors.info.withValues(alpha: 0.2),
         ),
       ),
       child: Column(
@@ -398,13 +398,13 @@ class WithdrawView extends GetView<WalletController> {
         children: [
           Row(
             children: [
-              Icon(Icons.info_outline, size: 18, color: Colors.blue.shade700),
+              Icon(Icons.info_outline, size: 18, color: colors.info),
               const SizedBox(width: 8),
               Text(
                 'Withdrawal Information',
                 style: AppTextStyles.labelMedium.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: Colors.blue.shade700,
+                  color: colors.info,
                 ),
               ),
             ],
@@ -428,14 +428,14 @@ class WithdrawView extends GetView<WalletController> {
           Text(
             label,
             style: AppTextStyles.bodySmall.copyWith(
-              color: Colors.blue.shade700,
+              color: AppColorScheme.of(Get.context!).info,
             ),
           ),
           Text(
             value,
             style: AppTextStyles.bodySmall.copyWith(
               fontWeight: FontWeight.w600,
-              color: Colors.blue.shade700,
+              color: AppColorScheme.of(Get.context!).info,
             ),
           ),
         ],
@@ -444,7 +444,7 @@ class WithdrawView extends GetView<WalletController> {
   }
 
   Widget _buildWithdrawButton(
-    ThemeData theme,
+    AppColorScheme colors,
     TextEditingController amountController,
     GlobalKey<FormState> formKey,
   ) {
@@ -467,13 +467,13 @@ class WithdrawView extends GetView<WalletController> {
                   }
                 },
           style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.primary,
-            foregroundColor: Colors.white,
+            backgroundColor: colors.primary,
+            foregroundColor: colors.textOnPrimary,
             padding: const EdgeInsets.symmetric(vertical: 16),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
-            disabledBackgroundColor: Colors.grey.shade300,
+            disabledBackgroundColor: colors.textDisabled,
           ),
           child: isProcessing
               ? const SizedBox(

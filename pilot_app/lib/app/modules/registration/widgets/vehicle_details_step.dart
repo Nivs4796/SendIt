@@ -13,7 +13,7 @@ class VehicleDetailsStep extends GetView<RegistrationController> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final colors = AppColorScheme.of(context);
 
     return SingleChildScrollView(
       padding: EdgeInsets.symmetric(
@@ -24,16 +24,16 @@ class VehicleDetailsStep extends GetView<RegistrationController> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Header
-          Text('Vehicle Details', style: AppTextStyles.h4.copyWith(color: theme.colorScheme.onSurface)),
-          Text('Tell us about your ride', style: AppTextStyles.caption.copyWith(color: theme.colorScheme.onSurface.withValues(alpha: 0.6))),
+          Text('Vehicle Details', style: AppTextStyles.h4.copyWith(color: colors.textPrimary)),
+          Text('Tell us about your ride', style: AppTextStyles.caption.copyWith(color: colors.textSecondary)),
 
           SizedBox(height: AppTheme.spacingMd),
 
           // Vehicle Type
-          Text('Vehicle Type', style: AppTextStyles.labelLarge.copyWith(color: theme.colorScheme.onSurface)),
+          Text('Vehicle Type', style: AppTextStyles.labelLarge.copyWith(color: colors.textPrimary)),
           SizedBox(height: AppTheme.spacingSm),
 
-          Obx(() => _buildVehicleTypeGrid(theme)),
+          Obx(() => _buildVehicleTypeGrid(colors)),
 
           SizedBox(height: AppTheme.spacingMd),
 
@@ -45,14 +45,14 @@ class VehicleDetailsStep extends GetView<RegistrationController> {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Fuel Type', style: AppTextStyles.labelLarge.copyWith(color: theme.colorScheme.onSurface)),
+                Text('Fuel Type', style: AppTextStyles.labelLarge.copyWith(color: colors.textPrimary)),
                 SizedBox(height: AppTheme.spacingSm),
                 Wrap(
                   spacing: AppTheme.spacingSm,
                   runSpacing: AppTheme.spacingSm,
                   children: controller.availableCategories.map((category) {
                     final isSelected = controller.selectedVehicleCategory.value == category;
-                    return _buildFuelChip(theme, category, isSelected);
+                    return _buildFuelChip(colors, category, isSelected);
                   }).toList(),
                 ),
                 SizedBox(height: AppTheme.spacingMd),
@@ -84,13 +84,13 @@ class VehicleDetailsStep extends GetView<RegistrationController> {
           // Age Warning
           Obx(() {
             if (controller.requiresLicense && controller.isMinor) {
-              return _buildWarningCard(theme);
+              return _buildWarningCard(colors);
             }
             return const SizedBox.shrink();
           }),
 
           // Info tip
-          _buildInfoTip(theme),
+          _buildInfoTip(colors),
 
           SizedBox(height: AppTheme.spacingMd),
         ],
@@ -98,7 +98,7 @@ class VehicleDetailsStep extends GetView<RegistrationController> {
     );
   }
 
-  Widget _buildVehicleTypeGrid(ThemeData theme) {
+  Widget _buildVehicleTypeGrid(AppColorScheme colors) {
     final screenWidth = MediaQuery.of(Get.context!).size.width;
     final cardWidth = (screenWidth - 32 - 16) / 3; // padding + gaps
 
@@ -110,13 +110,13 @@ class VehicleDetailsStep extends GetView<RegistrationController> {
         return SizedBox(
           width: cardWidth,
           height: cardWidth * 0.9,
-          child: _buildVehicleCard(theme, type, isSelected),
+          child: _buildVehicleCard(colors, type, isSelected),
         );
       }).toList(),
     );
   }
 
-  Widget _buildVehicleCard(ThemeData theme, VehicleType type, bool isSelected) {
+  Widget _buildVehicleCard(AppColorScheme colors, VehicleType type, bool isSelected) {
     return GestureDetector(
       onTap: () {
         controller.selectedVehicleType.value = type;
@@ -125,11 +125,11 @@ class VehicleDetailsStep extends GetView<RegistrationController> {
       child: Container(
         decoration: BoxDecoration(
           color: isSelected
-              ? AppColors.primary.withValues(alpha: 0.15)
+              ? colors.primary.withValues(alpha: 0.15)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
           border: Border.all(
-            color: isSelected ? AppColors.primary : theme.colorScheme.outline,
+            color: isSelected ? colors.primary : colors.border,
             width: isSelected ? 1.5 : 1,
           ),
         ),
@@ -139,14 +139,14 @@ class VehicleDetailsStep extends GetView<RegistrationController> {
             Icon(
               _getVehicleIcon(type),
               size: 22,
-              color: isSelected ? AppColors.primary : theme.colorScheme.onSurface.withValues(alpha: 0.7),
+              color: isSelected ? colors.primary : colors.textSecondary,
             ),
             SizedBox(height: AppTheme.spacingXs),
             Text(
               type.displayText,
               style: AppTextStyles.labelSmall.copyWith(
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                color: isSelected ? AppColors.primary : theme.colorScheme.onSurface,
+                color: isSelected ? colors.primary : colors.textPrimary,
               ),
               textAlign: TextAlign.center,
             ),
@@ -156,7 +156,7 @@ class VehicleDetailsStep extends GetView<RegistrationController> {
     );
   }
 
-  Widget _buildFuelChip(ThemeData theme, VehicleCategory category, bool isSelected) {
+  Widget _buildFuelChip(AppColorScheme colors, VehicleCategory category, bool isSelected) {
     return GestureDetector(
       onTap: () => controller.selectedVehicleCategory.value = category,
       child: Container(
@@ -165,10 +165,10 @@ class VehicleDetailsStep extends GetView<RegistrationController> {
           vertical: AppTheme.spacingSm,
         ),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : Colors.transparent,
+          color: isSelected ? colors.primary : Colors.transparent,
           borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
           border: Border.all(
-            color: isSelected ? AppColors.primary : theme.colorScheme.outline,
+            color: isSelected ? colors.primary : colors.border,
           ),
         ),
         child: Row(
@@ -177,13 +177,13 @@ class VehicleDetailsStep extends GetView<RegistrationController> {
             Icon(
               _getFuelIcon(category),
               size: 14,
-              color: isSelected ? Colors.white : theme.colorScheme.onSurface,
+              color: isSelected ? Colors.white : colors.textPrimary,
             ),
             SizedBox(width: AppTheme.spacingXs),
             Text(
               category.displayText,
               style: AppTextStyles.labelSmall.copyWith(
-                color: isSelected ? Colors.white : theme.colorScheme.onSurface,
+                color: isSelected ? Colors.white : colors.textPrimary,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
               ),
             ),
@@ -193,23 +193,23 @@ class VehicleDetailsStep extends GetView<RegistrationController> {
     );
   }
 
-  Widget _buildWarningCard(ThemeData theme) {
+  Widget _buildWarningCard(AppColorScheme colors) {
     return Container(
       margin: EdgeInsets.only(bottom: AppTheme.spacingMd),
       padding: EdgeInsets.all(AppTheme.spacingSm),
       decoration: BoxDecoration(
-        color: Colors.orange.withValues(alpha: 0.1),
+        color: colors.warning.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
-        border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
+        border: Border.all(color: colors.warning.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
-          Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 18),
+          Icon(Icons.warning_amber_rounded, color: colors.warning, size: 18),
           SizedBox(width: AppTheme.spacingSm),
           Expanded(
             child: Text(
               'You must be 18+ for motorized vehicles.',
-              style: AppTextStyles.bodySmall.copyWith(color: Colors.orange.shade700),
+              style: AppTextStyles.bodySmall.copyWith(color: colors.warning),
             ),
           ),
         ],
@@ -217,22 +217,22 @@ class VehicleDetailsStep extends GetView<RegistrationController> {
     );
   }
 
-  Widget _buildInfoTip(ThemeData theme) {
+  Widget _buildInfoTip(AppColorScheme colors) {
     return Container(
       padding: EdgeInsets.all(AppTheme.spacingSm),
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.05),
+        color: colors.primary.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.1)),
+        border: Border.all(color: colors.primary.withValues(alpha: 0.1)),
       ),
       child: Row(
         children: [
-          Icon(Icons.lightbulb_outline, color: AppColors.primary, size: 16),
+          Icon(Icons.lightbulb_outline, color: colors.primary, size: 16),
           SizedBox(width: AppTheme.spacingSm),
           Expanded(
             child: Text(
               'Choose your primary delivery vehicle',
-              style: AppTextStyles.bodySmall.copyWith(color: AppColors.primary),
+              style: AppTextStyles.bodySmall.copyWith(color: colors.primary),
             ),
           ),
         ],

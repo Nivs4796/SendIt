@@ -13,10 +13,10 @@ class WalletView extends GetView<WalletController> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final colors = AppColorScheme.of(context);
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: colors.background,
       appBar: AppBar(
         title: const Text('Wallet'),
         centerTitle: true,
@@ -37,19 +37,19 @@ class WalletView extends GetView<WalletController> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Balance Card
-                _buildBalanceCard(theme),
+                _buildBalanceCard(colors),
                 const SizedBox(height: 20),
 
                 // Quick Actions
-                _buildQuickActions(theme),
+                _buildQuickActions(colors),
                 const SizedBox(height: 20),
 
                 // Earnings Summary
-                _buildEarningsSummary(theme),
+                _buildEarningsSummary(colors),
                 const SizedBox(height: 20),
 
                 // Transactions
-                _buildTransactionsList(theme),
+                _buildTransactionsList(colors),
               ],
             ),
           ),
@@ -58,7 +58,7 @@ class WalletView extends GetView<WalletController> {
     );
   }
 
-  Widget _buildBalanceCard(ThemeData theme) {
+  Widget _buildBalanceCard(AppColorScheme colors) {
     final wallet = controller.wallet.value;
     return Container(
       width: double.infinity,
@@ -112,13 +112,13 @@ class WalletView extends GetView<WalletController> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: Colors.amber.withValues(alpha: 0.2),
+                color: colors.accent.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Text(
                 '₹${wallet!.pendingAmount.toStringAsFixed(0)} pending',
                 style: AppTextStyles.labelSmall.copyWith(
-                  color: Colors.amber,
+                  color: colors.accent,
                 ),
               ),
             ),
@@ -128,35 +128,35 @@ class WalletView extends GetView<WalletController> {
     );
   }
 
-  Widget _buildQuickActions(ThemeData theme) {
+  Widget _buildQuickActions(AppColorScheme colors) {
     return Row(
       children: [
         Expanded(
           child: _buildActionButton(
-            theme,
+            colors,
             icon: Icons.arrow_downward,
             label: 'Withdraw',
-            color: Colors.green,
-            onTap: () => _showWithdrawSheet(theme),
+            color: colors.success,
+            onTap: () => _showWithdrawSheet(colors),
           ),
         ),
         const SizedBox(width: 12),
         Expanded(
           child: _buildActionButton(
-            theme,
+            colors,
             icon: Icons.trending_up,
             label: 'Earnings',
-            color: Colors.blue,
+            color: colors.info,
             onTap: () => Get.toNamed('/earnings'),
           ),
         ),
         const SizedBox(width: 12),
         Expanded(
           child: _buildActionButton(
-            theme,
+            colors,
             icon: Icons.history,
             label: 'History',
-            color: Colors.orange,
+            color: colors.warning,
             onTap: () {
               // Already showing transactions below
             },
@@ -167,7 +167,7 @@ class WalletView extends GetView<WalletController> {
   }
 
   Widget _buildActionButton(
-    ThemeData theme, {
+    AppColorScheme colors, {
     required IconData icon,
     required String label,
     required Color color,
@@ -178,7 +178,7 @@ class WalletView extends GetView<WalletController> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainerHighest,
+          color: colors.surfaceVariant,
           borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
         ),
         child: Column(
@@ -199,12 +199,12 @@ class WalletView extends GetView<WalletController> {
     );
   }
 
-  Widget _buildEarningsSummary(ThemeData theme) {
+  Widget _buildEarningsSummary(AppColorScheme colors) {
     final wallet = controller.wallet.value;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
+        color: colors.surfaceVariant,
         borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
       ),
       child: Row(
@@ -216,7 +216,7 @@ class WalletView extends GetView<WalletController> {
                 Text(
                   'Today',
                   style: AppTextStyles.labelSmall.copyWith(
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                    color: colors.textSecondary,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -224,13 +224,13 @@ class WalletView extends GetView<WalletController> {
                   '₹${wallet?.todayEarnings.toStringAsFixed(0) ?? '0'}',
                   style: AppTextStyles.titleMedium.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: Colors.green,
+                    color: colors.success,
                   ),
                 ),
               ],
             ),
           ),
-          Container(width: 1, height: 40, color: theme.dividerColor),
+          Container(width: 1, height: 40, color: colors.border),
           Expanded(
             child: Padding(
               padding: const EdgeInsets.only(left: 16),
@@ -240,7 +240,7 @@ class WalletView extends GetView<WalletController> {
                   Text(
                     'This Week',
                     style: AppTextStyles.labelSmall.copyWith(
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                      color: colors.textSecondary,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -259,7 +259,7 @@ class WalletView extends GetView<WalletController> {
     );
   }
 
-  Widget _buildTransactionsList(ThemeData theme) {
+  Widget _buildTransactionsList(AppColorScheme colors) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -274,7 +274,7 @@ class WalletView extends GetView<WalletController> {
             return Container(
               padding: const EdgeInsets.all(32),
               decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerHighest,
+                color: colors.surfaceVariant,
                 borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
               ),
               child: Center(
@@ -283,13 +283,13 @@ class WalletView extends GetView<WalletController> {
                     Icon(
                       Icons.receipt_long_outlined,
                       size: 48,
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
+                      color: colors.textHint,
                     ),
                     const SizedBox(height: 12),
                     Text(
                       'No transactions yet',
                       style: AppTextStyles.bodyMedium.copyWith(
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                        color: colors.textSecondary,
                       ),
                     ),
                   ],
@@ -303,7 +303,7 @@ class WalletView extends GetView<WalletController> {
             itemCount: transactions.length,
             separatorBuilder: (_, __) => const SizedBox(height: 8),
             itemBuilder: (context, index) {
-              return _buildTransactionItem(theme, transactions[index]);
+              return _buildTransactionItem(colors, transactions[index]);
             },
           );
         }),
@@ -311,35 +311,35 @@ class WalletView extends GetView<WalletController> {
     );
   }
 
-  Widget _buildTransactionItem(ThemeData theme, WalletTransaction transaction) {
+  Widget _buildTransactionItem(AppColorScheme colors, WalletTransaction transaction) {
     final timeFormat = DateFormat('MMM d, h:mm a');
     final isCredit = transaction.isCredit;
-    
+
     IconData icon;
     Color color;
     switch (transaction.type) {
       case WalletTransactionType.credit:
         icon = Icons.arrow_downward;
-        color = Colors.green;
+        color = colors.success;
         break;
       case WalletTransactionType.bonus:
         icon = Icons.star;
-        color = Colors.amber;
+        color = colors.accent;
         break;
       case WalletTransactionType.withdrawal:
         icon = Icons.account_balance;
-        color = Colors.blue;
+        color = colors.info;
         break;
       case WalletTransactionType.debit:
         icon = Icons.arrow_upward;
-        color = Colors.red;
+        color = colors.error;
         break;
     }
 
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
+        color: colors.surfaceVariant,
         borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
@@ -366,7 +366,7 @@ class WalletView extends GetView<WalletController> {
                     Text(
                       timeFormat.format(transaction.timestamp),
                       style: AppTextStyles.labelSmall.copyWith(
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                        color: colors.textSecondary,
                       ),
                     ),
                     if (transaction.status != TransactionStatus.completed) ...[
@@ -374,13 +374,13 @@ class WalletView extends GetView<WalletController> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
-                          color: Colors.orange.withValues(alpha: 0.1),
+                          color: colors.warning.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
                           transaction.status.name,
                           style: AppTextStyles.labelSmall.copyWith(
-                            color: Colors.orange,
+                            color: colors.warning,
                             fontSize: 10,
                           ),
                         ),
@@ -395,7 +395,7 @@ class WalletView extends GetView<WalletController> {
             transaction.amountDisplay,
             style: AppTextStyles.bodyMedium.copyWith(
               fontWeight: FontWeight.bold,
-              color: isCredit ? Colors.green : Colors.red,
+              color: isCredit ? colors.success : colors.error,
             ),
           ),
         ],
@@ -403,14 +403,14 @@ class WalletView extends GetView<WalletController> {
     );
   }
 
-  void _showWithdrawSheet(ThemeData theme) {
+  void _showWithdrawSheet(AppColorScheme colors) {
     final amountController = TextEditingController();
 
     Get.bottomSheet(
       Container(
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: theme.scaffoldBackgroundColor,
+          color: colors.background,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: Column(
@@ -422,7 +422,7 @@ class WalletView extends GetView<WalletController> {
               style: AppTextStyles.titleMedium.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),
-            
+
             // Amount field
             TextField(
               controller: amountController,
@@ -436,7 +436,7 @@ class WalletView extends GetView<WalletController> {
               ),
             ),
             const SizedBox(height: 16),
-            
+
             // Bank account selection
             Text('Select Bank Account', style: AppTextStyles.labelMedium),
             const SizedBox(height: 8),
@@ -451,19 +451,19 @@ class WalletView extends GetView<WalletController> {
                       margin: const EdgeInsets.only(bottom: 8),
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: isSelected 
-                            ? AppColors.primary.withValues(alpha: 0.1)
-                            : theme.colorScheme.surfaceContainerHighest,
+                        color: isSelected
+                            ? colors.primary.withValues(alpha: 0.1)
+                            : colors.surfaceVariant,
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
-                          color: isSelected ? AppColors.primary : Colors.transparent,
+                          color: isSelected ? colors.primary : Colors.transparent,
                         ),
                       ),
                       child: Row(
                         children: [
                           Icon(
                             Icons.account_balance,
-                            color: isSelected ? AppColors.primary : theme.colorScheme.onSurface,
+                            color: isSelected ? colors.primary : colors.textPrimary,
                           ),
                           const SizedBox(width: 12),
                           Expanded(
@@ -479,7 +479,7 @@ class WalletView extends GetView<WalletController> {
                                 Text(
                                   account.accountNumber,
                                   style: AppTextStyles.labelSmall.copyWith(
-                                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                                    color: colors.textSecondary,
                                   ),
                                 ),
                               ],
@@ -489,13 +489,13 @@ class WalletView extends GetView<WalletController> {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                               decoration: BoxDecoration(
-                                color: AppColors.primary.withValues(alpha: 0.1),
+                                color: colors.primary.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
                                 'Primary',
                                 style: AppTextStyles.labelSmall.copyWith(
-                                  color: AppColors.primary,
+                                  color: colors.primary,
                                   fontSize: 10,
                                 ),
                               ),
@@ -508,7 +508,7 @@ class WalletView extends GetView<WalletController> {
               );
             }),
             const SizedBox(height: 20),
-            
+
             // Withdraw button
             Obx(() => SizedBox(
               width: double.infinity,
@@ -521,7 +521,7 @@ class WalletView extends GetView<WalletController> {
                         if (success) Get.back();
                       },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
+                  backgroundColor: colors.primary,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -536,7 +536,7 @@ class WalletView extends GetView<WalletController> {
                           color: Colors.white,
                         ),
                       )
-                    : const Text('Withdraw', style: TextStyle(color: Colors.white)),
+                    : Text('Withdraw', style: TextStyle(color: colors.textOnPrimary)),
               ),
             )),
             const SizedBox(height: 16),
@@ -550,7 +550,7 @@ class WalletView extends GetView<WalletController> {
   // Note: Pilots don't add money - they earn from deliveries
   // The Earnings button now navigates to the earnings screen
 
-  Widget _buildPaymentOption(ThemeData theme, String label, String value, RxString selected) {
+  Widget _buildPaymentOption(AppColorScheme colors, String label, String value, RxString selected) {
     final isSelected = selected.value == value;
     return GestureDetector(
       onTap: () => selected.value = value,
@@ -558,19 +558,19 @@ class WalletView extends GetView<WalletController> {
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: isSelected 
-              ? AppColors.primary.withValues(alpha: 0.1)
-              : theme.colorScheme.surfaceContainerHighest,
+          color: isSelected
+              ? colors.primary.withValues(alpha: 0.1)
+              : colors.surfaceVariant,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
-            color: isSelected ? AppColors.primary : Colors.transparent,
+            color: isSelected ? colors.primary : Colors.transparent,
           ),
         ),
         child: Row(
           children: [
             Icon(
               isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
-              color: isSelected ? AppColors.primary : theme.colorScheme.onSurface.withValues(alpha: 0.5),
+              color: isSelected ? colors.primary : colors.textHint,
             ),
             const SizedBox(width: 12),
             Text(label, style: AppTextStyles.bodyMedium),

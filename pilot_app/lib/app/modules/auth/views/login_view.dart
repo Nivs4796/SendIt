@@ -60,13 +60,13 @@ class _LoginContentState extends State<_LoginContent>
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<AuthController>();
-    final theme = Theme.of(context);
+    final colors = AppColorScheme.of(context);
     final screenHeight = MediaQuery.of(context).size.height;
 
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-        backgroundColor: theme.scaffoldBackgroundColor,
+        backgroundColor: colors.background,
         resizeToAvoidBottomInset: true,
         body: SafeArea(
           child: FadeTransition(
@@ -87,11 +87,11 @@ class _LoginContentState extends State<_LoginContent>
                           width: 120,
                           height: 120,
                           decoration: BoxDecoration(
-                            color: AppColors.primary,
+                            color: colors.primary,
                             borderRadius: BorderRadius.circular(32),
                             boxShadow: [
                               BoxShadow(
-                                color: AppColors.primary.withValues(alpha: 0.3),
+                                color: colors.primary.withValues(alpha: 0.3),
                                 blurRadius: 24,
                                 offset: const Offset(0, 8),
                               ),
@@ -151,14 +151,14 @@ class _LoginContentState extends State<_LoginContent>
                             text: 'By continuing, you agree to our ',
                             style: TextStyle(
                               fontSize: 12,
-                              color: theme.colorScheme.onSurfaceVariant,
+                              color: colors.textSecondary,
                             ),
                             children: [
                               TextSpan(
                                 text: 'Terms & Conditions',
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: AppColors.primary,
+                                  color: colors.primary,
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),

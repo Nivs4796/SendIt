@@ -13,10 +13,10 @@ class DocumentsView extends GetView<DocumentsController> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final colors = AppColorScheme.of(context);
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: colors.background,
       appBar: AppBar(
         title: const Text('My Documents'),
         centerTitle: true,
@@ -37,42 +37,43 @@ class DocumentsView extends GetView<DocumentsController> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Summary Card
-                _buildSummaryCard(theme),
+                _buildSummaryCard(colors),
                 const SizedBox(height: 20),
 
                 // Filter Chips
-                _buildFilterChips(theme),
+                _buildFilterChips(colors),
                 const SizedBox(height: 16),
 
                 // Documents List
-                _buildDocumentsList(theme),
+                _buildDocumentsList(colors),
               ],
             ),
           ),
         );
       }),
-      // Upload FAB
-      floatingActionButton: Obx(() => controller.isUploading.value
-          ? const FloatingActionButton(
-              onPressed: null,
-              child: SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: Colors.white,
-                ),
-              ),
-            )
-          : FloatingActionButton.extended(
-              onPressed: () => _showUploadOptions(context, theme),
-              icon: const Icon(Icons.add),
-              label: const Text('Upload'),
-            )),
+      // Upload FAB - use Obx wrapper with consistent widget type
+      floatingActionButton: Obx(() {
+        final isUploading = controller.isUploading.value;
+        return FloatingActionButton.extended(
+          key: const ValueKey('documents_fab'),
+          onPressed: isUploading ? null : () => _showUploadOptions(context, colors),
+          icon: isUploading
+              ? SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: colors.textOnPrimary,
+                  ),
+                )
+              : const Icon(Icons.add),
+          label: Text(isUploading ? 'Uploading...' : 'Upload'),
+        );
+      }),
     );
   }
 
-  Widget _buildSummaryCard(ThemeData theme) {
+  Widget _buildSummaryCard(AppColorScheme colors) {
     final summary = controller.summary.value;
     if (summary == null) return const SizedBox.shrink();
 
@@ -81,8 +82,8 @@ class DocumentsView extends GetView<DocumentsController> {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            AppColors.primary,
-            AppColors.primary.withValues(alpha: 0.8),
+            colors.primary,
+            colors.primary.withValues(alpha: 0.8),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -98,20 +99,20 @@ class DocumentsView extends GetView<DocumentsController> {
               Text(
                 'Document Status',
                 style: AppTextStyles.titleMedium.copyWith(
-                  color: Colors.white,
+                  color: colors.textOnPrimary,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
+                  color: colors.textOnPrimary.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
                   '${summary.verified}/${summary.total} Verified',
                   style: AppTextStyles.labelSmall.copyWith(
-                    color: Colors.white,
+                    color: colors.textOnPrimary,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -125,8 +126,8 @@ class DocumentsView extends GetView<DocumentsController> {
             borderRadius: BorderRadius.circular(4),
             child: LinearProgressIndicator(
               value: summary.verificationProgress,
-              backgroundColor: Colors.white.withValues(alpha: 0.3),
-              valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+              backgroundColor: colors.textOnPrimary.withValues(alpha: 0.3),
+              valueColor: AlwaysStoppedAnimation<Color>(colors.textOnPrimary),
               minHeight: 8,
             ),
           ),
@@ -135,9 +136,9 @@ class DocumentsView extends GetView<DocumentsController> {
           // Stats Row
           Row(
             children: [
-              _buildStatItem('Verified', summary.verified, Colors.white),
-              _buildStatItem('Pending', summary.pending, Colors.amber),
-              _buildStatItem('Action', summary.actionRequired, Colors.red.shade200),
+              _buildStatItem(colors, 'Verified', summary.verified, colors.textOnPrimary),
+              _buildStatItem(colors, 'Pending', summary.pending, colors.accent),
+              _buildStatItem(colors, 'Action', summary.actionRequired, colors.error),
             ],
           ),
         ],
@@ -145,7 +146,7 @@ class DocumentsView extends GetView<DocumentsController> {
     );
   }
 
-  Widget _buildStatItem(String label, int count, Color color) {
+  Widget _buildStatItem(AppColorScheme colors, String label, int count, Color color) {
     return Expanded(
       child: Column(
         children: [
@@ -159,7 +160,7 @@ class DocumentsView extends GetView<DocumentsController> {
           Text(
             label,
             style: AppTextStyles.labelSmall.copyWith(
-              color: Colors.white.withValues(alpha: 0.8),
+              color: colors.textOnPrimary.withValues(alpha: 0.8),
             ),
           ),
         ],
@@ -167,7 +168,7 @@ class DocumentsView extends GetView<DocumentsController> {
     );
   }
 
-  Widget _buildFilterChips(ThemeData theme) {
+  Widget _buildFilterChips(AppColorScheme colors) {
     final filters = [
       {'key': 'all', 'label': 'All'},
       {'key': 'verified', 'label': 'Verified'},
@@ -187,10 +188,10 @@ class DocumentsView extends GetView<DocumentsController> {
                 selected: isSelected,
                 label: Text(filter['label']!),
                 onSelected: (_) => controller.selectedFilter.value = filter['key']!,
-                selectedColor: AppColors.primary.withValues(alpha: 0.2),
-                checkmarkColor: AppColors.primary,
+                selectedColor: colors.primary.withValues(alpha: 0.2),
+                checkmarkColor: colors.primary,
                 labelStyle: AppTextStyles.labelMedium.copyWith(
-                  color: isSelected ? AppColors.primary : theme.colorScheme.onSurface,
+                  color: isSelected ? colors.primary : colors.textPrimary,
                 ),
               ),
             );
@@ -200,7 +201,7 @@ class DocumentsView extends GetView<DocumentsController> {
     );
   }
 
-  Widget _buildDocumentsList(ThemeData theme) {
+  Widget _buildDocumentsList(AppColorScheme colors) {
     return Obx(() {
       final docs = controller.filteredDocuments;
 
@@ -208,7 +209,7 @@ class DocumentsView extends GetView<DocumentsController> {
         return Container(
           padding: const EdgeInsets.all(32),
           decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceContainerHighest,
+            color: colors.surfaceVariant,
             borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
           ),
           child: Center(
@@ -217,13 +218,13 @@ class DocumentsView extends GetView<DocumentsController> {
                 Icon(
                   Icons.description_outlined,
                   size: 48,
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
+                  color: colors.textDisabled,
                 ),
                 const SizedBox(height: 12),
                 Text(
                   'No documents found',
                   style: AppTextStyles.bodyMedium.copyWith(
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                    color: colors.textSecondary,
                   ),
                 ),
               ],
@@ -238,20 +239,20 @@ class DocumentsView extends GetView<DocumentsController> {
         itemCount: docs.length,
         separatorBuilder: (_, __) => const SizedBox(height: 12),
         itemBuilder: (context, index) {
-          return _buildDocumentCard(theme, docs[index]);
+          return _buildDocumentCard(colors, docs[index]);
         },
       );
     });
   }
 
-  Widget _buildDocumentCard(ThemeData theme, DocumentModel document) {
+  Widget _buildDocumentCard(AppColorScheme colors, DocumentModel document) {
     final dateFormat = DateFormat('dd MMM yyyy');
     final statusColor = controller.getStatusColor(document.status);
     final statusIcon = controller.getStatusIcon(document.status);
 
     return Container(
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
+        color: colors.surfaceVariant,
         borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
         border: document.status.isActionRequired
             ? Border.all(color: statusColor.withValues(alpha: 0.5), width: 1.5)
@@ -260,7 +261,7 @@ class DocumentsView extends GetView<DocumentsController> {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () => _showDocumentDetails(theme, document),
+          onTap: () => _showDocumentDetails(colors, document),
           borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -302,7 +303,7 @@ class DocumentsView extends GetView<DocumentsController> {
                             Text(
                               document.documentNumber,
                               style: AppTextStyles.labelSmall.copyWith(
-                                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                                color: colors.textSecondary,
                               ),
                             ),
                           ],
@@ -342,10 +343,10 @@ class DocumentsView extends GetView<DocumentsController> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.red.withValues(alpha: 0.05),
+                      color: colors.error.withValues(alpha: 0.05),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                        color: Colors.red.withValues(alpha: 0.2),
+                        color: colors.error.withValues(alpha: 0.2),
                       ),
                     ),
                     child: Row(
@@ -353,14 +354,14 @@ class DocumentsView extends GetView<DocumentsController> {
                         Icon(
                           Icons.info_outline,
                           size: 16,
-                          color: Colors.red.shade700,
+                          color: colors.error,
                         ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             document.rejectionReason!,
                             style: AppTextStyles.labelSmall.copyWith(
-                              color: Colors.red.shade700,
+                              color: colors.error,
                             ),
                           ),
                         ),
@@ -375,10 +376,10 @@ class DocumentsView extends GetView<DocumentsController> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.orange.withValues(alpha: 0.05),
+                      color: colors.warning.withValues(alpha: 0.05),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                        color: Colors.orange.withValues(alpha: 0.2),
+                        color: colors.warning.withValues(alpha: 0.2),
                       ),
                     ),
                     child: Row(
@@ -386,13 +387,13 @@ class DocumentsView extends GetView<DocumentsController> {
                         Icon(
                           Icons.schedule,
                           size: 16,
-                          color: Colors.orange.shade700,
+                          color: colors.warning,
                         ),
                         const SizedBox(width: 8),
                         Text(
                           'Expires in ${document.daysUntilExpiry} days',
                           style: AppTextStyles.labelSmall.copyWith(
-                            color: Colors.orange.shade700,
+                            color: colors.warning,
                           ),
                         ),
                       ],
@@ -413,7 +414,7 @@ class DocumentsView extends GetView<DocumentsController> {
                           Text(
                             'Uploaded: ${dateFormat.format(document.uploadedAt!)}',
                             style: AppTextStyles.caption.copyWith(
-                              color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                              color: colors.textHint,
                             ),
                           ),
                         if (document.expiryDate != null)
@@ -421,8 +422,8 @@ class DocumentsView extends GetView<DocumentsController> {
                             'Expires: ${dateFormat.format(document.expiryDate!)}',
                             style: AppTextStyles.caption.copyWith(
                               color: document.isExpired
-                                  ? Colors.red
-                                  : theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                                  ? colors.error
+                                  : colors.textHint,
                             ),
                           ),
                       ],
@@ -435,7 +436,7 @@ class DocumentsView extends GetView<DocumentsController> {
                         icon: const Icon(Icons.upload, size: 16),
                         label: const Text('Re-upload'),
                         style: TextButton.styleFrom(
-                          foregroundColor: AppColors.primary,
+                          foregroundColor: colors.primary,
                           padding: const EdgeInsets.symmetric(horizontal: 12),
                         ),
                       ),
@@ -449,12 +450,12 @@ class DocumentsView extends GetView<DocumentsController> {
     );
   }
 
-  void _showDocumentDetails(ThemeData theme, DocumentModel document) {
+  void _showDocumentDetails(AppColorScheme colors, DocumentModel document) {
     Get.bottomSheet(
       Container(
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: theme.scaffoldBackgroundColor,
+          color: colors.background,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: Column(
@@ -467,7 +468,7 @@ class DocumentsView extends GetView<DocumentsController> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: theme.dividerColor,
+                  color: colors.border,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -481,7 +482,7 @@ class DocumentsView extends GetView<DocumentsController> {
                   width: 56,
                   height: 56,
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.1),
+                    color: colors.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Center(
@@ -526,19 +527,22 @@ class DocumentsView extends GetView<DocumentsController> {
 
             // Document Details
             if (document.documentNumber.isNotEmpty)
-              _buildDetailRow('Document Number', document.documentNumber),
+              _buildDetailRow(colors, 'Document Number', document.documentNumber),
             if (document.expiryDate != null)
               _buildDetailRow(
+                colors,
                 'Expiry Date',
                 DateFormat('dd MMM yyyy').format(document.expiryDate!),
               ),
             if (document.uploadedAt != null)
               _buildDetailRow(
+                colors,
                 'Uploaded On',
                 DateFormat('dd MMM yyyy').format(document.uploadedAt!),
               ),
             if (document.verifiedAt != null)
               _buildDetailRow(
+                colors,
                 'Verified On',
                 DateFormat('dd MMM yyyy').format(document.verifiedAt!),
               ),
@@ -558,8 +562,8 @@ class DocumentsView extends GetView<DocumentsController> {
                       icon: const Icon(Icons.upload),
                       label: const Text('Re-upload'),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
+                        backgroundColor: colors.primary,
+                        foregroundColor: colors.textOnPrimary,
                         padding: const EdgeInsets.symmetric(vertical: 12),
                       ),
                     ),
@@ -589,7 +593,7 @@ class DocumentsView extends GetView<DocumentsController> {
     );
   }
 
-  Widget _buildDetailRow(String label, String value) {
+  Widget _buildDetailRow(AppColorScheme colors, String label, String value) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
@@ -598,7 +602,7 @@ class DocumentsView extends GetView<DocumentsController> {
           Text(
             label,
             style: AppTextStyles.bodyMedium.copyWith(
-              color: Colors.grey,
+              color: colors.textSecondary,
             ),
           ),
           Text(
@@ -612,12 +616,12 @@ class DocumentsView extends GetView<DocumentsController> {
     );
   }
 
-  void _showUploadOptions(BuildContext context, ThemeData theme) {
+  void _showUploadOptions(BuildContext context, AppColorScheme colors) {
     Get.bottomSheet(
       Container(
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: theme.scaffoldBackgroundColor,
+          color: colors.background,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: Column(
@@ -630,7 +634,7 @@ class DocumentsView extends GetView<DocumentsController> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: theme.dividerColor,
+                  color: colors.border,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -656,7 +660,7 @@ class DocumentsView extends GetView<DocumentsController> {
               runSpacing: 12,
               children: DocumentType.values
                   .where((t) => t != DocumentType.other)
-                  .map((type) => _buildDocTypeButton(theme, type))
+                  .map((type) => _buildDocTypeButton(colors, type))
                   .toList(),
             ),
             const SizedBox(height: 24),
@@ -667,7 +671,7 @@ class DocumentsView extends GetView<DocumentsController> {
     );
   }
 
-  Widget _buildDocTypeButton(ThemeData theme, DocumentType type) {
+  Widget _buildDocTypeButton(AppColorScheme colors, DocumentType type) {
     // Check if already uploaded
     final existingDoc = controller.documents.firstWhereOrNull((d) => d.type == type);
     final isUploaded = existingDoc != null &&
@@ -676,16 +680,16 @@ class DocumentsView extends GetView<DocumentsController> {
     return GestureDetector(
       onTap: () {
         Get.back();
-        _showUploadForm(theme, type, existingDoc);
+        _showUploadForm(colors, type, existingDoc);
       },
       child: Container(
         width: 100,
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainerHighest,
+          color: colors.surfaceVariant,
           borderRadius: BorderRadius.circular(12),
           border: isUploaded
-              ? Border.all(color: Colors.green.withValues(alpha: 0.5))
+              ? Border.all(color: colors.success.withValues(alpha: 0.5))
               : null,
         ),
         child: Column(
@@ -700,7 +704,7 @@ class DocumentsView extends GetView<DocumentsController> {
             ),
             if (isUploaded) ...[
               const SizedBox(height: 4),
-              Icon(Icons.check_circle, size: 14, color: Colors.green),
+              Icon(Icons.check_circle, size: 14, color: colors.success),
             ],
           ],
         ),
@@ -708,7 +712,7 @@ class DocumentsView extends GetView<DocumentsController> {
     );
   }
 
-  void _showUploadForm(ThemeData theme, DocumentType type, DocumentModel? existingDoc) {
+  void _showUploadForm(AppColorScheme colors, DocumentType type, DocumentModel? existingDoc) {
     final docNumberController = TextEditingController(
       text: existingDoc?.documentNumber ?? '',
     );
@@ -718,7 +722,7 @@ class DocumentsView extends GetView<DocumentsController> {
       Container(
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: theme.scaffoldBackgroundColor,
+          color: colors.background,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: Column(
@@ -731,7 +735,7 @@ class DocumentsView extends GetView<DocumentsController> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: theme.dividerColor,
+                  color: colors.border,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -833,8 +837,8 @@ class DocumentsView extends GetView<DocumentsController> {
                     icon: const Icon(Icons.photo_library),
                     label: const Text('Gallery'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
+                      backgroundColor: colors.primary,
+                      foregroundColor: colors.textOnPrimary,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
                   ),

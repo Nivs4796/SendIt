@@ -13,10 +13,10 @@ class VehiclesView extends GetView<VehiclesController> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final colors = AppColorScheme.of(context);
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: colors.background,
       appBar: AppBar(
         title: const Text('My Vehicles'),
         centerTitle: true,
@@ -24,7 +24,7 @@ class VehiclesView extends GetView<VehiclesController> {
         backgroundColor: Colors.transparent,
         actions: [
           IconButton(
-            onPressed: () => _showAddVehicleSheet(context, theme),
+            onPressed: () => _showAddVehicleSheet(context, colors),
             icon: const Icon(Icons.add),
           ),
         ],
@@ -35,7 +35,7 @@ class VehiclesView extends GetView<VehiclesController> {
         }
 
         if (controller.vehicles.isEmpty) {
-          return _buildEmptyState(theme);
+          return _buildEmptyState(colors);
         }
 
         return RefreshIndicator(
@@ -44,7 +44,7 @@ class VehiclesView extends GetView<VehiclesController> {
             padding: const EdgeInsets.all(16),
             itemCount: controller.vehicles.length,
             itemBuilder: (context, index) {
-              return _buildVehicleCard(theme, controller.vehicles[index]);
+              return _buildVehicleCard(colors, controller.vehicles[index]);
             },
           ),
         );
@@ -52,7 +52,7 @@ class VehiclesView extends GetView<VehiclesController> {
     );
   }
 
-  Widget _buildEmptyState(ThemeData theme) {
+  Widget _buildEmptyState(AppColorScheme colors) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -62,7 +62,7 @@ class VehiclesView extends GetView<VehiclesController> {
             Icon(
               Icons.two_wheeler_outlined,
               size: 80,
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
+              color: colors.textHint,
             ),
             const SizedBox(height: 16),
             Text(
@@ -73,17 +73,17 @@ class VehiclesView extends GetView<VehiclesController> {
             Text(
               'Add your vehicle to start accepting deliveries',
               style: AppTextStyles.bodyMedium.copyWith(
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                color: colors.textSecondary,
               ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
-              onPressed: () => _showAddVehicleSheet(Get.context!, theme),
+              onPressed: () => _showAddVehicleSheet(Get.context!, AppColorScheme.of(Get.context!)),
               icon: const Icon(Icons.add),
               label: const Text('Add Vehicle'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
+                backgroundColor: colors.primary,
                 foregroundColor: Colors.white,
               ),
             ),
@@ -93,7 +93,7 @@ class VehiclesView extends GetView<VehiclesController> {
     );
   }
 
-  Widget _buildVehicleCard(ThemeData theme, VehicleModel vehicle) {
+  Widget _buildVehicleCard(AppColorScheme colors, VehicleModel vehicle) {
     final dateFormat = DateFormat('MMM d, yyyy');
     final insuranceExpiring = vehicle.insuranceExpiry != null &&
         vehicle.insuranceExpiry!.difference(DateTime.now()).inDays < 30;
@@ -102,10 +102,10 @@ class VehiclesView extends GetView<VehiclesController> {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
+        color: colors.surfaceVariant,
         borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
         border: vehicle.isActive
-            ? Border.all(color: AppColors.primary, width: 2)
+            ? Border.all(color: colors.primary, width: 2)
             : null,
       ),
       child: Column(
@@ -119,16 +119,16 @@ class VehiclesView extends GetView<VehiclesController> {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
+                  color: colors.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
                   _getVehicleIcon(vehicle.vehicleType),
-                  color: AppColors.primary,
+                  color: colors.primary,
                 ),
               ),
               const SizedBox(width: 12),
-              
+
               // Vehicle info
               Expanded(
                 child: Column(
@@ -147,17 +147,17 @@ class VehiclesView extends GetView<VehiclesController> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
-                              color: Colors.green.withValues(alpha: 0.1),
+                              color: colors.success.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(Icons.bolt, size: 12, color: Colors.green),
+                                Icon(Icons.bolt, size: 12, color: colors.success),
                                 Text(
                                   'EV',
                                   style: AppTextStyles.labelSmall.copyWith(
-                                    color: Colors.green,
+                                    color: colors.success,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -171,13 +171,13 @@ class VehiclesView extends GetView<VehiclesController> {
                     Text(
                       vehicle.registrationNumber,
                       style: AppTextStyles.bodySmall.copyWith(
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                        color: colors.textSecondary,
                       ),
                     ),
                   ],
                 ),
               ),
-              
+
               // Status badges
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
@@ -186,7 +186,7 @@ class VehiclesView extends GetView<VehiclesController> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: AppColors.primary,
+                        color: colors.primary,
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
@@ -202,8 +202,8 @@ class VehiclesView extends GetView<VehiclesController> {
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
                       color: vehicle.isVerified
-                          ? Colors.green.withValues(alpha: 0.1)
-                          : Colors.orange.withValues(alpha: 0.1),
+                          ? colors.success.withValues(alpha: 0.1)
+                          : colors.warning.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Row(
@@ -212,13 +212,13 @@ class VehiclesView extends GetView<VehiclesController> {
                         Icon(
                           vehicle.isVerified ? Icons.verified : Icons.pending,
                           size: 12,
-                          color: vehicle.isVerified ? Colors.green : Colors.orange,
+                          color: vehicle.isVerified ? colors.success : colors.warning,
                         ),
                         const SizedBox(width: 4),
                         Text(
                           vehicle.isVerified ? 'Verified' : 'Pending',
                           style: AppTextStyles.labelSmall.copyWith(
-                            color: vehicle.isVerified ? Colors.green : Colors.orange,
+                            color: vehicle.isVerified ? colors.success : colors.warning,
                           ),
                         ),
                       ],
@@ -228,50 +228,50 @@ class VehiclesView extends GetView<VehiclesController> {
               ),
             ],
           ),
-          
+
           const SizedBox(height: 16),
-          Divider(color: theme.dividerColor),
+          Divider(color: colors.border),
           const SizedBox(height: 12),
-          
+
           // Details
           Row(
             children: [
-              _buildDetailItem(theme, 'Year', '${vehicle.year ?? '-'}'),
-              _buildDetailItem(theme, 'Color', vehicle.color ?? '-'),
+              _buildDetailItem(colors, 'Year', '${vehicle.year ?? '-'}'),
+              _buildDetailItem(colors, 'Color', vehicle.color ?? '-'),
               _buildDetailItem(
-                theme,
+                colors,
                 'Type',
                 vehicle.vehicleType == VehicleType.twoWheeler ? '2W' : '4W',
               ),
             ],
           ),
-          
+
           // Insurance warning
           if (insuranceExpiring && vehicle.insuranceExpiry != null) ...[
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.orange.withValues(alpha: 0.1),
+                color: colors.warning.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.warning_amber, color: Colors.orange, size: 20),
+                  Icon(Icons.warning_amber, color: colors.warning, size: 20),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       'Insurance expires on ${dateFormat.format(vehicle.insuranceExpiry!)}',
-                      style: AppTextStyles.labelSmall.copyWith(color: Colors.orange),
+                      style: AppTextStyles.labelSmall.copyWith(color: colors.warning),
                     ),
                   ),
                 ],
               ),
             ),
           ],
-          
+
           const SizedBox(height: 12),
-          
+
           // Actions
           Row(
             children: [
@@ -280,8 +280,8 @@ class VehiclesView extends GetView<VehiclesController> {
                   child: OutlinedButton(
                     onPressed: () => controller.setActiveVehicle(vehicle.id),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.primary,
-                      side: BorderSide(color: AppColors.primary),
+                      foregroundColor: colors.primary,
+                      side: BorderSide(color: colors.primary),
                     ),
                     child: const Text('Set as Active'),
                   ),
@@ -289,7 +289,7 @@ class VehiclesView extends GetView<VehiclesController> {
               if (!vehicle.isActive) const SizedBox(width: 12),
               Expanded(
                 child: OutlinedButton(
-                  onPressed: () => _showVehicleDetails(theme, vehicle),
+                  onPressed: () => _showVehicleDetails(colors, vehicle),
                   child: const Text('View Details'),
                 ),
               ),
@@ -300,7 +300,7 @@ class VehiclesView extends GetView<VehiclesController> {
     );
   }
 
-  Widget _buildDetailItem(ThemeData theme, String label, String value) {
+  Widget _buildDetailItem(AppColorScheme colors, String label, String value) {
     return Expanded(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -308,7 +308,7 @@ class VehiclesView extends GetView<VehiclesController> {
           Text(
             label,
             style: AppTextStyles.labelSmall.copyWith(
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+              color: colors.textSecondary,
             ),
           ),
           Text(
@@ -337,14 +337,14 @@ class VehiclesView extends GetView<VehiclesController> {
     }
   }
 
-  void _showVehicleDetails(ThemeData theme, VehicleModel vehicle) {
+  void _showVehicleDetails(AppColorScheme colors, VehicleModel vehicle) {
     final dateFormat = DateFormat('MMM d, yyyy');
-    
+
     Get.bottomSheet(
       Container(
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: theme.scaffoldBackgroundColor,
+          color: colors.background,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: Column(
@@ -357,12 +357,12 @@ class VehiclesView extends GetView<VehiclesController> {
                   width: 56,
                   height: 56,
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.1),
+                    color: colors.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
                     _getVehicleIcon(vehicle.vehicleType),
-                    color: AppColors.primary,
+                    color: colors.primary,
                     size: 32,
                   ),
                 ),
@@ -380,7 +380,7 @@ class VehiclesView extends GetView<VehiclesController> {
                       Text(
                         vehicle.registrationNumber,
                         style: AppTextStyles.bodyMedium.copyWith(
-                          color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                          color: colors.textSecondary,
                         ),
                       ),
                     ],
@@ -389,18 +389,18 @@ class VehiclesView extends GetView<VehiclesController> {
               ],
             ),
             const SizedBox(height: 24),
-            
-            _buildDetailRow(theme, 'Vehicle Type', vehicle.vehicleType.displayName),
-            _buildDetailRow(theme, 'Year', '${vehicle.year ?? '-'}'),
-            _buildDetailRow(theme, 'Color', vehicle.color ?? '-'),
+
+            _buildDetailRow(colors, 'Vehicle Type', vehicle.vehicleType.displayName),
+            _buildDetailRow(colors, 'Year', '${vehicle.year ?? '-'}'),
+            _buildDetailRow(colors, 'Color', vehicle.color ?? '-'),
             if (vehicle.insuranceNumber != null)
-              _buildDetailRow(theme, 'Insurance No.', vehicle.insuranceNumber!),
+              _buildDetailRow(colors, 'Insurance No.', vehicle.insuranceNumber!),
             if (vehicle.insuranceExpiry != null)
-              _buildDetailRow(theme, 'Insurance Expiry', dateFormat.format(vehicle.insuranceExpiry!)),
-            _buildDetailRow(theme, 'Added On', dateFormat.format(vehicle.createdAt)),
-            
+              _buildDetailRow(colors, 'Insurance Expiry', dateFormat.format(vehicle.insuranceExpiry!)),
+            _buildDetailRow(colors, 'Added On', dateFormat.format(vehicle.createdAt)),
+
             const SizedBox(height: 24),
-            
+
             if (!vehicle.isActive) ...[
               Row(
                 children: [
@@ -408,11 +408,11 @@ class VehiclesView extends GetView<VehiclesController> {
                     child: OutlinedButton(
                       onPressed: () {
                         Get.back();
-                        _confirmDeleteVehicle(theme, vehicle);
+                        _confirmDeleteVehicle(colors, vehicle);
                       },
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.red,
-                        side: const BorderSide(color: Colors.red),
+                        foregroundColor: colors.error,
+                        side: BorderSide(color: colors.error),
                       ),
                       child: const Text('Delete Vehicle'),
                     ),
@@ -425,7 +425,7 @@ class VehiclesView extends GetView<VehiclesController> {
                         controller.setActiveVehicle(vehicle.id);
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
+                        backgroundColor: colors.primary,
                         foregroundColor: Colors.white,
                       ),
                       child: const Text('Set as Active'),
@@ -441,7 +441,7 @@ class VehiclesView extends GetView<VehiclesController> {
     );
   }
 
-  Widget _buildDetailRow(ThemeData theme, String label, String value) {
+  Widget _buildDetailRow(AppColorScheme colors, String label, String value) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
@@ -450,7 +450,7 @@ class VehiclesView extends GetView<VehiclesController> {
           Text(
             label,
             style: AppTextStyles.bodyMedium.copyWith(
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+              color: colors.textSecondary,
             ),
           ),
           Text(
@@ -462,7 +462,7 @@ class VehiclesView extends GetView<VehiclesController> {
     );
   }
 
-  void _confirmDeleteVehicle(ThemeData theme, VehicleModel vehicle) {
+  void _confirmDeleteVehicle(AppColorScheme colors, VehicleModel vehicle) {
     Get.dialog(
       AlertDialog(
         title: const Text('Delete Vehicle?'),
@@ -479,15 +479,15 @@ class VehiclesView extends GetView<VehiclesController> {
               Get.back();
               controller.deleteVehicle(vehicle.id);
             },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Delete', style: TextStyle(color: Colors.white)),
+            style: ElevatedButton.styleFrom(backgroundColor: colors.error),
+            child: Text('Delete', style: TextStyle(color: colors.textOnPrimary)),
           ),
         ],
       ),
     );
   }
 
-  void _showAddVehicleSheet(BuildContext context, ThemeData theme) {
+  void _showAddVehicleSheet(BuildContext context, AppColorScheme colors) {
     final formKey = GlobalKey<FormState>();
     final registrationController = TextEditingController();
     final makeController = TextEditingController();
@@ -506,7 +506,7 @@ class VehiclesView extends GetView<VehiclesController> {
             bottom: MediaQuery.of(context).viewInsets.bottom + 24,
           ),
           decoration: BoxDecoration(
-            color: theme.scaffoldBackgroundColor,
+            color: colors.background,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
           ),
           child: Form(
@@ -520,7 +520,7 @@ class VehiclesView extends GetView<VehiclesController> {
                   style: AppTextStyles.titleMedium.copyWith(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 20),
-                
+
                 // Vehicle Type
                 Text('Vehicle Type', style: AppTextStyles.labelMedium),
                 const SizedBox(height: 8),
@@ -537,24 +537,24 @@ class VehiclesView extends GetView<VehiclesController> {
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           decoration: BoxDecoration(
                             color: isSelected
-                                ? AppColors.primary.withValues(alpha: 0.1)
-                                : theme.colorScheme.surfaceContainerHighest,
+                                ? colors.primary.withValues(alpha: 0.1)
+                                : colors.surfaceVariant,
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
-                              color: isSelected ? AppColors.primary : Colors.transparent,
+                              color: isSelected ? colors.primary : Colors.transparent,
                             ),
                           ),
                           child: Column(
                             children: [
                               Icon(
                                 _getVehicleIcon(type),
-                                color: isSelected ? AppColors.primary : theme.colorScheme.onSurface,
+                                color: isSelected ? colors.primary : colors.textPrimary,
                               ),
                               const SizedBox(height: 4),
                               Text(
                                 type.displayName,
                                 style: AppTextStyles.labelSmall.copyWith(
-                                  color: isSelected ? AppColors.primary : null,
+                                  color: isSelected ? colors.primary : null,
                                 ),
                               ),
                             ],
@@ -565,7 +565,7 @@ class VehiclesView extends GetView<VehiclesController> {
                   }).toList(),
                 )),
                 const SizedBox(height: 16),
-                
+
                 // Registration Number
                 TextFormField(
                   controller: registrationController,
@@ -578,7 +578,7 @@ class VehiclesView extends GetView<VehiclesController> {
                   validator: (v) => v?.isEmpty == true ? 'Required' : null,
                 ),
                 const SizedBox(height: 12),
-                
+
                 // Make & Model
                 Row(
                   children: [
@@ -608,7 +608,7 @@ class VehiclesView extends GetView<VehiclesController> {
                   ],
                 ),
                 const SizedBox(height: 12),
-                
+
                 // Year & Color
                 Row(
                   children: [
@@ -639,7 +639,7 @@ class VehiclesView extends GetView<VehiclesController> {
                   ],
                 ),
                 const SizedBox(height: 24),
-                
+
                 // Add button
                 Obx(() => SizedBox(
                   width: double.infinity,
@@ -659,7 +659,7 @@ class VehiclesView extends GetView<VehiclesController> {
                             if (success) Get.back();
                           },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
+                      backgroundColor: colors.primary,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),

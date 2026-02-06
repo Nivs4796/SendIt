@@ -13,10 +13,10 @@ class BankDetailsView extends GetView<BankController> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final colors = AppColorScheme.of(context);
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: colors.background,
       appBar: AppBar(
         title: const Text('Bank Accounts'),
         centerTitle: true,
@@ -37,11 +37,11 @@ class BankDetailsView extends GetView<BankController> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Header Card
-                _buildHeaderCard(theme),
+                _buildHeaderCard(colors),
                 const SizedBox(height: 20),
 
                 // Bank Accounts List
-                _buildAccountsList(theme),
+                _buildAccountsList(colors),
               ],
             ),
           ),
@@ -49,21 +49,21 @@ class BankDetailsView extends GetView<BankController> {
       }),
       // Add Bank FAB
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showAddBankSheet(context, theme),
+        onPressed: () => _showAddBankSheet(context, colors),
         icon: const Icon(Icons.add),
         label: const Text('Add Bank'),
       ),
     );
   }
 
-  Widget _buildHeaderCard(ThemeData theme) {
+  Widget _buildHeaderCard(AppColorScheme colors) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            Colors.indigo,
-            Colors.indigo.shade700,
+            colors.primaryDark,
+            colors.primary,
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -125,14 +125,14 @@ class BankDetailsView extends GetView<BankController> {
                     Icon(
                       Icons.info_outline,
                       size: 16,
-                      color: Colors.amber.shade200,
+                      color: colors.accent,
                     ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         'Add a bank account to withdraw your earnings',
                         style: AppTextStyles.labelSmall.copyWith(
-                          color: Colors.amber.shade200,
+                          color: colors.accent,
                         ),
                       ),
                     ),
@@ -148,10 +148,10 @@ class BankDetailsView extends GetView<BankController> {
               ),
               child: Row(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.check_circle,
                     size: 16,
-                    color: Colors.greenAccent,
+                    color: colors.success,
                   ),
                   const SizedBox(width: 8),
                   Expanded(
@@ -172,7 +172,7 @@ class BankDetailsView extends GetView<BankController> {
     );
   }
 
-  Widget _buildAccountsList(ThemeData theme) {
+  Widget _buildAccountsList(AppColorScheme colors) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -187,7 +187,7 @@ class BankDetailsView extends GetView<BankController> {
             return Container(
               padding: const EdgeInsets.all(32),
               decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerHighest,
+                color: colors.surfaceVariant,
                 borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
               ),
               child: Center(
@@ -196,20 +196,20 @@ class BankDetailsView extends GetView<BankController> {
                     Icon(
                       Icons.account_balance_outlined,
                       size: 48,
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
+                      color: colors.textHint,
                     ),
                     const SizedBox(height: 12),
                     Text(
                       'No bank accounts added',
                       style: AppTextStyles.bodyMedium.copyWith(
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                        color: colors.textSecondary,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       'Add a bank account to start withdrawing',
                       style: AppTextStyles.labelSmall.copyWith(
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
+                        color: colors.textHint,
                       ),
                     ),
                   ],
@@ -224,7 +224,7 @@ class BankDetailsView extends GetView<BankController> {
             itemCount: accounts.length,
             separatorBuilder: (_, __) => const SizedBox(height: 12),
             itemBuilder: (context, index) {
-              return _buildAccountCard(theme, accounts[index]);
+              return _buildAccountCard(colors, accounts[index]);
             },
           );
         }),
@@ -232,21 +232,21 @@ class BankDetailsView extends GetView<BankController> {
     );
   }
 
-  Widget _buildAccountCard(ThemeData theme, BankAccountModel account) {
+  Widget _buildAccountCard(AppColorScheme colors, BankAccountModel account) {
     final dateFormat = DateFormat('dd MMM yyyy');
 
     return Container(
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
+        color: colors.surfaceVariant,
         borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
         border: account.isPrimary
-            ? Border.all(color: AppColors.primary.withValues(alpha: 0.5), width: 1.5)
+            ? Border.all(color: colors.primary.withValues(alpha: 0.5), width: 1.5)
             : null,
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () => _showAccountOptions(theme, account),
+          onTap: () => _showAccountOptions(colors, account),
           borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -260,13 +260,13 @@ class BankDetailsView extends GetView<BankController> {
                       width: 48,
                       height: 48,
                       decoration: BoxDecoration(
-                        color: Colors.indigo.withValues(alpha: 0.1),
+                        color: colors.info.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Center(
+                      child: Center(
                         child: Icon(
                           Icons.account_balance,
-                          color: Colors.indigo,
+                          color: colors.info,
                           size: 24,
                         ),
                       ),
@@ -295,13 +295,13 @@ class BankDetailsView extends GetView<BankController> {
                                     vertical: 4,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: AppColors.primary.withValues(alpha: 0.1),
+                                    color: colors.primary.withValues(alpha: 0.1),
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                   child: Text(
                                     'PRIMARY',
                                     style: AppTextStyles.labelSmall.copyWith(
-                                      color: AppColors.primary,
+                                      color: colors.primary,
                                       fontWeight: FontWeight.bold,
                                       fontSize: 9,
                                     ),
@@ -313,7 +313,7 @@ class BankDetailsView extends GetView<BankController> {
                           Text(
                             account.maskedAccountNumber,
                             style: AppTextStyles.labelMedium.copyWith(
-                              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                              color: colors.textSecondary,
                               fontFamily: 'monospace',
                             ),
                           ),
@@ -325,9 +325,9 @@ class BankDetailsView extends GetView<BankController> {
                     IconButton(
                       icon: Icon(
                         Icons.more_vert,
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                        color: colors.textHint,
                       ),
-                      onPressed: () => _showAccountOptions(theme, account),
+                      onPressed: () => _showAccountOptions(colors, account),
                     ),
                   ],
                 ),
@@ -337,13 +337,13 @@ class BankDetailsView extends GetView<BankController> {
                 Row(
                   children: [
                     _buildDetailChip(
-                      theme,
+                      colors,
                       Icons.person_outline,
                       account.accountHolderName,
                     ),
                     const SizedBox(width: 8),
                     _buildDetailChip(
-                      theme,
+                      colors,
                       Icons.code,
                       account.ifscCode,
                     ),
@@ -357,13 +357,13 @@ class BankDetailsView extends GetView<BankController> {
                       Icon(
                         Icons.location_on_outlined,
                         size: 14,
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                        color: colors.textHint,
                       ),
                       const SizedBox(width: 4),
                       Text(
                         account.branchName!,
                         style: AppTextStyles.labelSmall.copyWith(
-                          color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                          color: colors.textHint,
                         ),
                       ),
                     ],
@@ -375,7 +375,7 @@ class BankDetailsView extends GetView<BankController> {
                   Text(
                     'Added on ${dateFormat.format(account.createdAt!)}',
                     style: AppTextStyles.caption.copyWith(
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
+                      color: colors.textHint,
                     ),
                   ),
                 ],
@@ -387,11 +387,11 @@ class BankDetailsView extends GetView<BankController> {
     );
   }
 
-  Widget _buildDetailChip(ThemeData theme, IconData icon, String text) {
+  Widget _buildDetailChip(AppColorScheme colors, IconData icon, String text) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
+        color: colors.surface,
         borderRadius: BorderRadius.circular(4),
       ),
       child: Row(
@@ -400,13 +400,13 @@ class BankDetailsView extends GetView<BankController> {
           Icon(
             icon,
             size: 12,
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+            color: colors.textSecondary,
           ),
           const SizedBox(width: 4),
           Text(
             text,
             style: AppTextStyles.caption.copyWith(
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+              color: colors.textSecondary,
             ),
           ),
         ],
@@ -414,12 +414,12 @@ class BankDetailsView extends GetView<BankController> {
     );
   }
 
-  void _showAccountOptions(ThemeData theme, BankAccountModel account) {
+  void _showAccountOptions(AppColorScheme colors, BankAccountModel account) {
     Get.bottomSheet(
       Container(
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: theme.scaffoldBackgroundColor,
+          color: colors.background,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: Column(
@@ -431,7 +431,7 @@ class BankDetailsView extends GetView<BankController> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: theme.dividerColor,
+                  color: colors.border,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -445,12 +445,12 @@ class BankDetailsView extends GetView<BankController> {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: Colors.indigo.withValues(alpha: 0.1),
+                    color: colors.info.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.account_balance,
-                    color: Colors.indigo,
+                    color: colors.info,
                   ),
                 ),
                 const SizedBox(width: 14),
@@ -467,7 +467,7 @@ class BankDetailsView extends GetView<BankController> {
                       Text(
                         account.maskedAccountNumber,
                         style: AppTextStyles.labelSmall.copyWith(
-                          color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                          color: colors.textSecondary,
                         ),
                       ),
                     ],
@@ -480,7 +480,7 @@ class BankDetailsView extends GetView<BankController> {
             // Options
             if (!account.isPrimary)
               _buildOptionTile(
-                theme,
+                colors,
                 icon: Icons.star_outline,
                 title: 'Set as Primary',
                 subtitle: 'Use this account for withdrawals',
@@ -490,7 +490,7 @@ class BankDetailsView extends GetView<BankController> {
                 },
               ),
             _buildOptionTile(
-              theme,
+              colors,
               icon: Icons.delete_outline,
               title: 'Delete Account',
               subtitle: account.isPrimary
@@ -513,7 +513,7 @@ class BankDetailsView extends GetView<BankController> {
   }
 
   Widget _buildOptionTile(
-    ThemeData theme, {
+    AppColorScheme colors, {
     required IconData icon,
     required String title,
     required String subtitle,
@@ -522,10 +522,10 @@ class BankDetailsView extends GetView<BankController> {
     bool isDisabled = false,
   }) {
     final color = isDisabled
-        ? theme.colorScheme.onSurface.withValues(alpha: 0.3)
+        ? colors.textDisabled
         : isDestructive
-            ? Colors.red
-            : theme.colorScheme.onSurface;
+            ? colors.error
+            : colors.textPrimary;
 
     return Material(
       color: Colors.transparent,
@@ -576,7 +576,7 @@ class BankDetailsView extends GetView<BankController> {
     );
   }
 
-  void _showAddBankSheet(BuildContext context, ThemeData theme) {
+  void _showAddBankSheet(BuildContext context, AppColorScheme colors) {
     // Clear form
     controller.accountHolderController.clear();
     controller.accountNumberController.clear();
@@ -594,7 +594,7 @@ class BankDetailsView extends GetView<BankController> {
           maxHeight: MediaQuery.of(context).size.height * 0.9,
         ),
         decoration: BoxDecoration(
-          color: theme.scaffoldBackgroundColor,
+          color: colors.background,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: Form(
@@ -610,7 +610,7 @@ class BankDetailsView extends GetView<BankController> {
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: theme.dividerColor,
+                      color: colors.border,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -720,7 +720,7 @@ class BankDetailsView extends GetView<BankController> {
                                 ? null
                                 : controller.lookupIfsc,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.indigo,
+                              backgroundColor: colors.primary,
                               foregroundColor: Colors.white,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
@@ -782,7 +782,7 @@ class BankDetailsView extends GetView<BankController> {
                       ),
                       controlAffinity: ListTileControlAffinity.leading,
                       contentPadding: EdgeInsets.zero,
-                      activeColor: AppColors.primary,
+                      activeColor: colors.primary,
                     )),
                 const SizedBox(height: 24),
 
@@ -794,7 +794,7 @@ class BankDetailsView extends GetView<BankController> {
                             ? null
                             : controller.addBankAccount,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
+                          backgroundColor: colors.primary,
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
